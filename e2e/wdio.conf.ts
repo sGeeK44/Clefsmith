@@ -67,7 +67,13 @@ export const config: WebdriverIO.Config = {
   maxInstances: 1,
   capabilities: [capabilitiesFor(PLATFORM)],
 
-  services: ['appium'],
+  /**
+   * Appium reads the project's driver manifest on startup, which on a cold CI
+   * machine takes longer than the thirty seconds the service allows by
+   * default — and the service only logs the timeout, leaving every session to
+   * fail against a port nothing listens on yet.
+   */
+  services: [['appium', { appiumStartTimeout: 180_000 }]],
   port: 4723,
 
   framework: 'cucumber',

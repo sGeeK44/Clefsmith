@@ -103,15 +103,19 @@ jobs:
       # The suite is pointed at a udid, never a device name: the same model
       # exists under every installed runtime.
       # The device model is read from the runtime that will host it: the global
-      # device list also holds models no installed runtime supports, and
-      # simctl answers "Incompatible device" rather than picking another.
+      # device list also holds models no installed runtime supports, and simctl
+      # answers "Incompatible device" rather than picking another.
+      #
+      # The boot is waited for: the driver gives a simulator two minutes to
+      # finish booting, and a device created seconds earlier takes longer than
+      # that on a hosted runner.
       - name: Create and boot a simulator
         run: |
           newest='.runtimes | map(select(.isAvailable and (.identifier | contains("iOS")))) | sort_by(.version | split(".") | map(tonumber)) | last'
           runtime=$(xcrun simctl list runtimes --json | jq -r "$newest | .identifier")
           device=$(xcrun simctl list runtimes --json | jq -r "$newest | .supportedDeviceTypes | map(select(.productFamily == \"iPhone\")) | last | .identifier")
           udid=$(xcrun simctl create clefsmith-e2e "$device" "$runtime")
-          xcrun simctl boot "$udid"
+          xcrun simctl bootstatus "$udid" -b
           echo "E2E_IOS_UDID=$udid" >> "$GITHUB_ENV"
 
       - run: bun run e2e
