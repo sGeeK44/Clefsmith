@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# Applies the repository's branch rules from the file that holds them. A rule
+# that lives only in the settings page is a rule nobody reviews and nobody can
+# tell has changed.
+#
+# Re-running replaces the rule of the same name rather than adding a second
+# one.
+
+set -e
+
+root=$(git rev-parse --show-toplevel)
+repo=$(gh repo view --json nameWithOwner -q .nameWithOwner)
+
+for file in "$root"/.github/rulesets/*.json; do
+  name=$(jq -r .name "$file")
+  id=$(gh api "repos/$repo/rulesets" -q ".[] | select(.name == \"$name\") | .id")
+
+  if [ -n "$id" ]; then
+    gh api --silent -X PUT "repos/$repo/rulesets/$id" --input "$file"
+    printf '%s updated\n' "$name"
+  else
+    gh api --silent -X POST "repos/$repo/rulesets" --input "$file"
+    printf '%s created\n' "$name"
+  fi
+done
