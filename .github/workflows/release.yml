@@ -1,0 +1,25 @@
+name: release
+
+# A merge into main is a push to it. Nothing runs on an increment branch: a
+# release is cut from what main holds, not from what is on its way there.
+on:
+  push:
+    branches: [main]
+
+# Two merges in a row must not race over the same release pull request.
+concurrency:
+  group: release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      # A dedicated token, not GITHUB_TOKEN: pull requests opened with the
+      # latter trigger no workflow — GitHub's guard against a workflow feeding
+      # itself — and the release pull request would carry no checks, which is
+      # exactly what it needs the day a check becomes required.
+      - uses: googleapis/release-please-action@v5
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
