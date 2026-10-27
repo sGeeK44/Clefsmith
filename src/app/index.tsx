@@ -1,9 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native';
 
+import { useService } from '@/components/container-provider';
+import { SYMBOLS } from '@/infrastructure/symbols';
+
 export default function RootScreen() {
+  const getAppVersion = useService(SYMBOLS.usecases.GetAppVersion);
+
   return (
     <View style={styles.screen}>
-      <Text>Clefsmith</Text>
+      <Text>Clefsmith {getAppVersion()}</Text>
     </View>
   );
 }
