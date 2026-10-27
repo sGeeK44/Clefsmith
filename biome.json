@@ -62,6 +62,21 @@
       "path": "./biome-plugins/no-mock-module.grit",
       "includes": ["**", "!test/preload.ts"]
     },
-    "./biome-plugins/no-outward-relative-import.grit"
+    {
+      "path": "./biome-plugins/no-outward-relative-import.grit",
+      "includes": ["src/**"]
+    }
+  ],
+  "overrides": [
+    {
+      "includes": ["e2e/scripts/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noConsole": "off"
+          }
+        }
+      }
+    }
   ]
 }

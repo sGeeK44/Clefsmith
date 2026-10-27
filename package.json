@@ -13,7 +13,9 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "arch": "tools/arch/node_modules/.bin/depcruise src",
-    "postinstall": "cd tools/arch && bun install"
+    "e2e": "cd e2e && bun run e2e",
+    "e2e:check": "cd e2e && bun run check:conventions",
+    "postinstall": "cd tools/arch && bun install && cd ../../e2e && bun install"
   },
   "dependencies": {
     "expo": "~58.0.19",
