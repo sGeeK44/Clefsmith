@@ -48,6 +48,14 @@ function capabilitiesFor(platform: Platform): WebdriverIO.Capabilities {
     'appium:udid': fromEnv('E2E_IOS_UDID'),
     'appium:forceAppInstall': true,
     'appium:newCommandTimeout': 240,
+    /**
+     * The first session on a machine compiles and installs WebDriverAgent
+     * before the app is even launched, which takes minutes on a fresh CI
+     * runner. The defaults are sized for a developer machine, where that
+     * work was done once, months ago.
+     */
+    'appium:wdaLaunchTimeout': 360_000,
+    'appium:wdaConnectionTimeout': 360_000,
   };
 }
 
@@ -71,7 +79,7 @@ export const config: WebdriverIO.Config = {
 
   logLevel: 'warn',
   waitforTimeout: 30_000,
-  connectionRetryTimeout: 120_000,
+  connectionRetryTimeout: 420_000,
   connectionRetryCount: 2,
 
   /**
