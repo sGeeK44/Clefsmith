@@ -1,7 +1,16 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
-    ".": {},
+    ".": {
+      "ignoreDependencies": [
+        // The Inversify container entry opens on `import 'reflect-metadata/lite'`,
+        // unconditionally and whether or not a decorator is used. No file here
+        // imports it, and without it the bundle fails to resolve. It is declared
+        // directly so that it is not left to the resolver to find a peer nobody
+        // asked for.
+        "reflect-metadata"
+      ]
+    },
 
     // Neither e2e nor tools/arch is a package-manager workspace: each installs
     // on its own so its dependencies cannot shift what the app resolves. They
