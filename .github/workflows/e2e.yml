@@ -37,7 +37,10 @@ jobs:
           java-version: "21"
           cache: gradle
 
-      - run: ./gradlew assembleRelease
+      # Configuring the project downloads the NDK, and that download fails on a
+      # hosted runner often enough to have broken a run already. A real build
+      # error fails the second attempt too.
+      - run: ./gradlew assembleRelease || ./gradlew assembleRelease
         working-directory: android
 
       # ubuntu-latest ships /dev/kvm but not the permissions to use it. Without
