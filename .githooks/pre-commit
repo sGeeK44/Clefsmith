@@ -1,29 +1,7 @@
 #!/bin/sh
 #
-# The checks the repository already defines, made unavoidable. Each one is the
-# repository's own command: a hook that restated their arguments would drift the
-# moment a command changed, and the hook is the copy nobody remembers.
-#
-# Formatting and linting look at what is staged; everything below them looks at
-# the whole project, because a change routinely breaks a file it does not touch.
-#
-# The e2e suite is deliberately absent. Building a binary and booting a
-# simulator is not something a commit waits for.
+# Makes the repository's checks unavoidable. The chain itself lives in
+# tools/verify; the hook only says that a commit looks at what it is about to
+# contain.
 
-set -e
-
-run() {
-  printf '%s... ' "$1"
-  shift
-  if ! output=$("$@" 2>&1); then
-    printf 'failed\n\n%s\n' "$output"
-    exit 1
-  fi
-  printf 'ok\n'
-}
-
-run 'format and lint (staged)' bun run check --staged
-run 'typecheck' bun run typecheck
-run 'tests' bun test
-run 'architecture' bun run arch
-run 'dead code' bun run deadcode
+exec "$(git rev-parse --show-toplevel)/tools/verify" staged
