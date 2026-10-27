@@ -1,0 +1,35 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {},
+
+    // Neither e2e nor tools/arch is a package-manager workspace: each installs
+    // on its own so its dependencies cannot shift what the app resolves. They
+    // are declared here anyway — dead code in a package nobody analyses is
+    // never found.
+    "e2e": {
+      // Cucumber loads the step definitions by glob at run time, and they are
+      // what reaches the screen objects. Nothing imports them, which is what
+      // makes them entry points rather than dead files.
+      "entry": ["step-definitions/**/*.ts"],
+      "ignoreDependencies": [
+        // WebdriverIO resolves these from names in wdio.conf.ts, never by import:
+        "@cucumber/cucumber", // framework: 'cucumber'
+        "@wdio/appium-service", // services: ['appium']
+        "@wdio/local-runner", // runner: 'local'
+        // Appium is started by @wdio/appium-service, and picks its driver from
+        // the platform the session asks for.
+        "appium",
+        "appium-uiautomator2-driver",
+        "appium-xcuitest-driver"
+      ]
+    },
+
+    "tools/arch": {
+      // Run as a binary by the root `arch` script, so that the architecture
+      // rules are checked against a TypeScript version this tool supports
+      // rather than the one the app is built with.
+      "ignoreDependencies": ["dependency-cruiser"]
+    }
+  }
+}

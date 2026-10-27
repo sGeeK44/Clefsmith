@@ -6,6 +6,9 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "clefsmith",
+    "updates": {
+      "enabled": false
+    },
     "userInterfaceStyle": "automatic",
     "android": {
       "adaptiveIcon": {
