@@ -1,0 +1,5 @@
+language js
+
+`mock.module` as $mockModule where {
+  register_diagnostic(span=$mockModule, message="Register module mocks in test/preload.ts. Applied from a test file, mock.module only takes effect when the target module has not been imported yet, which makes the result depend on test ordering.")
+}
