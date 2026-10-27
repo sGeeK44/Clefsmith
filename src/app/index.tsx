@@ -8,7 +8,7 @@ export default function RootScreen() {
 
   return (
     <View style={styles.screen}>
-      <Text testID="app-version-broken">Clefsmith {getAppVersion()}</Text>
+      <Text testID="app-version">Clefsmith {getAppVersion()}</Text>
     </View>
   );
 }
