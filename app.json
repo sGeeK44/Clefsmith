@@ -15,7 +15,7 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.sgeek.clefsmith"
+      "package": "com.clefsmith.app"
     },
     "web": {
       "output": "server",
@@ -37,7 +37,7 @@
       "reactCompiler": true
     },
     "ios": {
-      "bundleIdentifier": "com.sgeek.clefsmith"
+      "bundleIdentifier": "com.clefsmith.app"
     }
   }
 }
