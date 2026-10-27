@@ -1,0 +1,42 @@
+#!/bin/sh
+#
+# The checks the repository defines, in one place, called by everything that
+# needs them: the pre-commit hook and the CI both run this file. Two lists of
+# commands drift the moment one is touched, and it is the forgotten copy that
+# lets a defect through.
+#
+# Usage: tools/verify [staged]
+#
+#   staged  format and lint only what is indexed — what a commit is about to
+#           contain. Without it they read the whole repository, which is what a
+#           fresh checkout needs: there, nothing is staged and a staged-only
+#           check would pass without reading a line.
+#
+# Everything below formatting looks at the whole project either way: a change
+# routinely breaks a file it does not touch.
+#
+# The e2e suite is deliberately absent. Building a binary and booting a
+# simulator is not something a commit waits for.
+
+set -e
+
+scope=''
+if [ "$1" = 'staged' ]; then
+  scope='--staged'
+fi
+
+run() {
+  printf '%s... ' "$1"
+  shift
+  if ! output=$("$@" 2>&1); then
+    printf 'failed\n\n%s\n' "$output"
+    exit 1
+  fi
+  printf 'ok\n'
+}
+
+run 'format and lint' bun run check $scope
+run 'typecheck' bun run typecheck
+run 'tests' bun test
+run 'architecture' bun run arch
+run 'dead code' bun run deadcode
