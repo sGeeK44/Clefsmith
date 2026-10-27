@@ -44,3 +44,4 @@ example
 
 # nested tool package
 tools/*/node_modules/
+e2e/node_modules/
