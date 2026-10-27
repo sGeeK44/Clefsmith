@@ -22,6 +22,11 @@ function required(name: string): string {
  * pointed at. A device name is ambiguous — the same model exists under every
  * installed runtime — and leaves the driver to infer a version from the SDK the
  * app was compiled against, which is not necessarily one that is installed.
+ *
+ * Both drivers skip the install when the same package and version is already on
+ * the device, which silently runs the suite against the previous build. The app
+ * is reinstalled on every session so that what is asserted is what was just
+ * built.
  */
 function capabilitiesFor(platform: Platform): WebdriverIO.Capabilities {
   if (platform === 'android') {
@@ -30,6 +35,7 @@ function capabilitiesFor(platform: Platform): WebdriverIO.Capabilities {
       'appium:automationName': 'UiAutomator2',
       'appium:app': required('E2E_ANDROID_APP'),
       'appium:avd': required('E2E_ANDROID_AVD'),
+      'appium:enforceAppInstall': true,
       'appium:newCommandTimeout': 240,
     };
   }
@@ -39,6 +45,7 @@ function capabilitiesFor(platform: Platform): WebdriverIO.Capabilities {
     'appium:automationName': 'XCUITest',
     'appium:app': required('E2E_IOS_APP'),
     'appium:udid': required('E2E_IOS_UDID'),
+    'appium:forceAppInstall': true,
     'appium:newCommandTimeout': 240,
   };
 }
