@@ -23,17 +23,19 @@ jobs:
         with:
           bun-version-file: .bun-version
 
-      - uses: actions/setup-java@v6
-        with:
-          distribution: temurin
-          java-version: "21"
-          cache: gradle
-
       - run: bun install --frozen-lockfile
 
       # The native folders are not in the repository: the job generates them,
       # which is what lets the build run without an Expo account.
       - run: bunx expo prebuild --platform android --no-install
+
+      # After the prebuild: the Gradle files the cache key is computed from do
+      # not exist until the native folder is generated.
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
 
       - run: ./gradlew assembleRelease
         working-directory: android
