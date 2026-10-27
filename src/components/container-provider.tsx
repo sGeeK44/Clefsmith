@@ -1,5 +1,5 @@
 import type { Container, ServiceIdentifier } from 'inversify';
-import { createContext, use, type ReactNode } from 'react';
+import { createContext, type ReactNode, use } from 'react';
 
 const ContainerContext = createContext<Container | null>(null);
 
