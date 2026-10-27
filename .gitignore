@@ -41,3 +41,6 @@ example
 # generated native folders
 /ios
 /android
+
+# nested tool package
+tools/*/node_modules/
