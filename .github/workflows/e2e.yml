@@ -1,0 +1,111 @@
+name: e2e
+
+# Only pull requests that target the default branch. An increment on an
+# accumulation branch does not wait for a native build, and the restriction
+# lives in the trigger rather than in a job condition — a skipped job still
+# reports a status, which would make it look like the suite had run.
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: gradle
+
+      - run: bun install --frozen-lockfile
+
+      # The native folders are not in the repository: the job generates them,
+      # which is what lets the build run without an Expo account.
+      - run: bunx expo prebuild --platform android --no-install
+
+      - run: ./gradlew assembleRelease
+        working-directory: android
+
+      # ubuntu-latest ships /dev/kvm but not the permissions to use it. Without
+      # this the emulator falls back to software rendering and boots in minutes
+      # instead of seconds.
+      - name: Let the runner use KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          arch: x86_64
+          target: google_apis
+          avd-name: clefsmith
+          script: bun run e2e
+        env:
+          E2E_PLATFORM: android
+          E2E_ANDROID_APP: ${{ github.workspace }}/android/app/build/outputs/apk/release/app-release.apk
+          E2E_ANDROID_AVD: clefsmith
+
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
+      # The runner's default Xcode is older than the SDK this Expo version
+      # builds against. The newest installed one is selected rather than a
+      # version written down here, which would rot with the runner image.
+      - name: Select the newest installed Xcode
+        run: |
+          xcode=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$xcode/Contents/Developer"
+          xcodebuild -version
+
+      - run: bun install --frozen-lockfile
+
+      - run: bunx expo prebuild --platform ios --no-install
+
+      - run: pod install
+        working-directory: ios
+
+      # A simulator build signs nothing, so the job needs no certificate.
+      - name: Build the app
+        run: |
+          xcodebuild -workspace ios/Clefsmith.xcworkspace \
+            -scheme Clefsmith \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -derivedDataPath ios/build \
+            CODE_SIGNING_ALLOWED=NO \
+            -quiet
+
+      # The suite is pointed at a udid, never a device name: the same model
+      # exists under every installed runtime.
+      - name: Create and boot a simulator
+        run: |
+          runtime=$(xcrun simctl list runtimes --json | jq -r '.runtimes | map(select(.isAvailable and (.identifier | contains("iOS")))) | sort_by(.version) | last | .identifier')
+          device=$(xcrun simctl list devicetypes --json | jq -r '.devicetypes | map(select(.productFamily == "iPhone")) | last | .identifier')
+          udid=$(xcrun simctl create clefsmith-e2e "$device" "$runtime")
+          xcrun simctl boot "$udid"
+          echo "E2E_IOS_UDID=$udid" >> "$GITHUB_ENV"
+
+      - run: bun run e2e
+        env:
+          E2E_PLATFORM: ios
+          E2E_IOS_APP: ${{ github.workspace }}/ios/build/Build/Products/Release-iphonesimulator/Clefsmith.app
