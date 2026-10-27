@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+reviews:
+  # Already the service's default. Written down because a setting nobody can
+  # read in the repository is a setting nobody revises — and because the day
+  # the default changes, this file is what keeps the reviews as they were.
+  profile: chill
+
+  # A comment opens a discussion; it does not refuse a merge. What blocks a
+  # merge is decided by the repository's rules, and a review tool is not one.
+  request_changes_workflow: false
