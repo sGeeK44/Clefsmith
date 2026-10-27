@@ -99,10 +99,14 @@ jobs:
 
       # The suite is pointed at a udid, never a device name: the same model
       # exists under every installed runtime.
+      # The device model is read from the runtime that will host it: the global
+      # device list also holds models no installed runtime supports, and
+      # simctl answers "Incompatible device" rather than picking another.
       - name: Create and boot a simulator
         run: |
-          runtime=$(xcrun simctl list runtimes --json | jq -r '.runtimes | map(select(.isAvailable and (.identifier | contains("iOS")))) | sort_by(.version) | last | .identifier')
-          device=$(xcrun simctl list devicetypes --json | jq -r '.devicetypes | map(select(.productFamily == "iPhone")) | last | .identifier')
+          newest='.runtimes | map(select(.isAvailable and (.identifier | contains("iOS")))) | sort_by(.version | split(".") | map(tonumber)) | last'
+          runtime=$(xcrun simctl list runtimes --json | jq -r "$newest | .identifier")
+          device=$(xcrun simctl list runtimes --json | jq -r "$newest | .supportedDeviceTypes | map(select(.productFamily == \"iPhone\")) | last | .identifier")
           udid=$(xcrun simctl create clefsmith-e2e "$device" "$runtime")
           xcrun simctl boot "$udid"
           echo "E2E_IOS_UDID=$udid" >> "$GITHUB_ENV"
