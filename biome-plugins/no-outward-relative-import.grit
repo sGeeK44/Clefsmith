@@ -1,0 +1,11 @@
+language js
+
+or {
+  `import $_ from $src` where { $src <: r"['\"]\.\./.*['\"]" },
+  `import $src` where { $src <: r"['\"]\.\./.*['\"]" },
+  `export $_ from $src` where { $src <: r"['\"]\.\./.*['\"]" },
+  `export { $_ } from $src` where { $src <: r"['\"]\.\./.*['\"]" },
+  `export * from $src` where { $src <: r"['\"]\.\./.*['\"]" }
+} where {
+  register_diagnostic(span=$src, message="Import internal modules through the @/ alias. A relative path that climbs out of its folder hides which layer it reaches, and survives a move that should have broken it.")
+}

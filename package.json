@@ -11,7 +11,9 @@
     "check": "biome check",
     "format": "biome check --write",
     "typecheck": "tsc --noEmit",
-    "test": "bun test"
+    "test": "bun test",
+    "arch": "tools/arch/node_modules/.bin/depcruise src",
+    "postinstall": "cd tools/arch && bun install"
   },
   "dependencies": {
     "expo": "~58.0.19",

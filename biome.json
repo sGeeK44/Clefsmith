@@ -61,6 +61,7 @@
     {
       "path": "./biome-plugins/no-mock-module.grit",
       "includes": ["**", "!test/preload.ts"]
-    }
+    },
+    "./biome-plugins/no-outward-relative-import.grit"
   ]
 }

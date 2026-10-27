@@ -1,0 +1,121 @@
+{
+  "forbidden": [
+    {
+      "name": "core-is-self-contained",
+      "comment": "core is the innermost layer: it holds what every other layer may depend on, so it may depend on none of them. Anything core needs from downstream is a sign the concept belongs downstream too.",
+      "severity": "error",
+      "from": {
+        "path": "^src/core/"
+      },
+      "to": {
+        "path": "^src/(domain|usecases|infrastructure|app|components)/"
+      }
+    },
+    {
+      "name": "domain-knows-only-core",
+      "comment": "The domain models the problem. It may lean on core, never on a use case, an adapter or a screen — otherwise the rules become unusable outside the app that happens to host them.",
+      "severity": "error",
+      "from": {
+        "path": "^src/domain/"
+      },
+      "to": {
+        "path": "^src/(usecases|infrastructure|app|components)/"
+      }
+    },
+    {
+      "name": "usecases-own-their-ports",
+      "comment": "A use case declares the port it needs and lets infrastructure implement it. Importing infrastructure directly inverts that and nails the use case to one adapter.",
+      "severity": "error",
+      "from": {
+        "path": "^src/usecases/"
+      },
+      "to": {
+        "path": "^src/(infrastructure|app|components)/"
+      }
+    },
+    {
+      "name": "infrastructure-serves-and-does-not-render",
+      "comment": "Infrastructure implements the ports the inner layers declare. Reaching into the app layer would make an adapter depend on the screen that happens to use it.",
+      "severity": "error",
+      "from": {
+        "path": "^src/infrastructure/"
+      },
+      "to": {
+        "path": "^src/(app|components)/"
+      }
+    },
+    {
+      "name": "no-rendering-below-app",
+      "comment": "React, React Native and Expo Router render. A rule, a use case or an adapter that imports one can no longer be exercised without a renderer, which is what keeps the inner layers testable in plain Bun.",
+      "severity": "error",
+      "from": {
+        "path": "^src/(core|domain|usecases|infrastructure)/"
+      },
+      "to": {
+        "dependencyTypes": ["npm"],
+        "path": "^node_modules/(react|react-dom|react-native|react-native-[^/]+|expo-router|@expo/[^/]+)/"
+      }
+    },
+    {
+      "name": "inner-layers-are-platform-free",
+      "comment": "core, domain and usecases state the problem and its rules; they must hold on any platform. Wrapping a platform SDK is infrastructure's job, which is why it is allowed there and nowhere above it.",
+      "severity": "error",
+      "from": {
+        "path": "^src/(core|domain|usecases)/"
+      },
+      "to": {
+        "dependencyTypes": ["npm"],
+        "path": "^node_modules/(expo|expo-[^/]+|@expo/[^/]+)/"
+      }
+    },
+    {
+      "name": "no-circular",
+      "comment": "A cycle makes the two modules one module that happens to be stored in two files: neither can be read, tested or replaced on its own.",
+      "severity": "error",
+      "from": {},
+      "to": {
+        "circular": true
+      }
+    },
+    {
+      "name": "not-to-dev-dep",
+      "comment": "Application code must not reach a devDependency: it is absent from a production install, so the failure appears at runtime in the bundle, not here.",
+      "severity": "error",
+      "from": {
+        "path": "^src/",
+        "pathNot": "[.]test[.][tj]sx?$"
+      },
+      "to": {
+        "dependencyTypes": ["npm-dev"]
+      }
+    },
+    {
+      "name": "no-orphans",
+      "comment": "A module nothing imports is either dead or wired by a path the graph cannot see. Both are worth knowing about.",
+      "severity": "warn",
+      "from": {
+        "orphan": true,
+        "pathNot": "[.]d[.]ts$"
+      },
+      "to": {}
+    }
+  ],
+  "options": {
+    "doNotFollow": {
+      "path": "node_modules"
+    },
+    "tsConfig": {
+      "fileName": "tsconfig.json"
+    },
+    "tsPreCompilationDeps": true,
+    "enhancedResolveOptions": {
+      "exportsFields": ["exports"],
+      "conditionNames": ["require", "import", "react-native", "default"]
+    },
+    "reporterOptions": {
+      "text": {
+        "highlightFocused": true
+      }
+    }
+  }
+}
