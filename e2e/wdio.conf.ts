@@ -54,6 +54,12 @@ function capabilitiesFor(platform: Platform): WebdriverIO.Capabilities {
      * runner. The defaults are sized for a developer machine, where that
      * work was done once, months ago.
      */
+    /**
+     * A simulator created by the job moments earlier is still settling when
+     * the driver first looks at it, and two minutes is not always enough —
+     * the session then fails and only the retry saves the run.
+     */
+    'appium:simulatorStartupTimeout': 300_000,
     'appium:wdaLaunchTimeout': 360_000,
     'appium:wdaConnectionTimeout': 360_000,
   };
