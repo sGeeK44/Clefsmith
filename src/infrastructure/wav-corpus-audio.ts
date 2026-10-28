@@ -48,7 +48,7 @@ export function createWavCorpusAudio(options: WavCorpusAudioOptions): CorpusAudi
  * file is no longer the file whose end of utterance was annotated, and the
  * bench would publish latencies measured against audio nobody listened to.
  */
-function decodeWav(bytes: Uint8Array, expectedRate: number, path: string): Int16Array {
+export function decodeWav(bytes: Uint8Array, expectedRate: number, path: string): Int16Array {
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 
   if (ascii(bytes, 0, 4) !== 'RIFF' || ascii(bytes, 8, 4) !== 'WAVE') {
