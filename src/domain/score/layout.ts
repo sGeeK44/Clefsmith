@@ -2,12 +2,7 @@ import type { Clef } from '@/domain/notation/clef';
 import { staffPosition } from '@/domain/notation/clef';
 import type { Pitch } from '@/domain/notation/pitch';
 import type { Engraving } from '@/domain/score/engraving';
-
-/**
- * A glyph the layout asks for by name. The name is SMuFL's; what it maps to is the
- * glyph table's business, and no layout rule is allowed to depend on it.
- */
-type GlyphName = 'gClef' | 'fClef' | 'noteheadBlack';
+import type { GlyphName } from '@/domain/score/glyph';
 
 /**
  * Where a glyph goes, in staff spaces measured from the bottom line of the staff.
