@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { staffPosition } from '@/domain/notation/clef';
+import { pitchOn, staffPosition } from '@/domain/notation/clef';
 
 describe('a pitch on a staff', () => {
   it('sits on the second line when it is the pitch the treble clef names', () => {
@@ -41,5 +41,32 @@ describe('a pitch on a staff', () => {
     const bass = staffPosition('bass', { degree: 'c', octave: 4 });
 
     expect(bass - treble).toBe(12);
+  });
+});
+
+describe('reading a position back', () => {
+  it('gives the pitch the clef puts there', () => {
+    expect(pitchOn('treble', 2)).toEqual({ degree: 'g', octave: 4 });
+    expect(pitchOn('bass', 6)).toEqual({ degree: 'f', octave: 3 });
+  });
+
+  it('crosses the octave downwards without landing on a negative degree', () => {
+    expect(pitchOn('treble', -2)).toEqual({ degree: 'c', octave: 4 });
+    expect(pitchOn('treble', -9)).toEqual({ degree: 'c', octave: 3 });
+  });
+
+  it('refuses a position that falls below c0, rather than naming a degree that is not one', () => {
+    expect(() => pitchOn('bass', -200)).toThrow('is below c0, which is not a pitch.');
+  });
+
+  it('undoes staffPosition at every position of the widest level', () => {
+    const positions = Array.from({ length: 21 }, (_, step) => step - 6);
+
+    expect(
+      positions.map((position) => staffPosition('treble', pitchOn('treble', position))),
+    ).toEqual(positions);
+    expect(positions.map((position) => staffPosition('bass', pitchOn('bass', position)))).toEqual(
+      positions,
+    );
   });
 });
