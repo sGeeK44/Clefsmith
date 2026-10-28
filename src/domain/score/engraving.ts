@@ -1,3 +1,5 @@
+import { ENGRAVING_DEFAULTS, GLYPHS } from '@/domain/score/bravura';
+
 /**
  * The thicknesses and distances a staff is drawn with, in staff spaces.
  *
@@ -17,3 +19,23 @@ export interface Engraving {
   /** Horizontal room the clef takes before the first notehead. */
   readonly clefWidth: number;
 }
+
+/**
+ * How much room the clef takes before the first notehead, and how far apart two
+ * noteheads sit — both in staff spaces.
+ *
+ * These two are **not** SMuFL's: a font publishes how its glyphs are shaped, never
+ * how far apart a score sets them. The clef allowance is the wider of the two clefs
+ * plus a space of air, so neither clef touches the first note.
+ */
+const CLEF_GAP = 1;
+const NOTE_SPACING = 3;
+
+export const ENGRAVING: Engraving = {
+  staffLineThickness: ENGRAVING_DEFAULTS.staffLineThickness,
+  legerLineThickness: ENGRAVING_DEFAULTS.legerLineThickness,
+  legerLineExtension: ENGRAVING_DEFAULTS.legerLineExtension,
+  noteheadWidth: GLYPHS.noteheadBlack.advance,
+  clefWidth: Math.max(GLYPHS.gClef.advance, GLYPHS.fClef.advance) + CLEF_GAP,
+  noteSpacing: NOTE_SPACING,
+};
