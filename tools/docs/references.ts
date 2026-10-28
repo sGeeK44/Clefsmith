@@ -39,6 +39,19 @@ const RUN = /^bun run ([\w:-]+)$/;
  */
 const PATH = /^[A-Za-z0-9._][A-Za-z0-9._/-]*$/;
 
+/** A path spelled against something other than the repository root. */
+const RELATIVE = /^\.{1,2}\//;
+
+/**
+ * The extensions that make a word with no directory in it a file name.
+ *
+ * Without this list `console.error` and `mock.module` read as files: a dot
+ * between two lowercase words is a member access as often as it is an
+ * extension, and nothing in the spelling tells them apart. An extension this
+ * list forgets costs one unchecked reference, never a false failure.
+ */
+const EXTENSIONS = ['grit', 'js', 'json', 'jsonc', 'lock', 'md', 'sh', 'toml', 'ts', 'tsx', 'yml'];
+
 export function referencesIn(document: string, markdown: string): DocReference[] {
   const found: DocReference[] = [];
   let fenced = false;
@@ -80,11 +93,11 @@ function referenceOf(span: string): Pick<DocReference, 'kind' | 'target'> | unde
 
   const [word] = span.split(/\s+/);
 
-  if (word === undefined || !PATH.test(word)) {
+  if (word === undefined || !PATH.test(word) || RELATIVE.test(word)) {
     return undefined;
   }
 
-  const named = word.includes('/') || /\.[A-Za-z0-9]+$/.test(word);
+  const named = word.includes('/') || EXTENSIONS.includes(word.split('.').pop() as string);
 
   return named ? { kind: 'path', target: word } : undefined;
 }
