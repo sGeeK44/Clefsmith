@@ -1,0 +1,12 @@
+# The versions of the tools this repository is built with, in one place. The
+# CI installs from this file too: a version deduced from whatever the runner
+# happens to ship changes behaviour without a commit explaining it.
+#
+#   mise install    once, to get them
+#   mise trust      once, to let mise read this file
+
+[tools]
+bun = "1.2.23"
+# The JDK the Android build runs on. Only the major version is pinned: a patch
+# bump of a JDK is not a change this project needs to review.
+java = "temurin-21"

@@ -18,9 +18,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: .bun-version
+      # Installs what mise.toml pins, the same versions a developer runs.
+      - uses: jdx/mise-action@v5
 
       # Installs the nested packages too, through the repository's own
       # postinstall — the CI sets nothing up that a developer does not.
