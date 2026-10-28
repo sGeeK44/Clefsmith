@@ -1,6 +1,8 @@
 import { diatonicIndex, type Pitch, pitchAt } from '@/domain/notation/pitch';
 
-export type Clef = 'treble' | 'bass';
+export const CLEFS = ['treble', 'bass'] as const;
+
+export type Clef = (typeof CLEFS)[number];
 
 /**
  * The pitch each clef nails to a line, and which line that is.
