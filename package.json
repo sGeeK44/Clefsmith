@@ -23,8 +23,10 @@
     "postinstall": "git rev-parse --git-dir >/dev/null 2>&1 && git config core.hooksPath .githooks; cd tools/arch && bun install && cd ../../e2e && bun install"
   },
   "dependencies": {
+    "@expo-google-fonts/outfit": "^0.4.3",
     "expo": "~58.0.19",
     "expo-constants": "~58.0.13",
+    "expo-font": "~58.0.10",
     "expo-linking": "~58.0.14",
     "expo-router": "~58.0.26",
     "expo-splash-screen": "~58.0.11",
