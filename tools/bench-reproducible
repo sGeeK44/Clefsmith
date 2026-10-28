@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Replays the fixture corpus twice and refuses any difference between the two
+# reports.
+#
+# A bench whose figures move on their own cannot decide anything: CLE-17 reads
+# a 2 % confusion and a 300 ms p95 off it, and a figure that is not the same
+# twice is not a figure. The fixture track runs on a clock it controls, so the
+# whole report is comparable here — latency included, which is exactly the part
+# a real track can never reproduce.
+
+set -e
+
+track='fixture-slow'
+first=$(mktemp)
+second=$(mktemp)
+
+bun bench/run.ts --track "$track" > "$first"
+bun bench/run.ts --track "$track" > "$second"
+
+# No EXIT trap: in a POSIX shell the handler's own status replaces the one the
+# script was exiting with, and a cleanup that succeeds would report a
+# difference as a pass.
+if diff -u "$first" "$second"; then
+  rm -f "$first" "$second"
+else
+  rm -f "$first" "$second"
+  echo 'The bench published different figures for the same corpus.'
+  exit 1
+fi
