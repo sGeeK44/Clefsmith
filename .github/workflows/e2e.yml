@@ -1,9 +1,16 @@
 name: e2e
 
-# Only pull requests that target the default branch. An increment on an
-# accumulation branch does not wait for a native build, and the restriction
-# lives in the trigger rather than in a job condition — a skipped job still
-# reports a status, which would make it look like the suite had run.
+# The suite runs on the release pull request, and nowhere else: forty-five
+# minutes is not something an ordinary change waits for. What ships is still
+# what was exercised — the release pull request is the last gate before the
+# tag.
+#
+# The workflow is still triggered by every pull request that targets the
+# default branch; it is the jobs that stand down. A workflow that did not
+# trigger at all would leave its checks pending forever on a branch that
+# requires them, whereas a job skipped by a condition reports success — which
+# is what lets the same two checks stay required and still mean something on
+# the release pull request.
 on:
   pull_request:
     branches: [main]
@@ -15,6 +22,9 @@ concurrency:
 
 jobs:
   android:
+    # The release pull request, or a run asked for by hand. Repeated on the
+    # iOS job below: a job-level condition cannot read a shared value.
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.head_ref, 'release-please--')
     runs-on: ubuntu-latest
     # Roughly twice what the job takes. Without a limit GitHub's own default
     # applies, and a suite that hangs holds a runner for six hours before
@@ -75,6 +85,7 @@ jobs:
           E2E_ANDROID_AVD: clefsmith
 
   ios:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.head_ref, 'release-please--')
     runs-on: macos-15
     timeout-minutes: 90
     steps:
