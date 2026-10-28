@@ -105,6 +105,22 @@ describe('a staff', () => {
   });
 });
 
+describe('the current note', () => {
+  it('carries its stem and its leger lines with it, and nothing else', () => {
+    const layout = staff('treble', [note('c', 4), note('c', 4, true)]);
+    const marked = layout.lines.filter((line) => line.current);
+
+    expect(marked).toHaveLength(2);
+    expect(marked.every((line) => line.from.x > (noteheads(layout)[0]?.x as number))).toBe(true);
+  });
+
+  it('leaves every staff line unmarked', () => {
+    const layout = staff('treble', [note('c', 4, true)]);
+
+    expect(staffLines(layout).some((line) => line.current)).toBe(false);
+  });
+});
+
 describe('a stem', () => {
   it('rises from a note below the middle line', () => {
     const [stem] = verticals(staff('treble', [note('f', 4)]));

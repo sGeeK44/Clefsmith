@@ -4,6 +4,7 @@ import { useService } from '@/components/container-provider';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Screen } from '@/components/ui/screen';
+import { Staff } from '@/components/ui/staff';
 import { Text } from '@/components/ui/text';
 import { SYMBOLS } from '@/infrastructure/symbols';
 
@@ -38,6 +39,20 @@ export default function RootScreen() {
         <Text tone="ok">Right</Text>
         <Text tone="late">Right, off the beat</Text>
         <Text tone="bad">Wrong</Text>
+      </Card>
+
+      <Card>
+        <Text variant="title">Staff</Text>
+        <Staff
+          clef="treble"
+          notes={[
+            { pitch: { degree: 'c', octave: 4 }, current: false },
+            { pitch: { degree: 'e', octave: 4 }, current: false },
+            { pitch: { degree: 'g', octave: 4 }, current: true },
+            { pitch: { degree: 'b', octave: 4 }, current: false },
+            { pitch: { degree: 'a', octave: 5 }, current: false },
+          ]}
+        />
       </Card>
 
       <View style={styles.actions}>

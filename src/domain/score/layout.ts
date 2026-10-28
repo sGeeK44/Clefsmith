@@ -26,6 +26,8 @@ interface LineSegment {
   readonly from: Point;
   readonly to: Point;
   readonly thickness: number;
+  /** True when the segment belongs to the current note, like its notehead. */
+  readonly current: boolean;
 }
 
 export interface StaffLayout {
@@ -71,8 +73,12 @@ export function layoutStaff(
     ],
     lines: [
       ...staffLines(width, engraving),
-      ...positions.flatMap((position, index) => legerLines(position, index, engraving)),
-      ...positions.map((position, index) => stem(position, index, engraving, glyphs)),
+      ...notes.flatMap((note, index) =>
+        legerLines(positions[index] as number, index, note.current, engraving),
+      ),
+      ...notes.map((note, index) =>
+        stem(positions[index] as number, index, note.current, engraving, glyphs),
+      ),
     ],
   };
 }
@@ -117,6 +123,7 @@ function staffLines(width: number, engraving: Engraving): LineSegment[] {
     from: { x: 0, y: line },
     to: { x: width, y: line },
     thickness: engraving.staffLineThickness,
+    current: false,
   }));
 }
 
@@ -125,7 +132,13 @@ function staffLines(width: number, engraving: Engraving): LineSegment[] {
  * right corner going up, the lower left going down — so the two meet without a gap
  * whatever the notehead is shaped like.
  */
-function stem(position: number, index: number, engraving: Engraving, glyphs: Glyphs): LineSegment {
+function stem(
+  position: number,
+  index: number,
+  current: boolean,
+  engraving: Engraving,
+  glyphs: Glyphs,
+): LineSegment {
   const up = position < MIDDLE_POSITION;
   const anchor = up ? glyphs.noteheadBlack.stemUp : glyphs.noteheadBlack.stemDown;
   const foot = {
@@ -137,6 +150,7 @@ function stem(position: number, index: number, engraving: Engraving, glyphs: Gly
     from: foot,
     to: { x: foot.x, y: foot.y + (up ? STEM_LENGTH : -STEM_LENGTH) },
     thickness: engraving.stemThickness,
+    current,
   };
 }
 
@@ -144,7 +158,12 @@ function stem(position: number, index: number, engraving: Engraving, glyphs: Gly
  * One leger line per line position the note reaches past the staff, the note's own
  * included. A note in the space just outside the staff reaches none.
  */
-function legerLines(position: number, index: number, engraving: Engraving): LineSegment[] {
+function legerLines(
+  position: number,
+  index: number,
+  current: boolean,
+  engraving: Engraving,
+): LineSegment[] {
   const outside = position > TOP_POSITION ? position - TOP_POSITION : Math.min(position, 0);
   const x = noteX(index, engraving);
   const half = engraving.noteheadWidth / 2 + engraving.legerLineExtension;
@@ -156,6 +175,7 @@ function legerLines(position: number, index: number, engraving: Engraving): Line
       from: { x: x - half, y },
       to: { x: x + half, y },
       thickness: engraving.legerLineThickness,
+      current,
     };
   });
 }
