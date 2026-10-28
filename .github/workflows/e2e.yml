@@ -19,9 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: .bun-version
+      # Installs what mise.toml pins, the same versions a developer runs.
+      - uses: jdx/mise-action@v5
 
       - run: bun install --frozen-lockfile
 
@@ -29,13 +28,19 @@ jobs:
       # which is what lets the build run without an Expo account.
       - run: bunx expo prebuild --platform android --no-install
 
-      # After the prebuild: the Gradle files the cache key is computed from do
-      # not exist until the native folder is generated.
-      - uses: actions/setup-java@v6
+      # Gradle reads JAVA_HOME, and the runner ships one of its own: without
+      # this it would silently build on a JDK nobody declared.
+      - run: echo "JAVA_HOME=$(mise where java)" >> "$GITHUB_ENV"
+
+      # After the prebuild: the Gradle files the key is computed from do not
+      # exist until the native folder is generated.
+      - uses: actions/cache@v6
         with:
-          distribution: temurin
-          java-version: "21"
-          cache: gradle
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-${{ hashFiles('android/**/*.gradle*', 'android/gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: gradle-
 
       # Configuring the project downloads the NDK, and that download fails on a
       # hosted runner often enough to have broken a run already. A real build
@@ -69,9 +74,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version-file: .bun-version
+      # Installs what mise.toml pins, the same versions a developer runs.
+      - uses: jdx/mise-action@v5
 
       # The runner's default Xcode is older than the SDK this Expo version
       # builds against. The newest installed one is selected rather than a
