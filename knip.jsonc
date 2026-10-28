@@ -2,6 +2,8 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "workspaces": {
     ".": {
+      // The bench is run by hand and by CI as a binary, never imported.
+      "entry": ["bench/run.ts", "bench/make-fixture-corpus.ts"],
       "ignoreDependencies": [
         // The Inversify container entry opens on `import 'reflect-metadata/lite'`,
         // unconditionally and whether or not a decorator is used. No file here
