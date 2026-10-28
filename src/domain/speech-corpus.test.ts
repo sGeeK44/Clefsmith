@@ -9,6 +9,7 @@ import {
 } from '@/domain/speech-corpus';
 
 const AXES = {
+  sampleRate: 16_000,
   speakers: ['s1', 's2'],
   notations: { syllabic: ['do'] },
   conditions: ['silence', 'instrumental'],
@@ -75,6 +76,7 @@ describe('speech corpus', () => {
 
   it('calls for one cell per speaker, note and condition, notation by notation', () => {
     const twoNotations: Corpus = {
+      sampleRate: 16_000,
       speakers: ['s1', 's2', 's3'],
       notations: { syllabic: ['do', 'ré'], letters: ['A', 'B', 'C'] },
       conditions: ['silence', 'instrumental'],
