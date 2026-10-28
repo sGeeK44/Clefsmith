@@ -1,7 +1,11 @@
 import { describe, expect, it } from 'bun:test';
-
+import {
+  audioMatchingTheManifest,
+  ONE_SECOND_OF_AUDIO,
+  recognizerAnswering,
+  virtualClock,
+} from '#test/speech-bench';
 import type { Corpus, Recording } from '@/domain/speech-corpus';
-import type { Recognition, SpeechRecognizer } from '@/domain/speech-recognizer';
 import {
   type CorpusAudio,
   createReplaySpeechCorpus,
@@ -9,7 +13,6 @@ import {
 } from '@/usecases/replay-speech-corpus';
 
 const SAMPLE_RATE = 16_000;
-const ONE_SECOND_OF_AUDIO = SAMPLE_RATE;
 
 function recordingOf(note: string): Recording {
   return {
@@ -30,62 +33,6 @@ const CORPUS: Corpus = {
   conditions: ['silence'],
   recordings: [recordingOf('do'), recordingOf('mi')],
 };
-
-function virtualClock() {
-  let current = 0;
-
-  return {
-    now: () => current,
-    sleepUntil: async (instant: number) => {
-      current = Math.max(current, instant);
-    },
-    advance: (ms: number) => {
-      current += ms;
-    },
-  };
-}
-
-const audioMatchingTheManifest: CorpusAudio = {
-  read: async (recording) => ({
-    pcm: new Int16Array(ONE_SECOND_OF_AUDIO),
-    sha256: recording.sha256,
-  }),
-};
-
-/**
- * A recogniser whose answers and response time are known in advance, so that
- * what the bench publishes can be compared against what it was fed.
- */
-function recognizerAnswering(
-  clock: ReturnType<typeof virtualClock>,
-  answers: readonly (string | null | 'silent')[],
-  responseMs: number,
-) {
-  const sessions: string[][] = [];
-  const fedAt: number[] = [];
-  let utterance = 0;
-  let emit: (recognition: Recognition) => void = () => undefined;
-
-  const recognizer: SpeechRecognizer = {
-    start: async (vocabulary, onRecognition) => {
-      sessions.push([...vocabulary]);
-      emit = onRecognition;
-    },
-    write: () => fedAt.push(clock.now()),
-    flush: async () => {
-      clock.advance(responseMs);
-      const answer = answers[utterance];
-      utterance += 1;
-
-      if (answer !== 'silent') {
-        emit({ kind: 'final', transcript: answer ?? null, at: clock.now() });
-      }
-    },
-    stop: async () => undefined,
-  };
-
-  return { recognizer, sessions, fedAt };
-}
 
 describe('replay a speech corpus', () => {
   it('publishes what the recogniser answered, recording by recording', async () => {
