@@ -10,6 +10,11 @@
         "tools/docs/check.ts"
       ],
       "ignoreDependencies": [
+        // The Outfit weights are embedded into the native projects by the
+        // expo-font config plugin, which reads their paths out of app.json.
+        // No file imports the package, and removing it would empty the app of
+        // its typography.
+        "@expo-google-fonts/outfit",
         // The Inversify container entry opens on `import 'reflect-metadata/lite'`,
         // unconditionally and whether or not a decorator is used. No file here
         // imports it, and without it the bundle fails to resolve. It is declared
