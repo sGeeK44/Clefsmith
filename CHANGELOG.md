@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.1.1](https://github.com/sGeeK44/Clefsmith/compare/clefsmith-v1.1.0...clefsmith-v1.1.1) (2026-10-28)
+
+
+### Bug Fixes
+
+* **ci:** bound how long a job may run ([813b555](https://github.com/sGeeK44/Clefsmith/commit/813b555285158e19c7f415d133266bd84eb30256))
+* **ci:** retry the pod download when the runner stalls on it ([4b248cc](https://github.com/sGeeK44/Clefsmith/commit/4b248cc76e4cd454f7895bafeb5b171bde2c2c84))
+* **ci:** run the device suite only on the release pull request ([e43218f](https://github.com/sGeeK44/Clefsmith/commit/e43218f975d8081a0d51ab1e974a29d103a350e6))
+* **ci:** stop the hook failing when nothing staged concerns the formatter ([7cd7c8e](https://github.com/sGeeK44/Clefsmith/commit/7cd7c8eea38b90f4f4d1e8a0a47136da8a3e3b68))
+
 ## [1.1.0](https://github.com/sGeeK44/Clefsmith/compare/clefsmith-v1.0.0...clefsmith-v1.1.0) (2026-10-28)
 
 
