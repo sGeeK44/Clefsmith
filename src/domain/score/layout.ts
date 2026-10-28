@@ -2,7 +2,7 @@ import type { Clef } from '@/domain/notation/clef';
 import { staffPosition } from '@/domain/notation/clef';
 import type { Pitch } from '@/domain/notation/pitch';
 import type { Engraving } from '@/domain/score/engraving';
-import type { GlyphName } from '@/domain/score/glyph';
+import type { GlyphName, Glyphs } from '@/domain/score/glyph';
 
 /**
  * Where a glyph goes, in staff spaces measured from the bottom line of the staff.
@@ -17,10 +17,14 @@ interface GlyphPlacement {
   readonly current: boolean;
 }
 
-interface LineSegment {
-  readonly from: number;
-  readonly to: number;
+interface Point {
+  readonly x: number;
   readonly y: number;
+}
+
+interface LineSegment {
+  readonly from: Point;
+  readonly to: Point;
   readonly thickness: number;
 }
 
@@ -36,12 +40,26 @@ const TOP_POSITION = (LINES - 1) * 2;
 
 const CLEF_GLYPHS: Record<Clef, GlyphName> = { treble: 'gClef', bass: 'fClef' };
 
+/**
+ * The middle line, in half-spaces. A notehead on it or above it takes a downward
+ * stem, so that a stem never leaves the staff on the side the note already did.
+ */
+const MIDDLE_POSITION = TOP_POSITION / 2;
+
+/** How far a stem reaches from the notehead it leaves, in staff spaces. */
+const STEM_LENGTH = 3.5;
+
 export interface Note {
   readonly pitch: Pitch;
   readonly current: boolean;
 }
 
-export function layoutStaff(clef: Clef, notes: readonly Note[], engraving: Engraving): StaffLayout {
+export function layoutStaff(
+  clef: Clef,
+  notes: readonly Note[],
+  engraving: Engraving,
+  glyphs: Glyphs,
+): StaffLayout {
   const positions = notes.map((note) => staffPosition(clef, note.pitch));
   const width = engraving.clefWidth + notes.length * engraving.noteSpacing;
 
@@ -54,6 +72,7 @@ export function layoutStaff(clef: Clef, notes: readonly Note[], engraving: Engra
     lines: [
       ...staffLines(width, engraving),
       ...positions.flatMap((position, index) => legerLines(position, index, engraving)),
+      ...positions.map((position, index) => stem(position, index, engraving, glyphs)),
     ],
   };
 }
@@ -95,11 +114,30 @@ function noteX(index: number, engraving: Engraving): number {
 
 function staffLines(width: number, engraving: Engraving): LineSegment[] {
   return Array.from({ length: LINES }, (_, line) => ({
-    from: 0,
-    to: width,
-    y: line,
+    from: { x: 0, y: line },
+    to: { x: width, y: line },
     thickness: engraving.staffLineThickness,
   }));
+}
+
+/**
+ * The stem leaves the notehead at the anchor the font publishes for it — the upper
+ * right corner going up, the lower left going down — so the two meet without a gap
+ * whatever the notehead is shaped like.
+ */
+function stem(position: number, index: number, engraving: Engraving, glyphs: Glyphs): LineSegment {
+  const up = position < MIDDLE_POSITION;
+  const anchor = up ? glyphs.noteheadBlack.stemUp : glyphs.noteheadBlack.stemDown;
+  const foot = {
+    x: noteX(index, engraving) + (anchor?.x ?? 0),
+    y: position / 2 + (anchor?.y ?? 0),
+  };
+
+  return {
+    from: foot,
+    to: { x: foot.x, y: foot.y + (up ? STEM_LENGTH : -STEM_LENGTH) },
+    thickness: engraving.stemThickness,
+  };
 }
 
 /**
@@ -111,10 +149,13 @@ function legerLines(position: number, index: number, engraving: Engraving): Line
   const x = noteX(index, engraving);
   const half = engraving.noteheadWidth / 2 + engraving.legerLineExtension;
 
-  return Array.from({ length: Math.floor(Math.abs(outside) / 2) }, (_, step) => ({
-    from: x - half,
-    to: x + half,
-    y: (position > TOP_POSITION ? TOP_POSITION + (step + 1) * 2 : -(step + 1) * 2) / 2,
-    thickness: engraving.legerLineThickness,
-  }));
+  return Array.from({ length: Math.floor(Math.abs(outside) / 2) }, (_, step) => {
+    const y = (position > TOP_POSITION ? TOP_POSITION + (step + 1) * 2 : -(step + 1) * 2) / 2;
+
+    return {
+      from: { x: x - half, y },
+      to: { x: x + half, y },
+      thickness: engraving.legerLineThickness,
+    };
+  });
 }

@@ -11,6 +11,7 @@ import { ENGRAVING_DEFAULTS, GLYPHS } from '@/domain/score/bravura';
 export interface Engraving {
   readonly staffLineThickness: number;
   readonly legerLineThickness: number;
+  readonly stemThickness: number;
   /** How far a leger line sticks out on each side of the notehead it carries. */
   readonly legerLineExtension: number;
   readonly noteheadWidth: number;
@@ -34,6 +35,7 @@ const NOTE_SPACING = 3;
 export const ENGRAVING: Engraving = {
   staffLineThickness: ENGRAVING_DEFAULTS.staffLineThickness,
   legerLineThickness: ENGRAVING_DEFAULTS.legerLineThickness,
+  stemThickness: ENGRAVING_DEFAULTS.stemThickness,
   legerLineExtension: ENGRAVING_DEFAULTS.legerLineExtension,
   noteheadWidth: GLYPHS.noteheadBlack.advance,
   clefWidth: Math.max(GLYPHS.gClef.advance, GLYPHS.fClef.advance) + CLEF_GAP,
