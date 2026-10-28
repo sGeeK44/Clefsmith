@@ -15,6 +15,7 @@ what this file is for.
 | write or move a test                             | `docs/testing.md`        |
 | write any code at all                            | `docs/code-style.md`     |
 | style a screen, or add a component or a token    | `docs/design-system.md`  |
+| draw a staff, or add a musical glyph             | `docs/score-engine.md`   |
 | run the speech bench, or record for it           | `bench/corpus/README.md` |
 | run the e2e suite                                | `e2e/README.md`          |
 

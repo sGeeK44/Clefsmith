@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
+import { GLYPHS } from '@/domain/score/bravura';
 import type { Engraving } from '@/domain/score/engraving';
-import type { Glyphs } from '@/domain/score/glyph';
 import { layoutStaff, type Note, type StaffLayout } from '@/domain/score/layout';
 
 const engraving: Engraving = {
@@ -13,23 +13,12 @@ const engraving: Engraving = {
   clefWidth: 4,
 };
 
-const glyphs: Glyphs = {
-  gClef: { codepoint: 'U+E050', advance: 2.684 },
-  fClef: { codepoint: 'U+E062', advance: 2.736 },
-  noteheadBlack: {
-    codepoint: 'U+E0A4',
-    advance: 1.18,
-    stemUp: { x: 1.18, y: 0.168 },
-    stemDown: { x: 0, y: -0.168 },
-  },
-};
-
 function note(degree: Note['pitch']['degree'], octave: number, current = false): Note {
   return { pitch: { degree, octave }, current };
 }
 
 function staff(clef: Parameters<typeof layoutStaff>[0], notes: readonly Note[]): StaffLayout {
-  return layoutStaff(clef, notes, engraving, glyphs);
+  return layoutStaff(clef, notes, engraving, GLYPHS);
 }
 
 function noteheads({ glyphs: placed }: StaffLayout) {
