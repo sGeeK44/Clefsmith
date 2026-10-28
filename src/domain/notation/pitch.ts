@@ -24,3 +24,19 @@ export interface Pitch {
 export function diatonicIndex({ degree, octave }: Pitch): number {
   return octave * DEGREES.length + DEGREES.indexOf(degree);
 }
+
+/**
+ * The pitch that stands at `index` degrees above `c0` — the way back.
+ *
+ * Below `c0` there is no pitch to name: the octave numbering starts there, and a
+ * negative index is a caller that has lost count rather than a very low note.
+ */
+export function pitchAt(index: number): Pitch {
+  if (index < 0) {
+    throw new Error(`${index} is below c0, which is not a pitch.`);
+  }
+
+  const octave = Math.trunc(index / DEGREES.length);
+
+  return { degree: DEGREES[index - octave * DEGREES.length] as Degree, octave };
+}
