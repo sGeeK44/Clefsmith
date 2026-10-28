@@ -1,5 +1,7 @@
 import { Stack } from 'expo-router';
 
+import '@/components/theme/unistyles';
+
 import { ContainerProvider } from '@/components/container-provider';
 import { createContainer } from '@/infrastructure/container';
 
