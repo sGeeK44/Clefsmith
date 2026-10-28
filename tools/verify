@@ -40,4 +40,5 @@ run 'typecheck' bun run typecheck
 run 'tests' bun test
 run 'architecture' bun run arch
 run 'dead code' bun run deadcode
+run 'documentation references' bun tools/docs/check.ts
 run 'bench reproducibility' tools/bench-reproducible
