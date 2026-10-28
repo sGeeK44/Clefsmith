@@ -1,5 +1,5 @@
 import { CLEFS } from '@/domain/notation/clef';
-import { LEVELS, type Level } from '@/domain/training/level';
+import { LEVELS } from '@/domain/training/level';
 import { type Answers, noProgress, type Progress, WINDOW } from '@/domain/training/progress';
 
 /**
@@ -18,21 +18,17 @@ export function encode(progress: Progress): string {
 /**
  * The record written down, or that of a learner who has never played.
  *
- * Never throws. A record that cannot be read — absent, truncated, hand-edited,
+ * Never throws. A record that cannot be read — never written, truncated, hand-edited,
  * written by a newer version — starts the learner over. Losing a practice history
  * is not worth a crash at every launch, and there is nothing here to recover.
  */
-export function decode(written: string | undefined): Progress {
+export function decode(written: string | null): Progress {
   return readProgress(parse(written)) ?? noProgress();
 }
 
-function parse(written: string | undefined): unknown {
-  if (written === undefined) {
-    return undefined;
-  }
-
+function parse(written: string | null): unknown {
   try {
-    return JSON.parse(written);
+    return JSON.parse(written ?? '');
   } catch {
     return undefined;
   }

@@ -25,7 +25,7 @@ Level 4 is the anchor, and it is not a guess: it is the range the previous appli
 shipped as its default, treble `C4–B5` and bass `D2–C4`. Below it the staff is being
 learnt; above it, left.
 
-A level knows nothing about unlocking, mastery or history. That is CLE-15.
+A level knows nothing about unlocking or history on its own; what opens one is below.
 
 **Checked** by `bun test`: the pools are written out in full, each level from 3 up contains
 the one below it, and the extremes of level 6 lay out with exactly three leger lines —
@@ -57,6 +57,47 @@ The same seven words per notation are the vocabulary the speech corpus was recor
 against. **Checked** by `bench/vocabulary.test.ts`: renaming a degree in the domain turns
 it red, because the recordings are named after those words and re-recording is a session
 with five speakers.
+
+## Progression
+
+A level is **held**, for one clef, when the **last 20 answers** to it count **at most 2
+mistakes**. A window that is not yet full is never held: an average over three answers
+lets a lucky run through.
+
+The window slides and forgets. Twenty mistakes followed by twenty right answers hold the
+level — a learner who has worked through a bad start should not carry it, and a cumulative
+ratio becomes unreachable after one.
+
+The highest level a learner may play is the **first one they do not hold**: level 1 for
+someone who has never played, level 6 once they hold them all. The two clefs are two
+skills and open independently.
+
+**Nothing derivable is written down.** A record holds the latest answers per clef and per
+level, and the number of finished sessions; whether a level is held and how far the learner
+has got are computed on every read. A stored `unlocked` flag and the answers that produced
+it drift apart, and nothing notices.
+
+**Checked** by `bun test`: the rules live in `src/domain/training/progress.ts` and are
+tested through the domain, with no store and no screen.
+
+## Keeping a record
+
+A record is written down as JSON under one key of the key-value store Expo ships on top of
+SQLite — SQLite rather than a file because the write is atomic, so an app killed halfway
+through one leaves the previous record rather than half of the new one. The database sits
+in the app's document directory, which an over-the-air update does not touch: it replaces
+the JavaScript bundle and nothing else.
+
+What is written carries a **schema number**. Anything that does not match — truncated,
+hand-edited, a clef or a level missing, an answer that is not a boolean, a window longer
+than the rule judges on, a schema this version does not know — reads back as a learner who
+has never played. Reading a record never throws: losing a practice history is not worth a
+crash at every launch, and there is nothing in one to recover.
+
+**Checked** by `bun test`, on the two halves that do not need a device:
+`src/infrastructure/progress-codec.ts` and the key-value slice of
+`src/infrastructure/progress-store.ts`. **Not checked by anything**: that the record
+survives an over-the-air update. That needs a published build and an update pushed at it.
 
 ## What is not here
 

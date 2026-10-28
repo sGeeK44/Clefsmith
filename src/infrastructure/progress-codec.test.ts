@@ -23,7 +23,7 @@ describe('a record written down', () => {
 
 describe('a record that cannot be read', () => {
   it('starts the learner over when nothing was ever written', () => {
-    expect(decode(undefined)).toEqual(noProgress());
+    expect(decode(null)).toEqual(noProgress());
   });
 
   it('starts the learner over when the text is not a record at all', () => {
