@@ -7,7 +7,10 @@
         "bench/run.ts",
         "bench/make-manifest.ts",
         "bench/make-fixture-corpus.ts",
-        "tools/docs/check.ts"
+        "tools/docs/check.ts",
+        // Run by hand when a glyph is added, and its output is committed as
+        // src/domain/score/bravura.ts. Nothing imports it, which is the point.
+        "tools/smufl/extract.ts"
       ],
       "ignoreDependencies": [
         // The Outfit weights are embedded into the native projects by the
