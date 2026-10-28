@@ -8,7 +8,7 @@ export const WINDOW = 20;
 const ALLOWED_MISTAKES = 2;
 
 /** The latest answers to each level, oldest first, at most `WINDOW` of them. */
-type Answers = Readonly<Record<Level, readonly boolean[]>>;
+export type Answers = Readonly<Record<Level, readonly boolean[]>>;
 
 /**
  * Everything the application remembers of a learner.
