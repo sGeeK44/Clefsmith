@@ -17,14 +17,20 @@ export const GLYPHS: Glyphs = {
   gClef: {
     codepoint: 'U+E050',
     advance: 2.684,
+    top: 4.392,
+    bottom: -2.632,
   },
   fClef: {
     codepoint: 'U+E062',
     advance: 2.736,
+    top: 1.048,
+    bottom: -2.54,
   },
   noteheadBlack: {
     codepoint: 'U+E0A4',
     advance: 1.18,
+    top: 0.5,
+    bottom: -0.5,
     stemUp: {
       x: 1.18,
       y: 0.168,

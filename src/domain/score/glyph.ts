@@ -19,6 +19,9 @@ export interface Glyph {
   /** The SMuFL codepoint, as the string a font lookup wants. */
   readonly codepoint: string;
   readonly advance: number;
+  /** How far the ink reaches above and below the origin. */
+  readonly top: number;
+  readonly bottom: number;
   /** Where an upward stem leaves the glyph, measured from its origin. */
   readonly stemUp?: Anchor;
   /** Where a downward stem leaves the glyph. */

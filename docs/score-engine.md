@@ -25,6 +25,8 @@ note below the staff has a negative `y`. It is SMuFL's own convention, so the fo
 metrics drop in without conversion, and a staff drawn twice as large is the same numbers
 against a larger space.
 
+The layout also publishes how far the drawing reaches above and below the bottom line,
+ink included — a canvas sized by the staff alone clips the clef, which is taller than it.
 The painter owns the one thing the layout does not know: a canvas grows downwards.
 
 `src/domain/notation/clef.ts` counts in **half**-spaces instead, because that is the gap
@@ -33,7 +35,8 @@ between two neighbouring degrees. The layout halves it once, where the notehead 
 ## The glyph table
 
 `src/domain/score/bravura.ts` is **generated** and must not be edited: it maps a SMuFL
-glyph name to a codepoint, an advance width and the two stem anchors. The layout asks for
+glyph name to a codepoint, an advance width, how far its ink reaches above and below its
+origin, and the two stem anchors. The layout asks for
 a name and never sees a codepoint.
 
 Adding a glyph — a flag, a rest, a beam — is three steps and none of them is a layout

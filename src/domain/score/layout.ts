@@ -34,6 +34,14 @@ export interface StaffLayout {
   readonly glyphs: readonly GlyphPlacement[];
   readonly lines: readonly LineSegment[];
   readonly width: number;
+  /**
+   * How far the drawing reaches above and below the bottom line, ink included.
+   *
+   * A painter that sized its canvas by the staff alone would clip a clef, which
+   * reaches further than any note, and leger lines, which reach further still.
+   */
+  readonly top: number;
+  readonly bottom: number;
 }
 
 /** The staff is five lines; a clef nails its own pitch to one of them. */
@@ -65,21 +73,33 @@ export function layoutStaff(
   const positions = notes.map((note) => staffPosition(clef, note.pitch));
   const width = engraving.clefWidth + notes.length * engraving.noteSpacing;
 
+  const placed = [
+    clefGlyph(clef),
+    ...notes.map((note, index) => notehead(note, positions[index] as number, index, engraving)),
+  ];
+  const lines = [
+    ...staffLines(width, engraving),
+    ...notes.flatMap((note, index) =>
+      legerLines(positions[index] as number, index, note.current, engraving),
+    ),
+    ...notes.map((note, index) =>
+      stem(positions[index] as number, index, note.current, engraving, glyphs),
+    ),
+  ];
+  const reach = [
+    ...lines.flatMap((line) => [line.from.y, line.to.y]),
+    ...placed.flatMap((glyph) => [
+      glyph.y + glyphs[glyph.glyph].top,
+      glyph.y + glyphs[glyph.glyph].bottom,
+    ]),
+  ];
+
   return {
     width,
-    glyphs: [
-      clefGlyph(clef),
-      ...notes.map((note, index) => notehead(note, positions[index] as number, index, engraving)),
-    ],
-    lines: [
-      ...staffLines(width, engraving),
-      ...notes.flatMap((note, index) =>
-        legerLines(positions[index] as number, index, note.current, engraving),
-      ),
-      ...notes.map((note, index) =>
-        stem(positions[index] as number, index, note.current, engraving, glyphs),
-      ),
-    ],
+    glyphs: placed,
+    lines,
+    top: Math.max(...reach),
+    bottom: Math.min(...reach),
   };
 }
 
