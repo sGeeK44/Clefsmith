@@ -14,12 +14,6 @@ const BRAVURA = require('../../../assets/fonts/Bravura.otf');
  */
 const EM_IN_SPACES = 4;
 
-/**
- * Room left above and below the staff for what sticks out of it — a clef reaches
- * further than any note, and leger lines reach further still.
- */
-const MARGIN = 2.5;
-
 export function Staff({
   clef,
   notes,
@@ -33,22 +27,15 @@ export function Staff({
   const font = useFont(BRAVURA, space * EM_IN_SPACES);
   const layout = layoutStaff(clef, notes, ENGRAVING, GLYPHS);
 
-  const ys = [
-    ...layout.lines.flatMap((line) => [line.from.y, line.to.y]),
-    ...layout.glyphs.map((glyph) => glyph.y),
-  ];
-  const top = Math.max(...ys) + MARGIN;
-  const height = (top - Math.min(...ys) + MARGIN) * space;
-
   /** Staff coordinates grow upwards; a canvas grows downwards. */
-  const at = (x: number, y: number) => vec(x * space, (top - y) * space);
+  const at = (x: number, y: number) => vec(x * space, (layout.top - y) * space);
 
   if (font === null) {
     return null;
   }
 
   return (
-    <Canvas style={{ width: layout.width * space, height }}>
+    <Canvas style={{ width: layout.width * space, height: (layout.top - layout.bottom) * space }}>
       {layout.lines.map((line) => (
         <Line
           key={`${line.from.x},${line.from.y}-${line.to.x},${line.to.y}`}

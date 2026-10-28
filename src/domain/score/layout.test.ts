@@ -94,6 +94,41 @@ describe('a staff', () => {
   });
 });
 
+describe('the extent of a staff', () => {
+  it('holds every line and every glyph it draws', () => {
+    const layout = staff('treble', [note('c', 3), note('b', 4, true), note('g', 6)]);
+    const reach = [
+      ...layout.lines.flatMap((line) => [line.from.y, line.to.y]),
+      ...layout.glyphs.map((glyph) => glyph.y + GLYPHS[glyph.glyph].top),
+      ...layout.glyphs.map((glyph) => glyph.y + GLYPHS[glyph.glyph].bottom),
+    ];
+
+    expect(Math.max(...reach)).toBeLessThanOrEqual(layout.top);
+    expect(Math.min(...reach)).toBeGreaterThanOrEqual(layout.bottom);
+  });
+
+  it('reaches past the staff for the clef alone, which is taller than it', () => {
+    const layout = staff('treble', []);
+
+    expect(layout.top).toBeGreaterThan(4);
+    expect(layout.bottom).toBeLessThan(0);
+  });
+
+  it('grows for a stem that leaves the staff where no glyph does', () => {
+    const layout = staff('bass', [note('e', 3)]);
+    const [stem] = verticals(layout);
+
+    expect(layout.bottom).toBeLessThanOrEqual(stem?.to.y as number);
+  });
+
+  it('grows with the leger lines a note needs', () => {
+    const inside = staff('treble', [note('b', 4)]);
+    const below = staff('treble', [note('c', 3)]);
+
+    expect(below.bottom).toBeLessThan(inside.bottom);
+  });
+});
+
 describe('the current note', () => {
   it('carries its stem and its leger lines with it, and nothing else', () => {
     const layout = staff('treble', [note('c', 4), note('c', 4, true)]);
