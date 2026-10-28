@@ -15,6 +15,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 
 import type { Corpus, Recording } from '@/domain/speech-corpus';
+import { encodeWav } from './wav';
 
 const ROOT = 'bench/fixture-corpus';
 const SAMPLE_RATE = 16_000;
@@ -25,35 +26,9 @@ const NOTATIONS: Record<string, string[]> = { syllabic: ['do', 'mi'], letters: [
 const CONDITIONS = ['silence', 'instrumental'];
 
 function wavOf(noteIndex: number): Uint8Array {
-  const samples = (SAMPLE_RATE * DURATION_MS) / 1000;
-  const data = samples * 2;
-  const bytes = new Uint8Array(44 + data);
-  const view = new DataView(bytes.buffer);
-  const tag = (at: number, text: string) => {
-    for (let index = 0; index < text.length; index += 1) {
-      bytes[at + index] = text.charCodeAt(index);
-    }
-  };
+  const samples = new Int16Array((SAMPLE_RATE * DURATION_MS) / 1000).fill(noteIndex);
 
-  tag(0, 'RIFF');
-  view.setUint32(4, bytes.byteLength - 8, true);
-  tag(8, 'WAVE');
-  tag(12, 'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true);
-  view.setUint16(22, 1, true);
-  view.setUint32(24, SAMPLE_RATE, true);
-  view.setUint32(28, SAMPLE_RATE * 2, true);
-  view.setUint16(32, 2, true);
-  view.setUint16(34, 16, true);
-  tag(36, 'data');
-  view.setUint32(40, data, true);
-
-  for (let index = 0; index < samples; index += 1) {
-    view.setInt16(44 + index * 2, noteIndex, true);
-  }
-
-  return bytes;
+  return encodeWav(samples, SAMPLE_RATE);
 }
 
 const recordings: Recording[] = [];
