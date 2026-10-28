@@ -41,6 +41,18 @@ describe('references a document makes', () => {
     expect(targetsIn('Import through `@/domain/clef`.')).toEqual([]);
   });
 
+  it('ignores a dotted identifier, where the dot opens a member and not an extension', () => {
+    expect(targetsIn('`console.error` is allowed, `mock.module` is not.')).toEqual([]);
+  });
+
+  it('ignores a relative path, which names nothing from the repository root', () => {
+    expect(targetsIn('Write `@/domain/latency`, never `../domain/latency`.')).toEqual([]);
+  });
+
+  it('keeps a file at the root, which has no directory to recognise it by', () => {
+    expect(targetsIn('Declared in `package.json`.')).toEqual(['package.json']);
+  });
+
   it('ignores a span that names no file', () => {
     expect(targetsIn('`bun test` reads `noUndeclaredDependencies` and `Date.now()`.')).toEqual([]);
   });
