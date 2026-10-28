@@ -1,4 +1,4 @@
-import { diatonicIndex, type Pitch } from '@/domain/notation/pitch';
+import { diatonicIndex, type Pitch, pitchAt } from '@/domain/notation/pitch';
 
 export type Clef = 'treble' | 'bass';
 
@@ -24,4 +24,10 @@ const ANCHORS: Record<Clef, { readonly pitch: Pitch; readonly position: number }
 export function staffPosition(clef: Clef, pitch: Pitch): number {
   const anchor = ANCHORS[clef];
   return anchor.position + (diatonicIndex(pitch) - diatonicIndex(anchor.pitch));
+}
+
+/** The pitch a clef reads at `position`, which is where `staffPosition` came from. */
+export function pitchOn(clef: Clef, position: number): Pitch {
+  const anchor = ANCHORS[clef];
+  return pitchAt(diatonicIndex(anchor.pitch) + (position - anchor.position));
 }
