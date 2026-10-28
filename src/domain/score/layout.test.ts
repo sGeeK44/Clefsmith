@@ -1,89 +1,148 @@
 import { describe, expect, it } from 'bun:test';
 import type { Engraving } from '@/domain/score/engraving';
-import { layoutStaff, type Note } from '@/domain/score/layout';
+import type { Glyphs } from '@/domain/score/glyph';
+import { layoutStaff, type Note, type StaffLayout } from '@/domain/score/layout';
 
 const engraving: Engraving = {
   staffLineThickness: 0.13,
   legerLineThickness: 0.16,
+  stemThickness: 0.12,
   legerLineExtension: 0.4,
   noteheadWidth: 1.18,
   noteSpacing: 3,
   clefWidth: 4,
 };
 
+const glyphs: Glyphs = {
+  gClef: { codepoint: 'U+E050', advance: 2.684 },
+  fClef: { codepoint: 'U+E062', advance: 2.736 },
+  noteheadBlack: {
+    codepoint: 'U+E0A4',
+    advance: 1.18,
+    stemUp: { x: 1.18, y: 0.168 },
+    stemDown: { x: 0, y: -0.168 },
+  },
+};
+
 function note(degree: Note['pitch']['degree'], octave: number, current = false): Note {
   return { pitch: { degree, octave }, current };
 }
 
+function staff(clef: Parameters<typeof layoutStaff>[0], notes: readonly Note[]): StaffLayout {
+  return layoutStaff(clef, notes, engraving, glyphs);
+}
+
+function noteheads({ glyphs: placed }: StaffLayout) {
+  return placed.filter((glyph) => glyph.glyph === 'noteheadBlack');
+}
+
+/** A staff line is the only segment that runs the whole width. */
+function staffLines({ lines, width }: StaffLayout) {
+  return lines.filter((line) => line.from.x === 0 && line.to.x === width);
+}
+
+function horizontals({ lines, width }: StaffLayout) {
+  return lines.filter((line) => line.from.y === line.to.y && line.to.x !== width);
+}
+
+function verticals({ lines }: StaffLayout) {
+  return lines.filter((line) => line.from.x === line.to.x);
+}
+
 describe('a staff', () => {
   it('draws five lines, one space apart, across the whole width', () => {
-    const { lines, width } = layoutStaff('treble', [note('g', 4)], engraving);
-    const staff = lines.filter((line) => line.from === 0 && line.to === width);
-
-    expect(staff.map((line) => line.y)).toEqual([0, 1, 2, 3, 4]);
+    expect(staffLines(staff('treble', [note('g', 4)])).map((line) => line.from.y)).toEqual([
+      0, 1, 2, 3, 4,
+    ]);
   });
 
   it('opens with the glyph of its clef, on the line that clef names', () => {
-    expect(layoutStaff('treble', [], engraving).glyphs).toEqual([
-      { glyph: 'gClef', x: 0, y: 1, current: false },
-    ]);
-    expect(layoutStaff('bass', [], engraving).glyphs).toEqual([
-      { glyph: 'fClef', x: 0, y: 3, current: false },
-    ]);
+    expect(staff('treble', []).glyphs).toEqual([{ glyph: 'gClef', x: 0, y: 1, current: false }]);
+    expect(staff('bass', []).glyphs).toEqual([{ glyph: 'fClef', x: 0, y: 3, current: false }]);
   });
 
   it('puts a notehead half a space up for every degree it climbs', () => {
-    const { glyphs } = layoutStaff('treble', [note('e', 4), note('f', 4), note('g', 4)], engraving);
+    const layout = staff('treble', [note('e', 4), note('f', 4), note('g', 4)]);
 
-    expect(
-      glyphs.filter((glyph) => glyph.glyph === 'noteheadBlack').map((glyph) => glyph.y),
-    ).toEqual([0, 0.5, 1]);
+    expect(noteheads(layout).map((glyph) => glyph.y)).toEqual([0, 0.5, 1]);
   });
 
   it('spaces the noteheads evenly after the clef', () => {
-    const { glyphs } = layoutStaff('treble', [note('e', 4), note('e', 4), note('e', 4)], engraving);
+    const layout = staff('treble', [note('e', 4), note('e', 4), note('e', 4)]);
 
-    expect(
-      glyphs.filter((glyph) => glyph.glyph === 'noteheadBlack').map((glyph) => glyph.x),
-    ).toEqual([4, 7, 10]);
+    expect(noteheads(layout).map((glyph) => glyph.x)).toEqual([4, 7, 10]);
   });
 
   it('marks the current note and no other', () => {
-    const { glyphs } = layoutStaff(
-      'treble',
-      [note('e', 4), note('f', 4, true), note('g', 4)],
-      engraving,
-    );
+    const layout = staff('treble', [note('e', 4), note('f', 4, true), note('g', 4)]);
 
-    expect(glyphs.map((glyph) => glyph.current)).toEqual([false, false, true, false]);
+    expect(layout.glyphs.map((glyph) => glyph.current)).toEqual([false, false, true, false]);
   });
 
   it('carries a note four spaces above the staff on four leger lines, all above', () => {
-    const { lines, width } = layoutStaff('treble', [note('g', 6)], engraving);
-    const leger = lines.filter((line) => line.to !== width);
-
-    expect(leger.map((line) => line.y)).toEqual([5, 6, 7, 8]);
+    expect(horizontals(staff('treble', [note('g', 6)])).map((line) => line.from.y)).toEqual([
+      5, 6, 7, 8,
+    ]);
   });
 
   it('carries a note below the staff on leger lines below it', () => {
-    const { lines, width } = layoutStaff('treble', [note('a', 3)], engraving);
-    const leger = lines.filter((line) => line.to !== width);
-
-    expect(leger.map((line) => line.y)).toEqual([-1, -2]);
+    expect(horizontals(staff('treble', [note('a', 3)])).map((line) => line.from.y)).toEqual([
+      -1, -2,
+    ]);
   });
 
   it('leaves a note in the space just outside the staff without a leger line', () => {
-    const { lines, width } = layoutStaff('treble', [note('g', 5), note('d', 4)], engraving);
-
-    expect(lines.filter((line) => line.to !== width)).toEqual([]);
+    expect(horizontals(staff('treble', [note('g', 5), note('d', 4)]))).toEqual([]);
   });
 
   it('draws a leger line wider than the notehead it carries, centred on it', () => {
-    const { lines, glyphs, width } = layoutStaff('treble', [note('c', 4)], engraving);
-    const [leger] = lines.filter((line) => line.to !== width);
-    const [head] = glyphs.filter((glyph) => glyph.glyph === 'noteheadBlack');
+    const layout = staff('treble', [note('c', 4)]);
+    const [leger] = horizontals(layout);
+    const [head] = noteheads(layout);
 
-    expect(leger?.from).toBeCloseTo((head?.x as number) - 1.18 / 2 - 0.4, 10);
-    expect(leger?.to).toBeCloseTo((head?.x as number) + 1.18 / 2 + 0.4, 10);
+    expect(leger?.from.x).toBeCloseTo((head?.x as number) - 1.18 / 2 - 0.4, 10);
+    expect(leger?.to.x).toBeCloseTo((head?.x as number) + 1.18 / 2 + 0.4, 10);
+  });
+});
+
+describe('a stem', () => {
+  it('rises from a note below the middle line', () => {
+    const [stem] = verticals(staff('treble', [note('f', 4)]));
+
+    expect((stem?.to.y as number) - (stem?.from.y as number)).toBe(3.5);
+  });
+
+  it('falls from a note above the middle line', () => {
+    const [stem] = verticals(staff('treble', [note('d', 5)]));
+
+    expect((stem?.to.y as number) - (stem?.from.y as number)).toBe(-3.5);
+  });
+
+  it('falls from a note on the middle line', () => {
+    const [stem] = verticals(staff('treble', [note('b', 4)]));
+
+    expect((stem?.to.y as number) - (stem?.from.y as number)).toBe(-3.5);
+  });
+
+  it('leaves a rising note at the right of its head, where the font says', () => {
+    const layout = staff('treble', [note('f', 4)]);
+    const [stem] = verticals(layout);
+    const [head] = noteheads(layout);
+
+    expect(stem?.from).toEqual({ x: (head?.x as number) + 1.18, y: (head?.y as number) + 0.168 });
+  });
+
+  it('leaves a falling note at the left of its head, where the font says', () => {
+    const layout = staff('treble', [note('d', 5)]);
+    const [stem] = verticals(layout);
+    const [head] = noteheads(layout);
+
+    expect(stem?.from).toEqual({ x: head?.x as number, y: (head?.y as number) - 0.168 });
+  });
+
+  it('gives each note one stem, at the stem thickness the font publishes', () => {
+    const layout = staff('treble', [note('e', 4), note('g', 5)]);
+
+    expect(verticals(layout).map((stem) => stem.thickness)).toEqual([0.12, 0.12]);
   });
 });
