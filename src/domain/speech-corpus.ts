@@ -36,6 +36,12 @@ export interface Recording extends Cell {
  * recorded.
  */
 export interface Corpus {
+  /**
+   * The rate every recording was captured at. One rate for the whole corpus:
+   * a track fed at a rate it was not opened for mishears everything, and that
+   * is not a confusion worth publishing.
+   */
+  readonly sampleRate: number;
   readonly speakers: readonly string[];
   readonly notations: Readonly<Record<string, readonly string[]>>;
   readonly conditions: readonly string[];
