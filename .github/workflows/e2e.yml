@@ -16,6 +16,11 @@ concurrency:
 jobs:
   android:
     runs-on: ubuntu-latest
+    # Roughly twice what the job takes. Without a limit GitHub's own default
+    # applies, and a suite that hangs holds a runner for six hours before
+    # anyone is told. The iOS job below is given more: it builds WebDriverAgent
+    # on top of the app.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
 
@@ -71,6 +76,7 @@ jobs:
 
   ios:
     runs-on: macos-15
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
 
