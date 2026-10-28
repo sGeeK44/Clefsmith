@@ -1,0 +1,155 @@
+{
+  "sampleRate": 16000,
+  "speakers": ["s1", "s2"],
+  "notations": {
+    "syllabic": ["do", "mi"],
+    "letters": ["A", "B"]
+  },
+  "conditions": ["silence", "instrumental"],
+  "recordings": [
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s1-syllabic-do-silence.wav",
+      "sha256": "6e00afcc0bfb3f0faf04f3e8ff8c1582fcdefd7a438c57db561f24d5fb205d89",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "instrumental",
+      "audio": "s1-syllabic-do-instrumental.wav",
+      "sha256": "6e00afcc0bfb3f0faf04f3e8ff8c1582fcdefd7a438c57db561f24d5fb205d89",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s1-syllabic-mi-silence.wav",
+      "sha256": "5552d4c643a8525356128d411052fccbec607f1bab2f5f36ac2fb53e7da1a443",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "instrumental",
+      "audio": "s1-syllabic-mi-instrumental.wav",
+      "sha256": "5552d4c643a8525356128d411052fccbec607f1bab2f5f36ac2fb53e7da1a443",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s1",
+      "notation": "letters",
+      "note": "A",
+      "condition": "silence",
+      "audio": "s1-letters-A-silence.wav",
+      "sha256": "6e00afcc0bfb3f0faf04f3e8ff8c1582fcdefd7a438c57db561f24d5fb205d89",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s1",
+      "notation": "letters",
+      "note": "A",
+      "condition": "instrumental",
+      "audio": "s1-letters-A-instrumental.wav",
+      "sha256": "6e00afcc0bfb3f0faf04f3e8ff8c1582fcdefd7a438c57db561f24d5fb205d89",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s1",
+      "notation": "letters",
+      "note": "B",
+      "condition": "silence",
+      "audio": "s1-letters-B-silence.wav",
+      "sha256": "5552d4c643a8525356128d411052fccbec607f1bab2f5f36ac2fb53e7da1a443",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s1",
+      "notation": "letters",
+      "note": "B",
+      "condition": "instrumental",
+      "audio": "s1-letters-B-instrumental.wav",
+      "sha256": "5552d4c643a8525356128d411052fccbec607f1bab2f5f36ac2fb53e7da1a443",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s2-syllabic-do-silence.wav",
+      "sha256": "6e00afcc0bfb3f0faf04f3e8ff8c1582fcdefd7a438c57db561f24d5fb205d89",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "instrumental",
+      "audio": "s2-syllabic-do-instrumental.wav",
+      "sha256": "6e00afcc0bfb3f0faf04f3e8ff8c1582fcdefd7a438c57db561f24d5fb205d89",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s2-syllabic-mi-silence.wav",
+      "sha256": "5552d4c643a8525356128d411052fccbec607f1bab2f5f36ac2fb53e7da1a443",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "instrumental",
+      "audio": "s2-syllabic-mi-instrumental.wav",
+      "sha256": "5552d4c643a8525356128d411052fccbec607f1bab2f5f36ac2fb53e7da1a443",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s2",
+      "notation": "letters",
+      "note": "A",
+      "condition": "silence",
+      "audio": "s2-letters-A-silence.wav",
+      "sha256": "6e00afcc0bfb3f0faf04f3e8ff8c1582fcdefd7a438c57db561f24d5fb205d89",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s2",
+      "notation": "letters",
+      "note": "A",
+      "condition": "instrumental",
+      "audio": "s2-letters-A-instrumental.wav",
+      "sha256": "6e00afcc0bfb3f0faf04f3e8ff8c1582fcdefd7a438c57db561f24d5fb205d89",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s2",
+      "notation": "letters",
+      "note": "B",
+      "condition": "silence",
+      "audio": "s2-letters-B-silence.wav",
+      "sha256": "5552d4c643a8525356128d411052fccbec607f1bab2f5f36ac2fb53e7da1a443",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s2",
+      "notation": "letters",
+      "note": "B",
+      "condition": "instrumental",
+      "audio": "s2-letters-B-instrumental.wav",
+      "sha256": "5552d4c643a8525356128d411052fccbec607f1bab2f5f36ac2fb53e7da1a443",
+      "utteranceEndMs": 300
+    }
+  ]
+}
