@@ -15,6 +15,10 @@ Every cell is recorded. A missing one fails the bench rather than shrinking the 
 because a confusion rate over four fifths of a grid is a different number and nothing on
 its face says so.
 
+A cell may hold **several takes**, and should. The grid is the floor, not the sample: an
+error rate read off one recording per cell can only come out as none of it or all of it,
+so the rate the bench publishes is only as fine as the number of takes behind it.
+
 - **Speakers** — at least five, as different from each other as you can get: pitch, accent,
   pace. The confusion pairs this bench exists to find are the ones that survive a change
   of voice.
@@ -32,7 +36,9 @@ its face says so.
 - One word per file, with a little silence after it. The silence is what a streaming
   recogniser needs to decide the word is over, and it is part of what is being measured.
 - Name each file `<speaker>-<notation>-<note>-<condition>.wav`, exactly as `axes.json`
-  spells them. The name is the only place a recording says which cell it fills.
+  spells them. The name is the only place a recording says which cell it fills. A second
+  take of the same cell adds a suffix — `s1-syllabic-do-silence-2.wav` — which is there to
+  make the names differ and is not read back.
 - Speakers are pseudonyms (`s1`…`s5`). Consent is tracked outside this repository, and no
   name, no email and no voice sample of anyone identifiable belongs in it.
 
@@ -43,7 +49,8 @@ bun bench/make-manifest.ts --corpus bench/corpus
 ```
 
 It hashes each file, proposes where the speaker stops talking, and refuses a grid that is
-incomplete or a file that is not named for a cell.
+incomplete or a file that is not named for a cell. A cell recorded more than once is not a
+defect.
 
 **Read the proposed offsets before the corpus is used to decide anything.** Every latency
 the bench publishes is measured from that number, and the proposal is energy-based: it
