@@ -99,6 +99,21 @@ The level reached is **written down**, not worked out. A session's accuracy is n
 so nothing could recompute it — and a rule that cannot be recomputed is one that has to be
 stored.
 
+## Where a learner starts
+
+The introduction offers three places to start from — study 1, 3 or 5 — and the middle one
+is what is offered before the learner says anything: neither extreme is a good guess, and
+the middle is the only answer wrong by the same amount in both directions.
+
+A starting point opens the **treble alone**. The bass is another skill and starts where it
+starts. It never lowers what is already open either, which is what makes replaying the
+introduction from the settings cost nothing — rather than a rule the screen has to
+remember.
+
+**Checked** by `bun test`: `src/usecases/finish-welcome.ts` holds both, and
+`src/components/wording/welcome.ts` holds the three offers. **Not checked by anything**:
+that the introduction is what opens on a first launch. That needs a device.
+
 ## Mastery per degree
 
 How well each of the seven degrees is read, out of a hundred, per clef. Degrees and not
