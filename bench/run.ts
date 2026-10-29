@@ -31,8 +31,8 @@ const audio = createWavCorpusAudio({
   sampleRate: corpus.sampleRate,
 });
 
-const outcomes = await createReplaySpeechCorpus(clock, audio)(corpus, recognizer);
-const report = speechBenchReport(corpus, outcomes);
+const result = await createReplaySpeechCorpus(clock, audio)(corpus, recognizer);
+const report = speechBenchReport(corpus, result);
 
 console.log(serializeSpeechBenchReport(report));
 

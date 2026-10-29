@@ -43,12 +43,12 @@ const UTTERANCES = CORPUS.recordings.length;
 async function benchAgainst(answers: readonly Answer[], responseMs: number) {
   const clock = virtualClock();
   const { recognizer } = recognizerAnswering(clock, answers, responseMs);
-  const outcomes = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
+  const result = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
     CORPUS,
     recognizer,
   );
 
-  return speechBenchReport(CORPUS, outcomes);
+  return speechBenchReport(CORPUS, result);
 }
 
 /** What a recogniser that always gets it right would answer, in replay order. */
@@ -101,7 +101,7 @@ describe('speech bench report', () => {
   it('publishes the cells an incomplete corpus is missing', async () => {
     const short = { ...CORPUS, recordings: CORPUS.recordings.slice(0, -1) };
 
-    const report = speechBenchReport(short, []);
+    const report = speechBenchReport(short, { outcomes: [], sessions: [] });
 
     expect(report.corpus).toEqual({
       declaredCells: UTTERANCES,
@@ -123,11 +123,20 @@ describe('speech bench report', () => {
       { recording: inLetters, heard: null, latencyMs: null },
     ];
 
-    const report = speechBenchReport(twoNotations, outcomes);
+    const report = speechBenchReport(twoNotations, { outcomes, sessions: [] });
 
     expect(report.confusion.map((matrix) => [matrix.notation, matrix.utterances])).toEqual([
       ['syllabic', 1],
       ['letters', 1],
     ]);
+  });
+
+  it('publishes what each notation session cost to open', () => {
+    const report = speechBenchReport(CORPUS, {
+      outcomes: [],
+      sessions: [{ notation: 'syllabic', startupMs: 612 }],
+    });
+
+    expect(report.sessions).toEqual([{ notation: 'syllabic', startupMs: 612 }]);
   });
 });
