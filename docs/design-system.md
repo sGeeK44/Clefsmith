@@ -33,7 +33,7 @@ is for. Without that plugin a themed component renders with no style at all.
 
 ## Components
 
-Four, in `src/components/ui/`:
+Five, in `src/components/ui/`:
 
 | Component | Holds                                                   |
 | --------- | ------------------------------------------------------- |
@@ -41,9 +41,14 @@ Four, in `src/components/ui/`:
 | `Button`  | Two weights of emphasis, `primary` and `quiet`.         |
 | `Card`    | The only component that knows what "raised" looks like. |
 | `Screen`  | The page: ground, safe-area insets, gutter.             |
+| `Choice`  | Which of several options is the current one.            |
 
-A fifth component arrives with the screen that needs it, not before. A design system
-grown ahead of its screens is a catalogue of guesses.
+`Choice` is not a `Button`: a button asks to be acted on, a choice shows a state. The
+selected option carries the accent, and nothing in it is primary.
+
+The next component arrives with the screen that needs it, not before. A design system
+grown ahead of its screens is a catalogue of guesses — `Choice` arrived with Réglages,
+which is the rule working rather than an exception to it.
 
 **Not checked by anything**: that a screen uses a token rather than a literal colour. It is
 a convention, held up at review.
