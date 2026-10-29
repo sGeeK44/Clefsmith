@@ -33,7 +33,7 @@ is for. Without that plugin a themed component renders with no style at all.
 
 ## Components
 
-Seven, in `src/components/ui/`:
+Eight, in `src/components/ui/`:
 
 | Component | Holds                                                     |
 | --------- | --------------------------------------------------------- |
@@ -57,8 +57,11 @@ only its colours are ours.
 
 The next component arrives with the screen that needs it, not before. A design system
 grown ahead of its screens is a catalogue of guesses — `Choice` arrived with Réglages,
-`Flash` with the desk and `Toggle` with the parcours, which is the rule working rather
-than an exception to it.
+`Flash` with the desk, `Toggle` with the parcours and `ProgressBar` with the exercise,
+which is the rule working rather than an exception to it.
+
+`ProgressBar` holds no number of its own. What the share means — notes read, files sent —
+is the screen's business, and a bar that knew would be a bar per screen.
 
 **Not checked by anything**: that a screen uses a token rather than a literal colour. It is
 a convention, held up at review.

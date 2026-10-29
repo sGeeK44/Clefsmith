@@ -40,11 +40,11 @@ export function countLine(at: number, total: number): string {
 /**
  * How much of the session is behind the learner, as the bar draws it.
  *
- * A session is never empty — the shortest length is four measures — so there is
- * no division by zero to defend against here.
+ * A session is never empty and the reading never runs past its last note, so
+ * neither a division by zero nor a share over one is defended against here.
  */
 export function shareOf(at: number, total: number): number {
-  return Math.min(at, total) / total;
+  return at / total;
 }
 
 /** `C'était un do` — the note the learner missed, named rather than pointed at. */
