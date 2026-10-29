@@ -9,9 +9,17 @@ import type { Notation } from '@/domain/notation/naming';
  */
 export interface Settings {
   readonly notation: Notation;
+  /**
+   * Whether the introduction has been seen — played through or passed over.
+   *
+   * It sits here rather than with the progression because the progression is
+   * erasable and this is not: starting the practice over must not hand the
+   * learner the introduction again.
+   */
+  readonly welcomed: boolean;
 }
 
 /** What a learner who has chosen nothing reads in. */
 export function defaultSettings(): Settings {
-  return { notation: 'syllabic' };
+  return { notation: 'syllabic', welcomed: false };
 }

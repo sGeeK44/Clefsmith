@@ -8,9 +8,9 @@ describe('the settings store', () => {
   it('reads back what it wrote', async () => {
     const store = createSettingsStore(storageHolding());
 
-    await store.save({ notation: 'letters' });
+    await store.save({ notation: 'letters', welcomed: true });
 
-    expect(await store.load()).toEqual({ notation: 'letters' });
+    expect(await store.load()).toEqual({ notation: 'letters', welcomed: true });
   });
 
   it('answers with the default when the key was never written', async () => {
@@ -20,15 +20,15 @@ describe('the settings store', () => {
   it('writes the record down rather than the object it was handed', async () => {
     const storage = storageHolding();
 
-    await createSettingsStore(storage).save({ notation: 'letters' });
+    await createSettingsStore(storage).save({ notation: 'letters', welcomed: true });
 
-    expect(storage.written.settings).toBe(encode({ notation: 'letters' }));
+    expect(storage.written.settings).toBe(encode({ notation: 'letters', welcomed: true }));
   });
 
   it('touches no key but its own, the progression included', async () => {
     const storage = storageHolding({ progress: 'untouched' });
 
-    await createSettingsStore(storage).save({ notation: 'letters' });
+    await createSettingsStore(storage).save({ notation: 'letters', welcomed: true });
 
     expect(storage.written.progress).toBe('untouched');
     expect(Object.keys(storage.written).sort()).toEqual(['progress', 'settings']);

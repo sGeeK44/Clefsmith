@@ -8,7 +8,7 @@ describe('choosing a notation', () => {
 
     await createChooseNotation(store)('letters');
 
-    expect(await store.load()).toEqual({ notation: 'letters' });
+    expect(await store.load()).toEqual({ notation: 'letters', welcomed: false });
   });
 
   it('keeps the last choice, not the first', async () => {
@@ -18,6 +18,17 @@ describe('choosing a notation', () => {
     await choose('letters');
     await choose('syllabic');
 
-    expect(store.written).toEqual([{ notation: 'letters' }, { notation: 'syllabic' }]);
+    expect(store.written).toEqual([
+      { notation: 'letters', welcomed: false },
+      { notation: 'syllabic', welcomed: false },
+    ]);
+  });
+
+  it('leaves the rest of the record alone', async () => {
+    const store = settingsHolding({ notation: 'syllabic', welcomed: true });
+
+    await createChooseNotation(store)('letters');
+
+    expect(await store.load()).toEqual({ notation: 'letters', welcomed: true });
   });
 });

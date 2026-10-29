@@ -8,7 +8,7 @@ import { defaultSettings, type Settings } from '@/domain/settings';
  * are written by different rules and there is no reason for one to move when the
  * other does.
  */
-const SCHEMA = 1;
+const SCHEMA = 2;
 
 export function encode(settings: Settings): string {
   return JSON.stringify({ schema: SCHEMA, ...settings });
@@ -40,8 +40,11 @@ function readSettings(value: unknown): Settings | undefined {
   }
 
   const notation = readNotation(value.notation);
+  const welcomed = value.welcomed;
 
-  return notation === undefined ? undefined : { notation };
+  return notation === undefined || typeof welcomed !== 'boolean'
+    ? undefined
+    : { notation, welcomed };
 }
 
 function readNotation(value: unknown): Notation | undefined {
