@@ -43,6 +43,7 @@
     "react-native-safe-area-context": "~5.10.1",
     "react-native-screens": "~4.30.0",
     "react-native-unistyles": "3.5.3",
+    "react-native-vosk": "2.1.7",
     "react-native-web": "~0.21.4",
     "react-native-worklets": "0.13.0",
     "reflect-metadata": "~0.2.2"
@@ -53,5 +54,8 @@
     "@types/react": "~19.3.0",
     "knip": "^6.43.0",
     "typescript": "~7.0.2"
+  },
+  "patchedDependencies": {
+    "react-native-vosk@2.1.7": "patches/react-native-vosk@2.1.7.patch"
   }
 }
