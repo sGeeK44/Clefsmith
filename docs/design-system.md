@@ -33,7 +33,7 @@ is for. Without that plugin a themed component renders with no style at all.
 
 ## Components
 
-Six, in `src/components/ui/`:
+Seven, in `src/components/ui/`:
 
 | Component | Holds                                                     |
 | --------- | --------------------------------------------------------- |
@@ -43,6 +43,7 @@ Six, in `src/components/ui/`:
 | `Screen`  | The page: ground, safe-area insets, gutter.               |
 | `Choice`  | Which of several options is the current one.              |
 | `Flash`   | A message that says something and then takes itself away. |
+| `Toggle`  | One thing that is either on or off, and its label.        |
 
 `Choice` is not a `Button`: a button asks to be acted on, a choice shows a state. The
 selected option carries the accent, and nothing in it is primary.
@@ -50,9 +51,14 @@ selected option carries the accent, and nothing in it is primary.
 `Flash` is not a dialog: nothing has to be dismissed and nothing is blocked while it is
 up. A message that needs an answer is a screen, not a flash.
 
+`Toggle` lets the platform draw the switch. It is a control the learner already knows how
+to read, and a hand-drawn one loses the gesture and the accessibility that come with it —
+only its colours are ours.
+
 The next component arrives with the screen that needs it, not before. A design system
-grown ahead of its screens is a catalogue of guesses — `Choice` arrived with Réglages and
-`Flash` with the desk, which is the rule working rather than an exception to it.
+grown ahead of its screens is a catalogue of guesses — `Choice` arrived with Réglages,
+`Flash` with the desk and `Toggle` with the parcours, which is the rule working rather
+than an exception to it.
 
 **Not checked by anything**: that a screen uses a token rather than a literal colour. It is
 a convention, held up at review.
