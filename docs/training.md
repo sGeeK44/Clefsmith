@@ -61,9 +61,41 @@ code defending against a state nothing can produce.
 
 The session length is the caller's decision, not the domain's.
 
+Reading one is a **value, not an object**: naming a degree returns a new drill, so a whole
+session is a fold over what the learner said. A right answer moves on; a wrong one sends
+the reading back to the **start of the measure**, and the notes already read in it are
+read again — a measure is the unit a reader re-reads, with or without a metronome keeping
+time. Four notes to a measure, and `src/domain/training/session-settings.ts` is the only
+place that says so: a session's length and the point a mistake sends you back to are the
+same number.
+
+Every attempt is recorded, right or wrong. **Accuracy is counted over attempts, not over
+notes**: a measure re-read three times cost what it cost.
+
 Chance is a port, `src/core/random.ts`, beside the clock and for the same reason: a
 generator that reaches for `Math.random` can be tested for its shape and nothing else.
-The adapter arrives with the first real caller.
+Its adapter, `src/core/math-random.ts`, arrived with the first real caller — drawing the
+notes of a session.
+
+A **revision** narrows the pool to the degrees it aims at and brings nothing: the bias
+towards new notes exists to practise what a level adds, and a revision adds nothing. It
+goes back over what is already there.
+
+## Reading one on screen
+
+The staff shows the **measure being read**, not the session: a mistake sends the reading
+back to the start of that measure, so the measure is the unit the learner's eye works in.
+
+Saying a note and being told about it happen in the **same place**. Three states — waiting,
+right, wrong — share one zone, because a screen that stacks them shows an empty box two
+thirds of the time, and because the learner's eyes should not have to move between the two.
+
+The tempo is shown and **not kept**: the first mode has no rhythm to keep, and a number on
+screen that does nothing is still what the learner set up.
+
+**Checked** by `bun test`: what the screen says lives in `src/components/wording/exercise.ts`
+— the count, the share, and which of the three states an attempt lands in. **Not checked by
+anything**: that the staff draws the measure the count names. That needs a renderer.
 
 ## Naming a note
 

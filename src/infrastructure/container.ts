@@ -1,17 +1,22 @@
 import { Container } from 'inversify';
 
+import { mathRandom } from '@/core/math-random';
+
 import { expoAppVersionReader } from '@/infrastructure/expo-app-version-reader';
 import { expoKeyValueStore } from '@/infrastructure/expo-key-value-store';
 import { expoMicrophonePermission } from '@/infrastructure/expo-microphone-permission';
 import { createProgressStore } from '@/infrastructure/progress-store';
 import { createSettingsStore } from '@/infrastructure/settings-store';
+import { silentAnswerSource } from '@/infrastructure/silent-answer-source';
 import { SYMBOLS } from '@/infrastructure/symbols';
 import { createAskForMicrophone } from '@/usecases/ask-for-microphone';
 import { createChooseNotation } from '@/usecases/choose-notation';
+import { createDrawSession } from '@/usecases/draw-session';
 import { createFinishWelcome } from '@/usecases/finish-welcome';
 import { createGetAppVersion } from '@/usecases/get-app-version';
 import { createGetProgress } from '@/usecases/get-progress';
 import { createGetSettings } from '@/usecases/get-settings';
+import { createListenForAnswers } from '@/usecases/listen-for-answers';
 import { createRecordFinishedSession } from '@/usecases/record-finished-session';
 import { createResetProgress } from '@/usecases/reset-progress';
 
@@ -59,6 +64,13 @@ export function createContainer(): Container {
       SYMBOLS.infrastructure.ProgressStore,
       SYMBOLS.infrastructure.SettingsStore,
     ]);
+
+  container.bind(SYMBOLS.infrastructure.AnswerSource).toConstantValue(silentAnswerSource);
+  container
+    .bind(SYMBOLS.usecases.ListenForAnswers)
+    .toResolvedValue(createListenForAnswers, [SYMBOLS.infrastructure.AnswerSource]);
+
+  container.bind(SYMBOLS.usecases.DrawSession).toConstantValue(createDrawSession(mathRandom));
 
   return container;
 }
