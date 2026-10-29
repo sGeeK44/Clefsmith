@@ -52,6 +52,12 @@
         {
           "models": ["./assets/models/vosk-model-small-fr-0.22"]
         }
+      ],
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Clefsmith écoute le nom des notes que vous lisez à voix haute. Rien n'est enregistré."
+        }
       ]
     ],
     "experiments": {
