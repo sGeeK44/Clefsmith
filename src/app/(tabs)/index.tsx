@@ -9,34 +9,37 @@ import { Flash } from '@/components/ui/flash';
 import { Screen } from '@/components/ui/screen';
 import { Staff } from '@/components/ui/staff';
 import { Text } from '@/components/ui/text';
-import { STUDIES, tempoOf } from '@/components/wording/study';
-import { nameOf } from '@/domain/notation/naming';
+import { STUDIES, studyLine, tempoOf } from '@/components/wording/study';
+import { type Notation, nameOf } from '@/domain/notation/naming';
 import type { Pitch } from '@/domain/notation/pitch';
 import { type Level, newcomersOf } from '@/domain/training/level';
 import { SYMBOLS } from '@/infrastructure/symbols';
+
+const PARCOURS = '/studies';
+
+/** In the mockup's order. The last two have nothing behind them yet. */
+const MODES = [
+  { id: 'reading', label: 'Lecture de notes', open: true },
+  { id: 'rhythmic-reading', label: 'Lecture rythmée', open: true },
+  { id: 'rhythm', label: 'Rythme seul', open: false },
+  { id: 'dictation', label: 'Dictée musicale', open: false },
+] as const;
 
 /**
  * The desk: where the learner is, and what they can do about it.
  *
  * Only the treble clef is on it. The bass clef has a progression of its own, and
- * no screen of CLE-14 shows it — a desk that showed both would be asking the
- * learner to pick a clef before they have read a note.
+ * no screen of CLE-14 shows it — a desk showing both would ask the learner to
+ * pick a clef before they have read a note.
+ *
+ * Nothing that depends on the record is drawn before the record is read. A level
+ * guessed while loading would show the learner someone else's study for a frame.
  */
-const PARCOURS = '/studies';
-
-/** In the mockup's order. The last two have nothing behind them yet. */
-const MODES = [
-  { label: 'Lecture de notes', open: true },
-  { label: 'Lecture rythmée', open: true },
-  { label: 'Rythme seul', open: false },
-  { label: 'Dictée musicale', open: false },
-] as const;
-
 export default function DeskScreen() {
   const getProgress = useService(SYMBOLS.usecases.GetProgress);
   const getSettings = useService(SYMBOLS.usecases.GetSettings);
   const [level, setLevel] = useState<Level>();
-  const [names, setNames] = useState<(pitch: Pitch) => string>();
+  const [notation, setNotation] = useState<Notation>();
   const [coming, setComing] = useState<string>();
 
   useEffect(() => {
@@ -44,7 +47,7 @@ export default function DeskScreen() {
   }, [getProgress]);
 
   useEffect(() => {
-    getSettings().then(({ notation }) => setNames(() => (pitch: Pitch) => nameOf(pitch, notation)));
+    getSettings().then((settings) => setNotation(settings.notation));
   }, [getSettings]);
 
   const forget = useCallback(() => setComing(undefined), []);
@@ -53,17 +56,13 @@ export default function DeskScreen() {
     <Screen>
       <Text variant="display">Mon pupitre</Text>
 
-      {level !== undefined && names !== undefined && <Current level={level} names={names} />}
+      {level !== undefined && notation !== undefined && (
+        <Current level={level} notation={notation} />
+      )}
 
       <View style={styles.modes}>
         {MODES.map((mode) => (
-          <Mode
-            key={mode.label}
-            label={mode.label}
-            level={level}
-            onClosed={setComing}
-            open={mode.open}
-          />
+          <Mode key={mode.id} level={level} mode={mode} onClosed={setComing} />
         ))}
       </View>
 
@@ -79,13 +78,7 @@ export default function DeskScreen() {
  * the mockup draws, and a button nested in a tappable card is two targets where
  * the learner sees one.
  */
-function Current({
-  level,
-  names,
-}: {
-  readonly level: Level;
-  readonly names: (pitch: Pitch) => string;
-}) {
+function Current({ level, notation }: { readonly level: Level; readonly notation: Notation }) {
   const brought = newcomersOf('treble', level);
 
   return (
@@ -105,59 +98,46 @@ function Current({
         )}
 
         <Text variant="title">{tempoOf(level)}</Text>
-        <Text variant="caption" tone="muted">
-          {subtitle(level, brought, names)}
+        <Text testID="current-study-line" variant="caption" tone="muted">
+          {studyLine(level, notation)}
         </Text>
       </Card>
     </Pressable>
   );
 }
 
-/**
- * `Étude 4 · Fa, Sol`, or just `Étude 6` at the level that brings nothing.
- *
- * The notes are named through the learner's own notation, which is the first
- * place that setting shows on a screen.
- */
-function subtitle(
-  level: Level,
-  brought: readonly Pitch[],
-  names: (pitch: Pitch) => string,
-): string {
-  const study = `Étude ${level}`;
-
-  return brought.length === 0
-    ? study
-    : `${study} · ${brought.map(names).map(capitalised).join(', ')}`;
-}
-
-function capitalised(name: string): string {
-  return name.charAt(0).toUpperCase() + name.slice(1);
-}
-
 function Mode({
-  label,
   level,
-  open,
+  mode,
   onClosed,
 }: {
-  readonly label: string;
   readonly level: Level | undefined;
-  readonly open: boolean;
+  readonly mode: (typeof MODES)[number];
   readonly onClosed: (message: string) => void;
 }) {
+  const { id, label, open } = mode;
+
   return (
     <Pressable
       onPress={() => (open ? router.push(PARCOURS) : onClosed(`${label} arrive bientôt`))}
       style={styles.mode}
-      testID={`mode-${label}`}
+      testID={`mode-${id}`}
     >
       <Text>{label}</Text>
       <Text variant="caption" tone={open ? 'accent' : 'muted'}>
-        {open ? `${level ?? 1} / ${STUDIES}` : 'Bientôt'}
+        {badge(open, level)}
       </Text>
     </Pressable>
   );
+}
+
+/** An open mode says how far up the six the learner is, once that is known. */
+function badge(open: boolean, level: Level | undefined): string {
+  if (!open) {
+    return 'Bientôt';
+  }
+
+  return level === undefined ? '' : `${level} / ${STUDIES}`;
 }
 
 const styles = StyleSheet.create((theme) => ({

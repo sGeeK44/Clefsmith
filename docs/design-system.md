@@ -33,22 +33,26 @@ is for. Without that plugin a themed component renders with no style at all.
 
 ## Components
 
-Five, in `src/components/ui/`:
+Six, in `src/components/ui/`:
 
-| Component | Holds                                                   |
-| --------- | ------------------------------------------------------- |
-| `Text`    | The only place a font family or a type size is named.   |
-| `Button`  | Two weights of emphasis, `primary` and `quiet`.         |
-| `Card`    | The only component that knows what "raised" looks like. |
-| `Screen`  | The page: ground, safe-area insets, gutter.             |
-| `Choice`  | Which of several options is the current one.            |
+| Component | Holds                                                     |
+| --------- | --------------------------------------------------------- |
+| `Text`    | The only place a font family or a type size is named.     |
+| `Button`  | Two weights of emphasis, `primary` and `quiet`.           |
+| `Card`    | The only component that knows what "raised" looks like.   |
+| `Screen`  | The page: ground, safe-area insets, gutter.               |
+| `Choice`  | Which of several options is the current one.              |
+| `Flash`   | A message that says something and then takes itself away. |
 
 `Choice` is not a `Button`: a button asks to be acted on, a choice shows a state. The
 selected option carries the accent, and nothing in it is primary.
 
+`Flash` is not a dialog: nothing has to be dismissed and nothing is blocked while it is
+up. A message that needs an answer is a screen, not a flash.
+
 The next component arrives with the screen that needs it, not before. A design system
-grown ahead of its screens is a catalogue of guesses — `Choice` arrived with Réglages,
-which is the rule working rather than an exception to it.
+grown ahead of its screens is a catalogue of guesses — `Choice` arrived with Réglages and
+`Flash` with the desk, which is the rule working rather than an exception to it.
 
 **Not checked by anything**: that a screen uses a token rather than a literal colour. It is
 a convention, held up at review.
@@ -65,12 +69,9 @@ why it is declared in `knip.jsonc`.
 
 ## Looking at it
 
-The gallery is no longer the home route — the three tabs are — but it is still there, at
-`/gallery`, reached by a deep link and by nothing in the interface. It shows the type
-scale, the status tones, both buttons and a card: switch the system setting and every role
-on the page moves at once.
-
-It disappears with CLE-36, the screen `Staff`, `Button` and `Card` were built for.
+Nothing any more: the gallery route is gone. `Staff`, `Card` and `Text` have the desk,
+`Choice` has Réglages, and a role is looked at on the screen that uses it. Switch the
+system setting and every role on the page moves at once.
 
 **Not checked by anything**: that the palette moves with the system setting. It needs a
 device, and the device suite only runs on the release pull request.

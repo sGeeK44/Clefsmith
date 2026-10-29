@@ -1,4 +1,5 @@
-import { LEVELS, type Level } from '@/domain/training/level';
+import { type Notation, nameOf } from '@/domain/notation/naming';
+import { LEVELS, type Level, newcomersOf } from '@/domain/training/level';
 
 /**
  * What a level is called on screen.
@@ -25,3 +26,20 @@ export function tempoOf(level: Level): string {
 
 /** How many levels there are to climb, which a screen shows as `n / 6`. */
 export const STUDIES = LEVELS.length;
+
+/**
+ * `Étude 4 · Do, Ré`, or just `Étude 6` at the level that brings nothing.
+ *
+ * The notes are named through the learner's own notation, and capitalised the way
+ * a list of names is written rather than the way a note is answered out loud.
+ */
+export function studyLine(level: Level, notation: Notation): string {
+  const study = `Étude ${level}`;
+  const brought = newcomersOf('treble', level).map((pitch) => capitalised(nameOf(pitch, notation)));
+
+  return brought.length === 0 ? study : `${study} · ${brought.join(', ')}`;
+}
+
+function capitalised(name: string): string {
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
