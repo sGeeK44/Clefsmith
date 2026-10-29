@@ -6,3 +6,6 @@
 # bench/make-fixture-corpus.ts, they are already in history as plain blobs, and
 # moving them now would rewrite it for no gain.
 bench/corpus/**/*.wav filter=lfs diff=lfs merge=lfs -text
+
+# Written by `bun patch --commit`, never by hand.
+patches/*.patch linguist-generated=true

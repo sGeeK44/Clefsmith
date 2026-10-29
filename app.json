@@ -46,7 +46,8 @@
           ]
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "react-native-vosk"
     ],
     "experiments": {
       "typedRoutes": true,

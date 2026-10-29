@@ -23,7 +23,13 @@
         // imports it, and without it the bundle fails to resolve. It is declared
         // directly so that it is not left to the resolver to find a peer nobody
         // asked for.
-        "reflect-metadata"
+        "reflect-metadata",
+        // Autolinking and the config plugin registered in app.json are what
+        // pull Vosk into the native build; no file imports the package. The
+        // adapter declares the slice of its API it drives rather than
+        // importing it, so that it can be driven by a stand-in under test —
+        // importing it reaches for a native module no test runner has.
+        "react-native-vosk"
       ]
     },
 

@@ -1,0 +1,456 @@
+diff --git a/android/src/main/java/com/vosk/VoskModule.kt b/android/src/main/java/com/vosk/VoskModule.kt
+index c2c4d64938e8da3bd5396c3c7178024d4e90cb6c..31eebff6a306e3e8ca2b74b074700f8470b7b2ba 100644
+--- a/android/src/main/java/com/vosk/VoskModule.kt
++++ b/android/src/main/java/com/vosk/VoskModule.kt
+@@ -1,5 +1,6 @@
+ package com.vosk
+ 
++import android.util.Base64
+ import android.util.Log
+ import com.facebook.react.bridge.Promise
+ import com.facebook.react.bridge.ReactApplicationContext
+@@ -8,6 +9,8 @@ import com.facebook.react.bridge.ReadableMap
+ import com.facebook.react.module.annotations.ReactModule
+ import com.facebook.react.modules.core.DeviceEventManagerModule
+ import java.io.IOException
++import java.nio.ByteBuffer
++import java.nio.ByteOrder
+ import org.json.JSONObject
+ import org.vosk.Model
+ import org.vosk.Recognizer
+@@ -26,6 +29,8 @@ class VoskModule(reactContext: ReactApplicationContext) :
+   private var recognizer: Recognizer? = null
+   private var sampleRate = 16000.0f
+   private var isStopping = false
++  /** The session decodes handed-in audio instead of capturing the microphone. */
++  private var pushAudio = false
+ 
+   override fun getName(): String {
+     return NAME
+@@ -135,10 +140,13 @@ class VoskModule(reactContext: ReactApplicationContext) :
+       promise.reject(IOException("Model is not loaded yet"))
+       return
+     }
+-    if (speechService != null) {
++    if (speechService != null || recognizer != null) {
+       promise.reject(IOException("Recognizer is already in use"))
+       return
+     }
++    pushAudio =
++            options != null && options.hasKey("pushAudio") && !options.isNull("pushAudio") &&
++                    options.getBoolean("pushAudio")
+     try {
+       recognizer =
+               if (options != null && options.hasKey("grammar") && !options.isNull("grammar")) {
+@@ -146,6 +154,14 @@ class VoskModule(reactContext: ReactApplicationContext) :
+               } else {
+                 Recognizer(model, sampleRate)
+               }
++      // A pushed-audio session starts no SpeechService: SpeechService exists only
++      // to pump the microphone into the recognizer, and here the caller does the
++      // pumping itself through acceptWaveform.
++      if (pushAudio) {
++        promise.resolve("Recognizer successfully started")
++        return
++      }
++
+       speechService = SpeechService(recognizer, sampleRate)
+       val started =
+               if (options != null && options.hasKey("timeout") && !options.isNull("timeout")) {
+@@ -202,7 +218,47 @@ class VoskModule(reactContext: ReactApplicationContext) :
+     }
+   }
+ 
++  override fun acceptWaveform(pcmBase64: String) {
++    if (!pushAudio) return
++    val current = recognizer ?: return
++    val bytes = try {
++      Base64.decode(pcmBase64, Base64.DEFAULT)
++    } catch (e: IllegalArgumentException) {
++      emitOnError("acceptWaveform was handed something that is not base64: $e")
++      return
++    }
++    if (bytes.isEmpty()) return
++
++    val shorts = ShortArray(bytes.size / 2)
++    ByteBuffer.wrap(bytes).order(ByteOrder.LITTLE_ENDIAN).asShortBuffer().get(shorts)
++
++    try {
++      if (current.acceptWaveForm(shorts, shorts.size)) {
++        onResult(current.result)
++      } else {
++        onPartialResult(current.partialResult)
++      }
++    } catch (e: Exception) {
++      emitOnError(e.toString())
++    }
++  }
++
++  override fun finish() {
++    if (!pushAudio) return
++    val current = recognizer ?: return
++    val text = try {
++      parseHypothesis(current.finalResult)
++    } catch (e: Exception) {
++      emitOnError(e.toString())
++      null
++    }
++    // Emitted whatever came back, empty transcript included: a caller waiting on
++    // the end of a silent utterance has to be told that silence is the answer.
++    emitOnFinalResult(text ?: "")
++  }
++
+   override fun stop() {
++    pushAudio = false
+     cleanRecognizer()
+   }
+ 
+diff --git a/ios/Vosk.mm b/ios/Vosk.mm
+index 4556403d00596ffe8d187845b45470020774ee26..da1ac53a2cb8733817b0ab786e13f5f11172b28d 100644
+--- a/ios/Vosk.mm
++++ b/ios/Vosk.mm
+@@ -8,6 +8,11 @@
+ // Specific key to detect execution on the processing queue
+ static void *kVoskProcessingQueueKey = &kVoskProcessingQueueKey;
+ 
++// Pushed audio carries no format of its own, so the rate is fixed rather than
++// guessed. 16 kHz is what the small Vosk models are trained on; a caller that
++// hands samples at another rate gets a decode of the wrong thing, silently.
++static const double kVoskPushedSampleRate = 16000.0;
++
+ @implementation Vosk {
+   // État interne migré depuis Swift
+   RNVoskModel *_Nullable _currentModel;
+@@ -24,6 +29,7 @@ static void *kVoskProcessingQueueKey = &kVoskProcessingQueueKey;
+   BOOL _tapInstalled; // track tap installation
+   BOOL _pendingTap; // indicates we are retrying tap installation
+   int _tapRetryCount; // retry counter
++  BOOL _pushAudio; // session decodes handed-in audio instead of capturing
+ }
+ RCT_EXPORT_MODULE()
+ 
+@@ -46,6 +52,7 @@ RCT_EXPORT_MODULE()
+     _tapInstalled = NO;
+     _pendingTap = NO;
+     _tapRetryCount = 0;
++    _pushAudio = NO;
+   }
+   return self;
+ }
+@@ -124,6 +131,33 @@ RCT_EXPORT_MODULE()
+     timeoutMs = *(options->timeout());
+   }
+ 
++  _pushAudio = (options && options->pushAudio()) ? *(options->pushAudio()) : NO;
++
++  // A pushed-audio session owns no capture: no audio session, no permission,
++  // no engine, no tap. It builds the recognizer and then waits to be handed
++  // samples. Everything below this branch exists to get the microphone
++  // running, and none of it has a meaning here.
++  if (_pushAudio) {
++    __weak __typeof(self) weakSelfPush = self;
++    dispatch_async(_processingQueue, ^{
++      __strong __typeof(self) self = weakSelfPush;
++      if (!self) return;
++      self->_recognizer = [self newRecognizerWithGrammar:grammar
++                                             sampleRate:kVoskPushedSampleRate];
++      dispatch_async(dispatch_get_main_queue(), ^{
++        self->_isStarting = NO;
++        if (!self->_recognizer) {
++          [self emitOnError:@"Recognizer initialization failed (null)"];
++          reject(@"start", @"Recognizer initialization failed", nil);
++          return;
++        }
++        self->_isRunning = YES;
++        resolve(nil);
++      });
++    });
++    return;
++  }
++
+   CFAbsoluteTime tStart = CFAbsoluteTimeGetCurrent();
+   // Configure session category first (allowed even before permission)
+   NSError *catErr = nil;
+@@ -291,6 +325,87 @@ RCT_EXPORT_MODULE()
+   }
+ }
+ 
++- (VoskRecognizer *_Nullable)newRecognizerWithGrammar:(NSArray<NSString *> *_Nullable)grammar
++                                           sampleRate:(double)sampleRate {
++  if (_currentModel == nil) return NULL;
++  if (grammar != nil && grammar.count > 0) {
++    NSError *jsonErr = nil;
++    NSData *jsonGrammar = [NSJSONSerialization dataWithJSONObject:grammar options:0 error:&jsonErr];
++    if (jsonGrammar && !jsonErr) {
++      std::string grammarStd((const char *)[jsonGrammar bytes], [jsonGrammar length]);
++      return vosk_recognizer_new_grm(_currentModel.model, (float)sampleRate, grammarStd.c_str());
++    }
++  }
++  return vosk_recognizer_new(_currentModel.model, (float)sampleRate);
++}
++
++// Mirrors what the microphone tap does with a buffer, so that a replayed
++// recording and a spoken one travel the same path from here on.
++- (void)emitForAccepted:(int)accepted recognizer:(VoskRecognizer *)recognizer {
++  const char *cstr = accepted ? vosk_recognizer_result(recognizer)
++                              : vosk_recognizer_partial_result(recognizer);
++  BOOL isFinal = accepted != 0;
++  NSString *json = cstr ? [NSString stringWithUTF8String:cstr] : nil;
++  if (!json) return;
++  dispatch_async(dispatch_get_main_queue(), ^{
++    NSData *data = [json dataUsingEncoding:NSUTF8StringEncoding];
++    NSDictionary *parsed = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil] : nil;
++    if (![parsed isKindOfClass:[NSDictionary class]]) {
++      if (isFinal) { [self emitOnResult:json]; } else { [self emitOnPartialResult:json]; }
++      return;
++    }
++    NSString *text = parsed[@"text"];
++    NSString *partial = parsed[@"partial"];
++    if (isFinal) {
++      if (text.length > 0) [self emitOnResult:text];
++      self->_lastPartial = nil;
++    } else if (partial.length > 0 &&
++               (!self->_lastPartial || ![self->_lastPartial isEqualToString:partial])) {
++      [self emitOnPartialResult:partial];
++      self->_lastPartial = partial;
++    }
++  });
++}
++
++- (void)acceptWaveform:(nonnull NSString *)pcmBase64 {
++  if (!_isRunning || !_pushAudio) return;
++  NSData *pcm = [[NSData alloc] initWithBase64EncodedString:pcmBase64 options:0];
++  if (pcm.length == 0) return;
++  __weak __typeof(self) weakSelf = self;
++  dispatch_async(_processingQueue, ^{
++    __strong __typeof(self) self = weakSelf;
++    if (!self || !self->_isRunning) return;
++    VoskRecognizer *recognizer = self->_recognizer;
++    if (!recognizer) return;
++    int accepted = vosk_recognizer_accept_waveform(recognizer, (const char *)pcm.bytes, (int32_t)pcm.length);
++    [self emitForAccepted:accepted recognizer:recognizer];
++  });
++}
++
++- (void)finish {
++  if (!_isRunning || !_pushAudio) return;
++  __weak __typeof(self) weakSelf = self;
++  dispatch_async(_processingQueue, ^{
++    __strong __typeof(self) self = weakSelf;
++    if (!self) return;
++    VoskRecognizer *recognizer = self->_recognizer;
++    const char *cstr = recognizer ? vosk_recognizer_final_result(recognizer) : NULL;
++    NSString *text = @"";
++    if (cstr) {
++      NSString *json = [NSString stringWithUTF8String:cstr];
++      NSData *data = [json dataUsingEncoding:NSUTF8StringEncoding];
++      NSDictionary *parsed = data ? [NSJSONSerialization JSONObjectWithData:data options:0 error:nil] : nil;
++      if ([parsed isKindOfClass:[NSDictionary class]] && [parsed[@"text"] isKindOfClass:[NSString class]]) {
++        text = parsed[@"text"];
++      }
++    }
++    self->_lastPartial = nil;
++    // Emitted unconditionally, empty transcript included: a caller waiting on
++    // the end of a silent utterance has to be told that silence is the answer.
++    dispatch_async(dispatch_get_main_queue(), ^{ [self emitOnFinalResult:text]; });
++  });
++}
++
+ - (void)stop {
+   if (!_isRunning)
+     return; // idempotent
+@@ -360,6 +475,14 @@ RCT_EXPORT_MODULE()
+     _timeoutSource = nil;
+   }
+ 
++  if (_pushAudio) {
++    // Nothing was ever activated for a pushed-audio session, so nothing is
++    // reset here: switching the shared session to playback would stomp on
++    // whatever the rest of the app is doing with it.
++    _pushAudio = NO;
++    return;
++  }
++
+   AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+   NSError *err = nil;
+   if (@available(iOS 10.0, *)) {
+diff --git a/lib/commonjs/index.js b/lib/commonjs/index.js
+index 7239f346dc40bd9a59704cd6ac4049db8274c370..c55b0c98c01aa291c71bde65aa7ec59c0a0ae35b 100644
+--- a/lib/commonjs/index.js
++++ b/lib/commonjs/index.js
+@@ -9,6 +9,8 @@ exports.onFinalResult = onFinalResult;
+ exports.onPartialResult = onPartialResult;
+ exports.onResult = onResult;
+ exports.onTimeout = onTimeout;
++exports.acceptWaveform = acceptWaveform;
++exports.finish = finish;
+ exports.start = start;
+ exports.stop = stop;
+ exports.unload = unload;
+@@ -68,6 +70,9 @@ async function requestRecordPermission() {
+  *   }).catch(e => console.log(e));
+  */
+ function start(options) {
++  // Pushed audio touches no microphone, so asking for it would prompt for a
++  // permission the session never uses.
++  if (options?.pushAudio === true) return Vosk.start(options);
+   return requestRecordPermission().then(granted => {
+     if (granted) return _NativeVosk.default.start(options);
+     return Promise.reject('Record permission not granted');
+@@ -131,3 +136,9 @@ function onResult(cb) {
+   return _NativeVosk.default.onResult(cb);
+ }
+ //# sourceMappingURL=index.js.map
++function acceptWaveform(pcmBase64) {
++  return Vosk.acceptWaveform(pcmBase64);
++}
++function finish() {
++  return Vosk.finish();
++}
+diff --git a/lib/module/index.js b/lib/module/index.js
+index f0b7f23b186845f9884b3b4c19e8cf3b38fccb28..2a7800092d6beb9a486550d14877da88ac8802a7 100644
+--- a/lib/module/index.js
++++ b/lib/module/index.js
+@@ -56,6 +56,9 @@ async function requestRecordPermission() {
+  *   }).catch(e => console.log(e));
+  */
+ export function start(options) {
++  // Pushed audio touches no microphone, so asking for it would prompt for a
++  // permission the session never uses.
++  if (options?.pushAudio === true) return Vosk.start(options);
+   return requestRecordPermission().then(granted => {
+     if (granted) return Vosk.start(options);
+     return Promise.reject('Record permission not granted');
+@@ -119,3 +122,9 @@ export function onResult(cb) {
+   return Vosk.onResult(cb);
+ }
+ //# sourceMappingURL=index.js.map
++export function acceptWaveform(pcmBase64) {
++  return Vosk.acceptWaveform(pcmBase64);
++}
++export function finish() {
++  return Vosk.finish();
++}
+diff --git a/lib/typescript/src/NativeVosk.d.ts b/lib/typescript/src/NativeVosk.d.ts
+index 735a55aad64f188b10d1df3e3793b1785dcf1080..6f4907315a26167724bc487f6dbb1bd8c6ee63bd 100644
+--- a/lib/typescript/src/NativeVosk.d.ts
++++ b/lib/typescript/src/NativeVosk.d.ts
+@@ -9,12 +9,19 @@ export type VoskOptions = {
+      * Timeout in milliseconds to listen.
+      */
+     timeout?: number;
++    /**
++     * Decode only what `acceptWaveform` pushes, instead of capturing the
++     * microphone.
++     */
++    pushAudio?: boolean;
+ };
+ export interface Spec extends TurboModule {
+     loadModel: (path: string) => Promise<void>;
+     unload: () => void;
+     start: (options?: VoskOptions) => Promise<void>;
+     stop: () => void;
++    acceptWaveform: (pcmBase64: string) => void;
++    finish: () => void;
+     addListener: (eventType: string) => void;
+     removeListeners: (count: number) => void;
+     readonly onResult: CodegenTypes.EventEmitter<string>;
+diff --git a/lib/typescript/src/index.d.ts b/lib/typescript/src/index.d.ts
+index 858414f38c06ecbb8bc46ff9acc76be8f74165b9..8062e917d97059e65f09abc779eede4107a04c7c 100644
+--- a/lib/typescript/src/index.d.ts
++++ b/lib/typescript/src/index.d.ts
+@@ -42,6 +42,15 @@ export declare function start(options?: VoskOptions): Promise<void>;
+  * @returns void
+  */
+ export declare function stop(): void;
++/**
++ * Hands 16-bit little-endian mono PCM to the recogniser, base64-encoded.
++ * Only a session started with `pushAudio` decodes it.
++ */
++export declare function acceptWaveform(pcmBase64: string): void;
++/**
++ * Ends the current utterance and emits its final result, even an empty one.
++ */
++export declare function finish(): void;
+ /**
+  * Event listener for error event
+  *
+diff --git a/src/NativeVosk.ts b/src/NativeVosk.ts
+index fe1dce5d39043d6e0b013c90757ef0ce504a38b4..4ffd5ccc11c619dac0ad2a8d41b8184cce178125 100644
+--- a/src/NativeVosk.ts
++++ b/src/NativeVosk.ts
+@@ -11,6 +11,18 @@ export type VoskOptions = {
+    * Timeout in milliseconds to listen.
+    */
+   timeout?: number;
++  /**
++   * Decode only what `acceptWaveform` pushes, instead of capturing the
++   * microphone.
++   *
++   * The recogniser then opens no audio session and asks for no recording
++   * permission: it sits idle until audio is handed to it. This is what lets a
++   * recording be replayed through the very decoder the application runs, which
++   * capturing the microphone cannot do — a file played out loud and picked up
++   * again measures the room, the speaker and the microphone as much as it
++   * measures the decoder.
++   */
++  pushAudio?: boolean;
+ };
+ 
+ export interface Spec extends TurboModule {
+@@ -20,6 +32,9 @@ export interface Spec extends TurboModule {
+   start: (options?: VoskOptions) => Promise<void>;
+   stop: () => void;
+ 
++  acceptWaveform: (pcmBase64: string) => void;
++  finish: () => void;
++
+   addListener: (eventType: string) => void;
+   removeListeners: (count: number) => void;
+ 
+diff --git a/src/index.ts b/src/index.ts
+index a9a83b14e7845279ce91cd3bae2d5986d9114f50..014981d33b6a9e979214bb47a24a0e153e3583f2 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -56,12 +56,41 @@ async function requestRecordPermission() {
+  *   }).catch(e => console.log(e));
+  */
+ export function start(options?: VoskOptions) {
++  // Pushed audio touches no microphone, so asking for the microphone would
++  // prompt the user for a permission the session never uses — and would fail
++  // the session outright wherever that permission is denied.
++  if (options?.pushAudio === true) return Vosk.start(options);
++
+   return requestRecordPermission().then((granted) => {
+     if (granted) return Vosk.start(options);
+     return Promise.reject('Record permission not granted');
+   });
+ }
+ 
++/**
++ * Hands 16-bit little-endian mono PCM to the recogniser, base64-encoded.
++ *
++ * Only a session started with `pushAudio` decodes it; a microphone session
++ * ignores it. Base64 rather than an array of numbers because the bridge
++ * allocates per element: a 20 ms frame is 320 samples, and at fifty frames a
++ * second the difference between one allocation and three hundred is the
++ * difference between measuring the decoder and measuring the bridge.
++ */
++export function acceptWaveform(pcmBase64: string) {
++  return Vosk.acceptWaveform(pcmBase64);
++}
++
++/**
++ * Ends the current utterance and emits its final result.
++ *
++ * It emits one even when the recogniser heard nothing — an empty transcript is
++ * still an answer, and a caller awaiting the final result of a silent utterance
++ * would otherwise wait for ever.
++ */
++export function finish() {
++  return Vosk.finish();
++}
++
+ /**
+  * Stops the recognizer. Listener should receive final result if there is any.
+  *
