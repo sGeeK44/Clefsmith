@@ -164,7 +164,9 @@ neither moves when the other does.
 
 Whether the learner has seen the **introduction** is kept with what they have chosen, not
 with what they have learnt, for the same reason: erasing the practice must not hand them
-the introduction back. It is marked whether the introduction was played through or passed
+the introduction back. Resetting the progression writes the record of a learner who
+has never played rather than removing the key — the two read back the same, and writing is
+the one of them that is atomic — and it never reaches the other record at all. It is marked whether the introduction was played through or passed
 over — passing it over is still having seen it.
 
 Both are written down as JSON in the key-value store Expo ships on top of

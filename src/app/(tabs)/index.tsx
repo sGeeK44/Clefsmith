@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
@@ -42,9 +42,12 @@ export default function DeskScreen() {
   const [notation, setNotation] = useState<Notation>();
   const [coming, setComing] = useState<string>();
 
-  useEffect(() => {
-    getProgress().then((progress) => setLevel(progress.level.treble));
-  }, [getProgress]);
+  /** Re-read on focus: the progression can be reset from the next tab along. */
+  useFocusEffect(
+    useCallback(() => {
+      getProgress().then((progress) => setLevel(progress.level.treble));
+    }, [getProgress]),
+  );
 
   useEffect(() => {
     getSettings().then((settings) => setNotation(settings.notation));

@@ -1,5 +1,5 @@
-import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
@@ -45,9 +45,12 @@ export default function ProgressScreen() {
   const [notation, setNotation] = useState<Notation>();
   const [clef, setClef] = useState<Clef>('treble');
 
-  useEffect(() => {
-    getProgress().then(setProgress);
-  }, [getProgress]);
+  /** Re-read on focus: the progression can be reset from the next tab along. */
+  useFocusEffect(
+    useCallback(() => {
+      getProgress().then(setProgress);
+    }, [getProgress]),
+  );
 
   useEffect(() => {
     getSettings().then((settings) => setNotation(settings.notation));
