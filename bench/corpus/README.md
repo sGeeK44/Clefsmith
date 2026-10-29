@@ -87,3 +87,68 @@ bun run bench --corpus bench/corpus --track <track>
 
 Tracks are declared in `bench/tracks.ts`. The `fixture-*` ones replay `bench/fixture-corpus`
 and exist to check the bench itself; they prove nothing about speech.
+
+## Running it on a device
+
+The figures CLE-17 decides on cannot be measured on the host: the point is how the
+decoder behaves on the hardware the application runs on. The host run above checks the
+bench; this one measures a track.
+
+### 1. Put the model in place
+
+The models are not committed — see the footprints below — and they are not downloaded at
+run time either, because one of the things being measured is a run with the device in
+airplane mode. Download and unpack one next to the application, before the build:
+
+```sh
+mkdir -p assets/models
+curl -LO https://alphacephei.com/vosk/models/vosk-model-small-fr-0.22.zip
+unzip vosk-model-small-fr-0.22.zip -d assets/models
+```
+
+`app.json` hands that folder to the native build through the `react-native-vosk` config
+plugin. A different model means changing both that list and `MODEL_PATH` in
+`src/app/bench.tsx`.
+
+### 2. Build
+
+```sh
+npx expo run:ios --configuration Release
+npx expo run:android --variant release
+```
+
+**Release, not debug.** A development build serves its assets from the Metro server over
+HTTP, so the corpus would be fetched over the network and the airplane-mode run would
+measure nothing. A release build carries the recordings inside it. Start it with
+`EXPO_PUBLIC_SPEECH_BENCH=1` so the bench screen is reachable; nothing in the application
+links to it.
+
+### 3. Run and collect
+
+Open the bench screen and replay the corpus. It writes one report per run into the
+application's document directory, named after the instant it was produced and never
+overwritten — two runs of the same build are what tells a figure apart from a
+fluctuation.
+
+- **iOS** — the Files app, under _On My iPhone → Clefsmith_. `UIFileSharingEnabled` is
+  what puts it there.
+- **Android** — `adb exec-out run-as com.clefsmith.app cat files/<name>.json`.
+
+The report is the same shape as the host one, written by the same function, so the two
+and the other track's are comparable line for line.
+
+## Model footprint
+
+Measured here rather than quoted: AlphaCephei publishes only the compressed sizes.
+
+| Model                         | Download | On disk, unpacked      |
+| ----------------------------- | -------- | ---------------------- |
+| `vosk-model-small-fr-0.22`    | 42.2 MB  | **68.5 MB** (65.3 MiB) |
+| `vosk-model-small-en-us-0.15` | 41.2 MB  | **70.9 MB** (67.6 MiB) |
+
+Both are needed for a bench covering both languages, and on Android the unpacked copy sits
+next to the compressed one inside the package, so budget for more than one of these
+figures per language shipped.
+
+Nothing checks these numbers. Re-measure with `du` after unpacking if the model version
+changes.

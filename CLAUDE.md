@@ -18,6 +18,7 @@ what this file is for.
 | draw a staff, or add a musical glyph             | `docs/score-engine.md`   |
 | add a level, a notation, or a progression rule   | `docs/training.md`       |
 | run the speech bench, or record for it           | `bench/corpus/README.md` |
+| patch a dependency, or bump a patched one        | `patches/README.md`      |
 | run the e2e suite                                | `e2e/README.md`          |
 
 Each of those documents states, for every rule it carries, the check that applies it — or
