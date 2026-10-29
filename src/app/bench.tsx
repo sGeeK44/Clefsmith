@@ -1,5 +1,7 @@
-import { File, Paths } from 'expo-file-system';
+import Constants from 'expo-constants';
+import { Directory, File, Paths } from 'expo-file-system';
 import { useState } from 'react';
+import { Platform } from 'react-native';
 import * as vosk from 'react-native-vosk';
 import { createBundledCorpusAudio } from '@/components/speech-bench/bundled-corpus-audio';
 import { CORPUS_ASSETS, CORPUS_MANIFEST } from '@/components/speech-bench/corpus-assets';
@@ -19,6 +21,41 @@ import { serializeSpeechBenchReport, speechBenchReport } from '@/usecases/speech
  * hold in airplane mode, which is one of the things being measured.
  */
 const MODEL_PATH = 'vosk-model-small-fr-0.22';
+
+/**
+ * Leaves a second copy of a report where `adb pull` can reach it, and says
+ * where it is.
+ *
+ * iOS publishes its document directory through the Files application
+ * (`UIFileSharingEnabled`), so a report written there is already reachable. On
+ * Android that directory is private to the application, and the airplane-mode
+ * criterion forces a release build, which is not debuggable — so `adb run-as`
+ * cannot reach it either. The external files directory is the one place both
+ * the application and `adb pull` can read.
+ *
+ * A copy rather than the original, because outside its own directories
+ * `expo-file-system` reads permissions off the target itself: a file that does
+ * not exist yet is not readable, so creating one there is refused, while
+ * copying into a directory that does exist is not.
+ */
+async function publishForPull(report: File, name: string): Promise<string> {
+  if (Platform.OS !== 'android') {
+    return report.uri;
+  }
+
+  const packageName = Constants.expoConfig?.android?.package;
+
+  if (packageName === undefined) {
+    throw new Error('No Android package name in the embedded config.');
+  }
+
+  const directory = new Directory(`file:///sdcard/Android/data/${packageName}/files`);
+
+  directory.create({ intermediates: true, idempotent: true });
+  await report.copy(directory);
+
+  return new File(directory, name).uri;
+}
 
 /**
  * Runs the speech bench on this device and leaves its report behind.
@@ -76,12 +113,13 @@ export default function SpeechBenchScreen() {
        * the same build are what tells a figure apart from a fluctuation, and a
        * report that replaces the previous one makes that comparison impossible.
        */
-      const file = new File(Paths.document, `speech-bench-${new Date().toISOString()}.json`);
+      const name = `speech-bench-${new Date().toISOString()}.json`;
+      const file = new File(Paths.document, name);
 
       file.create({ overwrite: false });
       file.write(serializeSpeechBenchReport(speechBenchReport(CORPUS_MANIFEST, result)));
 
-      setReport(file.uri);
+      setReport(await publishForPull(file, name));
       setStatus('Done.');
     } catch (error) {
       setStatus(`Failed: ${error instanceof Error ? error.message : String(error)}`);
