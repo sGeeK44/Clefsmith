@@ -74,7 +74,12 @@ notes**: a measure re-read three times cost what it cost.
 
 Chance is a port, `src/core/random.ts`, beside the clock and for the same reason: a
 generator that reaches for `Math.random` can be tested for its shape and nothing else.
-The adapter arrives with the first real caller.
+Its adapter, `src/core/math-random.ts`, arrived with the first real caller — drawing the
+notes of a session.
+
+A **revision** narrows the pool to the degrees it aims at and brings nothing: the bias
+towards new notes exists to practise what a level adds, and a revision adds nothing. It
+goes back over what is already there.
 
 ## Naming a note
 
