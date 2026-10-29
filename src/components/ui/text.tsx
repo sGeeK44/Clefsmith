@@ -10,7 +10,8 @@ import { StyleSheet } from 'react-native-unistyles';
  */
 
 type Variant = 'caption' | 'body' | 'title' | 'display';
-type Tone = 'ink' | 'muted' | 'accent' | 'ok' | 'late' | 'bad';
+/** Exported so that a rule deciding a tone can be written, and tested, outside a screen. */
+export type Tone = 'ink' | 'muted' | 'accent' | 'ok' | 'late' | 'bad';
 
 export function Text({
   variant = 'body',

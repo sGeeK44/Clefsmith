@@ -99,6 +99,29 @@ The level reached is **written down**, not worked out. A session's accuracy is n
 so nothing could recompute it — and a rule that cannot be recomputed is one that has to be
 stored.
 
+## Mastery per degree
+
+How well each of the seven degrees is read, out of a hundred, per clef. Degrees and not
+pitches: `b3` and `b4` are both "si", and a learner who hesitates on one hesitates on the
+other.
+
+Meeting a degree in a session is worth **two**, however many times it was drawn — a
+session that happens to draw "fa" nine times is not nine times the practice — and each
+mistake on it costs **four**. The score never leaves 0–100.
+
+A degree never met carries **no score at all**, not a zero. That is what lets a screen say
+"not yet" instead of showing a figure nobody earned, and what keeps it out of the weakest
+degrees: sending a learner to revise a note they have never seen is not revision.
+
+A targeted revision aims at the **two weakest**, weakest first, ties broken by the order
+the degrees climb an octave. It needs two degrees that have been met — below that there is
+nothing to name — and, being a review, it opens no level.
+
+**Checked** by `bun test`: the scoring and the ranking live in
+`src/domain/training/progress.ts`, and how they are read out loud in
+`src/components/wording/progress.ts`. **Not checked by anything**: that the bars on the
+Progrès tab are as tall as the scores. That needs a renderer.
+
 ## Setting up a session
 
 Three things are chosen before a session and gone with it: the **tempo** (40 to 160 to the
