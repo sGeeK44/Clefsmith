@@ -21,7 +21,12 @@ function storeWith(entries: Record<string, string> = {}): KeyValueStore & {
 describe('the progress store', () => {
   it('reads back what it wrote', async () => {
     const store = createProgressStore(storeWith());
-    const played = sessionFinished(noProgress());
+    const played = sessionFinished(noProgress(), {
+      clef: 'treble',
+      level: 1,
+      review: false,
+      answers: [{ degree: 'c', correct: true }],
+    });
 
     await store.save(played);
 

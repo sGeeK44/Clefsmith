@@ -1,23 +1,31 @@
 import { describe, expect, it } from 'bun:test';
 import { storeHolding } from '#test/progress-store';
+import type { SessionResult } from '@/domain/training/progress';
 import { createRecordFinishedSession } from '@/usecases/record-finished-session';
+
+const read: SessionResult = {
+  clef: 'treble',
+  level: 1,
+  review: false,
+  answers: [{ degree: 'c', correct: true }],
+};
 
 describe('record finished session', () => {
   it('counts one more than the store holds', async () => {
     const store = storeHolding();
     const recordFinishedSession = createRecordFinishedSession(store);
 
-    await recordFinishedSession();
-    await recordFinishedSession();
+    await recordFinishedSession(read);
+    await recordFinishedSession(read);
 
     expect((await store.load()).sessions).toBe(2);
   });
 
-  it('leaves the answers alone', async () => {
+  it('hands the result to the rules rather than applying its own', async () => {
     const store = storeHolding();
 
-    await createRecordFinishedSession(store)();
+    await createRecordFinishedSession(store)({ ...read, review: true });
 
-    expect((await store.load()).answers.treble[1]).toEqual([]);
+    expect((await store.load()).level.treble).toBe(1);
   });
 });

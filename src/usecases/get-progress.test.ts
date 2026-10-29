@@ -5,7 +5,12 @@ import { createGetProgress } from '@/usecases/get-progress';
 
 describe('get progress', () => {
   it('answers with the record its store holds', async () => {
-    const kept = sessionFinished(noProgress());
+    const kept = sessionFinished(noProgress(), {
+      clef: 'treble',
+      level: 1,
+      review: false,
+      answers: [{ degree: 'c', correct: true }],
+    });
 
     expect(await createGetProgress(storeHolding(kept))()).toEqual(kept);
   });
