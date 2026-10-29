@@ -1,4 +1,4 @@
-# The recorded corpus is the measurement instrument: 140 WAV files that must stay
+# The recorded corpus is the measurement instrument: WAV files that must stay
 # byte-identical, because every figure the bench publishes is read off them.
 # Git LFS keeps them out of the pack while the manifest checksums keep them honest.
 #
