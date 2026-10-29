@@ -6,7 +6,6 @@ import { createProgressStore } from '@/infrastructure/progress-store';
 import { SYMBOLS } from '@/infrastructure/symbols';
 import { createGetAppVersion } from '@/usecases/get-app-version';
 import { createGetProgress } from '@/usecases/get-progress';
-import { createRecordAnswer } from '@/usecases/record-answer';
 import { createRecordFinishedSession } from '@/usecases/record-finished-session';
 
 export function createContainer(): Container {
@@ -23,9 +22,6 @@ export function createContainer(): Container {
   container
     .bind(SYMBOLS.usecases.GetProgress)
     .toResolvedValue(createGetProgress, [SYMBOLS.infrastructure.ProgressStore]);
-  container
-    .bind(SYMBOLS.usecases.RecordAnswer)
-    .toResolvedValue(createRecordAnswer, [SYMBOLS.infrastructure.ProgressStore]);
   container
     .bind(SYMBOLS.usecases.RecordFinishedSession)
     .toResolvedValue(createRecordFinishedSession, [SYMBOLS.infrastructure.ProgressStore]);
