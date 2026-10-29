@@ -44,13 +44,19 @@ by the engine and counted — two leger lines under the treble staff, one over i
 
 ## Sessions
 
-`sessionOf` draws the pitches of one session from a pool, uniformly, and **never the same
-pitch twice in a row**: a note that has just been answered is answered again without being
-read.
+`sessionOf` draws the pitches of one session from a pool, and **never the same pitch twice
+in a row**: a note that has just been answered is answered again without being read.
 
-It takes a pool rather than a level on purpose. The no-repeat rule is unsatisfiable on a
-pool of one, and no level is that small — taking a level would have made the refusal
-unreachable, which is code defending against a state nothing can produce.
+The draw is not uniform. It is **biased towards the notes the level brings**: a little
+under half the time it reaches for those alone, the rest of the time for the whole pool.
+Without the bias, a level that adds two notes to a pool of seven shows them barely a
+quarter of the time, and the thing being learnt is the thing least practised. The bias
+disappears on its own at level 6, which brings nothing.
+
+It takes the pool and the newcomers rather than a level on purpose. Both refusals are
+unsatisfiable on inputs no level produces — a pool of one, and a single newcomer that the
+previous pitch rules out — so taking a level would have made them unreachable, which is
+code defending against a state nothing can produce.
 
 The session length is the caller's decision, not the domain's.
 
