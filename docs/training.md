@@ -81,6 +81,22 @@ A **revision** narrows the pool to the degrees it aims at and brings nothing: th
 towards new notes exists to practise what a level adds, and a revision adds nothing. It
 goes back over what is already there.
 
+## Reading one on screen
+
+The staff shows the **measure being read**, not the session: a mistake sends the reading
+back to the start of that measure, so the measure is the unit the learner's eye works in.
+
+Saying a note and being told about it happen in the **same place**. Three states — waiting,
+right, wrong — share one zone, because a screen that stacks them shows an empty box two
+thirds of the time, and because the learner's eyes should not have to move between the two.
+
+The tempo is shown and **not kept**: the first mode has no rhythm to keep, and a number on
+screen that does nothing is still what the learner set up.
+
+**Checked** by `bun test`: what the screen says lives in `src/components/wording/exercise.ts`
+— the count, the share, and which of the three states an attempt lands in. **Not checked by
+anything**: that the staff draws the measure the count names. That needs a renderer.
+
 ## Naming a note
 
 Two notations, `syllabic` (`do ré mi fa sol la si`) and `letters` (`C D E F G A B`). A name
