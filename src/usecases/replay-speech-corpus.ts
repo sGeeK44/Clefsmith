@@ -11,7 +11,7 @@ export interface CorpusAudio {
   read(recording: Recording): Promise<{ pcm: Int16Array; sha256: string }>;
 }
 
-export interface ReplayOutcome {
+interface ReplayOutcome {
   readonly recording: Recording;
   /** The note the recogniser settled on, or `null` if it settled on nothing. */
   readonly heard: string | null;
@@ -35,10 +35,29 @@ export interface ReplayOutcome {
  */
 const FRAME_MS = 20;
 
+/**
+ * What one notation's session cost to open.
+ *
+ * The grammar is fixed when the session opens, so changing notation in the
+ * application means closing the recogniser and opening another — a cost the
+ * user waits through. It is measured here rather than estimated, because it is
+ * the one part of the bench the replay is already doing anyway.
+ */
+interface ReplaySession {
+  readonly notation: string;
+  /** Milliseconds from asking for a session to having one. */
+  readonly startupMs: number;
+}
+
+export interface ReplayResult {
+  readonly outcomes: readonly ReplayOutcome[];
+  readonly sessions: readonly ReplaySession[];
+}
+
 export type ReplaySpeechCorpus = (
   corpus: Corpus,
   recognizer: SpeechRecognizer,
-) => Promise<ReplayOutcome[]>;
+) => Promise<ReplayResult>;
 
 /**
  * Replays the corpus through a recogniser, one notation at a time.
@@ -50,15 +69,19 @@ export type ReplaySpeechCorpus = (
 export function createReplaySpeechCorpus(clock: Clock, audio: CorpusAudio): ReplaySpeechCorpus {
   return async (corpus, recognizer) => {
     const outcomes: ReplayOutcome[] = [];
+    const sessions: ReplaySession[] = [];
 
     for (const [notation, notes] of Object.entries(corpus.notations)) {
       const finals: Extract<Recognition, { kind: 'final' }>[] = [];
+      const askedAt = clock.now();
 
       await recognizer.start(notes, (recognition) => {
         if (recognition.kind === 'final') {
           finals.push(recognition);
         }
       });
+
+      sessions.push({ notation, startupMs: clock.now() - askedAt });
 
       for (const recording of corpus.recordings.filter((it) => it.notation === notation)) {
         finals.length = 0;
@@ -78,7 +101,7 @@ export function createReplaySpeechCorpus(clock: Clock, audio: CorpusAudio): Repl
       await recognizer.stop();
     }
 
-    return outcomes;
+    return { outcomes, sessions };
   };
 }
 

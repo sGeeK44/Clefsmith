@@ -66,7 +66,7 @@ export default function SpeechBenchScreen() {
         modelPath: MODEL_PATH,
       });
 
-      const outcomes = await createReplaySpeechCorpus(systemClock, audio)(
+      const result = await createReplaySpeechCorpus(systemClock, audio)(
         CORPUS_MANIFEST,
         recognizer,
       );
@@ -79,7 +79,7 @@ export default function SpeechBenchScreen() {
       const file = new File(Paths.document, `speech-bench-${new Date().toISOString()}.json`);
 
       file.create({ overwrite: false });
-      file.write(serializeSpeechBenchReport(speechBenchReport(CORPUS_MANIFEST, outcomes)));
+      file.write(serializeSpeechBenchReport(speechBenchReport(CORPUS_MANIFEST, result)));
 
       setReport(file.uri);
       setStatus('Done.');
