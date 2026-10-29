@@ -4,7 +4,10 @@ import { StyleSheet } from 'react-native-unistyles';
 import { Text } from '@/components/ui/text';
 
 /**
- * A labelled choice between a handful of options, all of them on screen.
+ * A choice between a handful of options, all of them on screen.
+ *
+ * The label is optional: a choice whose options say what they are — two clefs —
+ * does not need a word above it saying so again.
  *
  * It is not a `Button`: a button asks to be acted on, a choice shows which of
  * several states is the current one. That is why the selected option is the one
@@ -22,16 +25,18 @@ export function Choice<T extends string>({
   chosen,
   onChoose,
 }: {
-  readonly label: string;
+  readonly label?: string;
   readonly options: readonly Option<T>[];
   readonly chosen: T | undefined;
   readonly onChoose: (value: T) => void;
 }) {
   return (
     <View style={styles.choice}>
-      <Text variant="caption" tone="muted">
-        {label}
-      </Text>
+      {label !== undefined && (
+        <Text variant="caption" tone="muted">
+          {label}
+        </Text>
+      )}
       <View style={styles.options}>
         {options.map((option) => (
           <Item

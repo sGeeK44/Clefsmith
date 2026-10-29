@@ -91,9 +91,31 @@ The percentage covers the **whole session**, not a window over the last answers.
 is the unit a learner recognises: they played it, they saw the score at the end, and the
 next level either opened or it did not.
 
+Where a level sits for a learner — behind them, under them, or ahead of them — is
+**worked out** from the level they are on, never stored. A level ahead of them does not
+answer.
+
 The level reached is **written down**, not worked out. A session's accuracy is not kept,
 so nothing could recompute it — and a rule that cannot be recomputed is one that has to be
 stored.
+
+## Setting up a session
+
+Three things are chosen before a session and gone with it: the **tempo** (40 to 160 to the
+minute, ten at a time, starting at 60), the **length** in measures (4, 8, 12 or 16,
+starting at 8), and whether the **metronome** beats. A measure is four notes, so eight
+measures is a session of thirty-two exercises.
+
+None of it is written down. They are not preferences — they are how this session is to be
+played — and the way to make "not kept between two launches" true is to have nowhere to
+keep them, rather than a rule someone has to remember not to break.
+
+Sixty to the minute is the one tempo a learner counts without being taught how. The
+metronome starts off: the first mode has no rhythm to keep.
+
+**Checked** by `bun test`: `src/domain/training/session-settings.ts` holds the bounds and
+the arithmetic, so they hold wherever a session is started from rather than on the screen
+that happens to show them.
 
 ## Keeping a record
 

@@ -1,16 +1,278 @@
+import { router } from 'expo-router';
+import { useCallback, useEffect, useState } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
+
+import { useService } from '@/components/container-provider';
+import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Choice, type Option } from '@/components/ui/choice';
 import { Screen } from '@/components/ui/screen';
+import { Staff } from '@/components/ui/staff';
 import { Text } from '@/components/ui/text';
+import { Toggle } from '@/components/ui/toggle';
+import { lengthLine, measuresLine, tempoLine } from '@/components/wording/session';
+import { broughtLine, clefName, studyLine, tempoOf } from '@/components/wording/study';
+import { CLEFS, type Clef } from '@/domain/notation/clef';
+import type { Notation } from '@/domain/notation/naming';
+import { LEVELS, type Level, poolOf } from '@/domain/training/level';
+import { type Progress, type Reach, reachOf } from '@/domain/training/progress';
+import {
+  defaultSessionSettings,
+  faster,
+  MEASURES,
+  type Measures,
+  type SessionSettings,
+  slower,
+} from '@/domain/training/session-settings';
+import { SYMBOLS } from '@/infrastructure/symbols';
+
+const PICK_CLEF: readonly Option<Clef>[] = CLEFS.map((clef) => ({
+  value: clef,
+  label: clefName(clef),
+}));
+
+/** `Choice` chooses between words; the four lengths travel as their own digits. */
+const PICK_MEASURES: readonly Option<`${Measures}`>[] = MEASURES.map((measures) => ({
+  value: `${measures}`,
+  label: `${measures}`,
+}));
 
 /**
- * The parcours, stacked over the tabs.
+ * The parcours: the six studies of one clef, and what the chosen one holds.
  *
- * It is empty: CLE-37 fills it. It exists here so that "touching a mode leads to
- * the parcours" is something that can be checked rather than promised.
+ * A study ahead of the learner does not answer — it is drawn so that they can
+ * see where they are going, not so that they can skip there.
  */
 export default function StudiesScreen() {
+  const getProgress = useService(SYMBOLS.usecases.GetProgress);
+  const getSettings = useService(SYMBOLS.usecases.GetSettings);
+  const [progress, setProgress] = useState<Progress>();
+  const [notation, setNotation] = useState<Notation>();
+  const [clef, setClef] = useState<Clef>('treble');
+  const [chosen, setChosen] = useState<Level>();
+  const [session, setSession] = useState<SessionSettings>(defaultSessionSettings);
+
+  useEffect(() => {
+    getProgress().then((read) => {
+      setProgress(read);
+      setChosen(read.level.treble);
+    });
+  }, [getProgress]);
+
+  useEffect(() => {
+    getSettings().then((settings) => setNotation(settings.notation));
+  }, [getSettings]);
+
+  /** Changing clef moves the learner to where they are in that clef, not where they were. */
+  const pickClef = useCallback(
+    (picked: Clef) => {
+      setClef(picked);
+      setChosen(progress?.level[picked]);
+    },
+    [progress],
+  );
+
+  const read = progress !== undefined && notation !== undefined && chosen !== undefined;
+
   return (
     <Screen>
       <Text variant="display">Parcours</Text>
+
+      {read && (
+        <>
+          <Choice options={PICK_CLEF} chosen={clef} onChoose={pickClef} />
+
+          <SessionPanel onChange={setSession} session={session} />
+
+          <ScrollView contentContainerStyle={styles.ladder}>
+            {LEVELS.map((level) => (
+              <Study
+                key={level}
+                chosen={level === chosen}
+                clef={clef}
+                level={level}
+                notation={notation}
+                onChoose={setChosen}
+                session={session}
+                reach={reachOf(progress, clef, level)}
+              />
+            ))}
+          </ScrollView>
+        </>
+      )}
     </Screen>
+  );
+}
+
+function Study({
+  chosen,
+  clef,
+  level,
+  notation,
+  onChoose,
+  reach,
+  session,
+}: {
+  readonly chosen: boolean;
+  readonly clef: Clef;
+  readonly level: Level;
+  readonly notation: Notation;
+  readonly onChoose: (level: Level) => void;
+  readonly reach: Reach;
+  readonly session: SessionSettings;
+}) {
+  const ahead = reach === 'ahead';
+
+  return (
+    <View style={styles.study}>
+      <Pressable
+        disabled={ahead}
+        onPress={() => onChoose(level)}
+        style={styles.head}
+        testID={`study-${level}`}
+      >
+        <Text style={ahead ? styles.ahead : styles.reached}>{level}</Text>
+        <Text variant="title">{tempoOf(level)}</Text>
+        {reach === 'done' && (
+          <Text variant="caption" tone="ok">
+            Terminé
+          </Text>
+        )}
+      </Pressable>
+
+      {chosen && !ahead && <Open clef={clef} level={level} notation={notation} session={session} />}
+    </View>
+  );
+}
+
+/** What the chosen study holds, and the way into it. */
+function Open({
+  clef,
+  level,
+  notation,
+  session,
+}: {
+  readonly clef: Clef;
+  readonly level: Level;
+  readonly notation: Notation;
+  readonly session: SessionSettings;
+}) {
+  const { tempo, measures, metronome } = session;
+
+  return (
+    <Card>
+      <Text variant="caption" tone="muted">
+        {studyLine(level, notation)}
+      </Text>
+
+      {/* The last studies draw fifteen notes, which is wider than any phone. */}
+      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+        <Staff
+          clef={clef}
+          notes={poolOf(clef, level).map((pitch) => ({ pitch, current: false }))}
+          space={8}
+        />
+      </ScrollView>
+
+      <View style={styles.marks}>
+        <Text variant="caption" tone="muted">
+          {measuresLine(measures)}
+        </Text>
+        <Text variant="caption" tone="muted">
+          {tempoLine(tempo)}
+        </Text>
+        <Text variant="caption" tone="muted">
+          {broughtLine(clef, level)}
+        </Text>
+      </View>
+
+      <Button
+        label="Commencer"
+        onPress={() =>
+          router.push({
+            pathname: '/exercise',
+            params: { clef, level, tempo, measures, metronome: String(metronome) },
+          })
+        }
+        testID="start"
+      />
+    </Card>
+  );
+}
+
+const styles = StyleSheet.create((theme) => ({
+  ladder: { gap: theme.spacing.s, paddingBottom: theme.spacing.l },
+  study: { gap: theme.spacing.xs },
+  head: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
+  marks: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.m },
+  panel: { gap: theme.spacing.xs },
+  reached: { color: theme.colors.accent },
+  ahead: { color: theme.colors.muted },
+}));
+
+/**
+ * What this session is to be played with, folded away until it is wanted.
+ *
+ * Folded, it still says the two numbers that change the session most, so the
+ * learner never has to open it to find out what they are about to play.
+ */
+function SessionPanel({
+  onChange,
+  session,
+}: {
+  readonly onChange: (session: SessionSettings) => void;
+  readonly session: SessionSettings;
+}) {
+  const [open, setOpen] = useState(false);
+  const { tempo, measures, metronome } = session;
+
+  return (
+    <View style={styles.panel}>
+      <Pressable onPress={() => setOpen(!open)} style={styles.marks} testID="session-settings">
+        <Text>Réglages de séance</Text>
+        <Text variant="caption" tone="muted">
+          {`${tempoLine(tempo)} · ${measuresLine(measures)}`}
+        </Text>
+      </Pressable>
+
+      {open && (
+        <Card>
+          <View style={styles.marks}>
+            <Text>Tempo</Text>
+            <Button
+              emphasis="quiet"
+              label="−"
+              onPress={() => onChange({ ...session, tempo: slower(tempo) })}
+              testID="tempo-slower"
+            />
+            <Text testID="tempo">{tempoLine(tempo)}</Text>
+            <Button
+              emphasis="quiet"
+              label="+"
+              onPress={() => onChange({ ...session, tempo: faster(tempo) })}
+              testID="tempo-faster"
+            />
+          </View>
+
+          <Choice
+            chosen={`${measures}`}
+            label="Mesures"
+            onChoose={(picked) => onChange({ ...session, measures: Number(picked) as Measures })}
+            options={PICK_MEASURES}
+          />
+          <Text testID="session-length" tone="muted" variant="caption">
+            {lengthLine(measures)}
+          </Text>
+
+          <Toggle
+            label="Métronome"
+            on={metronome}
+            onToggle={(on) => onChange({ ...session, metronome: on })}
+            testID="metronome"
+          />
+        </Card>
+      )}
+    </View>
   );
 }

@@ -82,6 +82,19 @@ export function sessionFinished(progress: Progress, result: SessionResult): Prog
   };
 }
 
+/** Where a level sits for a learner: behind them, under them, or ahead of them. */
+export type Reach = 'done' | 'current' | 'ahead';
+
+export function reachOf(progress: Progress, clef: Clef, level: Level): Reach {
+  const on = progress.level[clef];
+
+  if (level < on) {
+    return 'done';
+  }
+
+  return level === on ? 'current' : 'ahead';
+}
+
 export function masteryOf(progress: Progress, clef: Clef, degree: Degree): number | undefined {
   return progress.mastery[clef][degree];
 }
