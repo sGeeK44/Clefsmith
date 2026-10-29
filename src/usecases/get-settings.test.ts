@@ -4,8 +4,8 @@ import { createGetSettings } from '@/usecases/get-settings';
 
 describe('reading the settings', () => {
   it('answers with what the store holds', async () => {
-    expect(await createGetSettings(settingsHolding({ notation: 'letters' }))()).toEqual({
-      notation: 'letters',
-    });
+    expect(
+      await createGetSettings(settingsHolding({ notation: 'letters', welcomed: true }))(),
+    ).toEqual({ notation: 'letters', welcomed: true });
   });
 });

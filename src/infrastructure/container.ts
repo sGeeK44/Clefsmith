@@ -2,10 +2,13 @@ import { Container } from 'inversify';
 
 import { expoAppVersionReader } from '@/infrastructure/expo-app-version-reader';
 import { expoKeyValueStore } from '@/infrastructure/expo-key-value-store';
+import { expoMicrophonePermission } from '@/infrastructure/expo-microphone-permission';
 import { createProgressStore } from '@/infrastructure/progress-store';
 import { createSettingsStore } from '@/infrastructure/settings-store';
 import { SYMBOLS } from '@/infrastructure/symbols';
+import { createAskForMicrophone } from '@/usecases/ask-for-microphone';
 import { createChooseNotation } from '@/usecases/choose-notation';
+import { createFinishWelcome } from '@/usecases/finish-welcome';
 import { createGetAppVersion } from '@/usecases/get-app-version';
 import { createGetProgress } from '@/usecases/get-progress';
 import { createGetSettings } from '@/usecases/get-settings';
@@ -38,6 +41,20 @@ export function createContainer(): Container {
   container
     .bind(SYMBOLS.usecases.ChooseNotation)
     .toResolvedValue(createChooseNotation, [SYMBOLS.infrastructure.SettingsStore]);
+
+  container
+    .bind(SYMBOLS.infrastructure.MicrophonePermission)
+    .toConstantValue(expoMicrophonePermission);
+  container
+    .bind(SYMBOLS.usecases.AskForMicrophone)
+    .toResolvedValue(createAskForMicrophone, [SYMBOLS.infrastructure.MicrophonePermission]);
+
+  container
+    .bind(SYMBOLS.usecases.FinishWelcome)
+    .toResolvedValue(createFinishWelcome, [
+      SYMBOLS.infrastructure.ProgressStore,
+      SYMBOLS.infrastructure.SettingsStore,
+    ]);
 
   return container;
 }

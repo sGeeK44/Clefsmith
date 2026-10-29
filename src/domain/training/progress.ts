@@ -82,6 +82,20 @@ export function sessionFinished(progress: Progress, result: SessionResult): Prog
   };
 }
 
+/**
+ * Where a learner says they are starting from, in the treble alone.
+ *
+ * The bass is another skill and starts where it starts. The level never comes
+ * down either: someone replaying the introduction is situating themselves again,
+ * not undoing what they have already opened.
+ */
+export function startedAt(progress: Progress, level: Level): Progress {
+  return {
+    ...progress,
+    level: { ...progress.level, treble: Math.max(progress.level.treble, level) as Level },
+  };
+}
+
 /** Where a level sits for a learner: behind them, under them, or ahead of them. */
 export type Reach = 'done' | 'current' | 'ahead';
 
