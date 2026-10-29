@@ -147,6 +147,11 @@ Two records, under two keys: what the learner has **learnt**, and what they have
 over must not take the vocabulary with it — and each carries its own schema number, so
 neither moves when the other does.
 
+Whether the learner has seen the **introduction** is kept with what they have chosen, not
+with what they have learnt, for the same reason: erasing the practice must not hand them
+the introduction back. It is marked whether the introduction was played through or passed
+over — passing it over is still having seen it.
+
 Both are written down as JSON in the key-value store Expo ships on top of
 SQLite — SQLite rather than a file because the write is atomic, so an app killed halfway
 through one leaves the previous record rather than half of the new one. The database sits
@@ -162,6 +167,10 @@ history is not worth a crash at every launch, and there is nothing in one to rec
 Schema 1 held a sliding window of the last twenty answers per level, a rule this version
 no longer has. Those records are not migrated; they start the learner over. There is no
 released build carrying one.
+
+The choices are at schema 2, which added the introduction mark. Schema 1 is not migrated
+either — a record carrying it reads in as a new learner — and no released build carries
+one.
 
 **Checked** by `bun test`, on the halves that do not need a device: the two codecs,
 `src/infrastructure/progress-codec.ts` and `src/infrastructure/settings-codec.ts`, and the

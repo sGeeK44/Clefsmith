@@ -1,6 +1,7 @@
 import type { ServiceIdentifier } from 'inversify';
 
 import type { ChooseNotation } from '@/usecases/choose-notation';
+import type { FinishWelcome } from '@/usecases/finish-welcome';
 import type { AppVersionReader, GetAppVersion } from '@/usecases/get-app-version';
 import type { GetProgress, ProgressStore } from '@/usecases/get-progress';
 import type { GetSettings, SettingsStore } from '@/usecases/get-settings';
@@ -14,6 +15,7 @@ export const SYMBOLS = {
   },
   usecases: {
     ChooseNotation: Symbol.for('ChooseNotation') as ServiceIdentifier<ChooseNotation>,
+    FinishWelcome: Symbol.for('FinishWelcome') as ServiceIdentifier<FinishWelcome>,
     GetAppVersion: Symbol.for('GetAppVersion') as ServiceIdentifier<GetAppVersion>,
     GetProgress: Symbol.for('GetProgress') as ServiceIdentifier<GetProgress>,
     GetSettings: Symbol.for('GetSettings') as ServiceIdentifier<GetSettings>,
