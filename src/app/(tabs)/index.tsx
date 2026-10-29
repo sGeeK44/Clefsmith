@@ -10,7 +10,7 @@ import { Screen } from '@/components/ui/screen';
 import { Staff } from '@/components/ui/staff';
 import { Text } from '@/components/ui/text';
 import { STUDIES, studyLine, tempoOf } from '@/components/wording/study';
-import { type Notation, nameOf } from '@/domain/notation/naming';
+import type { Notation } from '@/domain/notation/naming';
 import type { Pitch } from '@/domain/notation/pitch';
 import { type Level, newcomersOf } from '@/domain/training/level';
 import { SYMBOLS } from '@/infrastructure/symbols';
