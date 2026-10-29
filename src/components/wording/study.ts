@@ -1,3 +1,4 @@
+import type { Clef } from '@/domain/notation/clef';
 import { type Notation, nameOf } from '@/domain/notation/naming';
 import { LEVELS, type Level, newcomersOf } from '@/domain/training/level';
 
@@ -42,4 +43,24 @@ export function studyLine(level: Level, notation: Notation): string {
 
 function capitalised(name: string): string {
   return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+/** What the clef selector calls each clef. */
+const CLEFS: Record<Clef, string> = { treble: 'Clé de sol', bass: 'Clé de fa' };
+
+export function clefName(clef: Clef): string {
+  return CLEFS[clef];
+}
+
+/**
+ * What a study adds, counted — or `Révision` when it adds nothing.
+ *
+ * The last study brings no note of its own: it is the same staff read faster, so
+ * what it offers is a review rather than a number. No study brings exactly one,
+ * in either clef, so there is no singular to write.
+ */
+export function broughtLine(clef: Clef, level: Level): string {
+  const brought = newcomersOf(clef, level).length;
+
+  return brought === 0 ? 'Révision' : `${brought} nouvelles notes`;
 }
