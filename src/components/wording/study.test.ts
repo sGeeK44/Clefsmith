@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { STUDIES, studyLine, tempoOf } from '@/components/wording/study';
+import { broughtLine, clefName, STUDIES, studyLine, tempoOf } from '@/components/wording/study';
 import { LEVELS } from '@/domain/training/level';
 
 describe('what a level is called on screen', () => {
@@ -34,5 +34,30 @@ describe('the line under a study', () => {
 
   it('says nothing after the number when the study brings no note of its own', () => {
     expect(studyLine(6, 'syllabic')).toBe('Étude 6');
+  });
+});
+
+describe('what a study brings, in words', () => {
+  it('counts the notes it adds', () => {
+    expect(broughtLine('treble', 2)).toBe('2 nouvelles notes');
+  });
+
+  it('says review where a study adds nothing', () => {
+    expect(broughtLine('treble', 6)).toBe('Révision');
+  });
+
+  it('counts the three the first study opens with', () => {
+    expect(broughtLine('treble', 1)).toBe('3 nouvelles notes');
+  });
+
+  it('counts each clef on its own, where the two differ', () => {
+    expect(broughtLine('treble', 5)).toBe('6 nouvelles notes');
+    expect(broughtLine('bass', 5)).toBe('4 nouvelles notes');
+  });
+});
+
+describe('what a clef is called', () => {
+  it('names both', () => {
+    expect([clefName('treble'), clefName('bass')]).toEqual(['Clé de sol', 'Clé de fa']);
   });
 });
