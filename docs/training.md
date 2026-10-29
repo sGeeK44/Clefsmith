@@ -11,7 +11,8 @@ Six per clef, and **not the same six**. A level is a range of **positions on the
 in half-spaces from the bottom line — the unit `src/domain/notation/clef.ts` counts in.
 
 The mockup calls a level an _étude_ and names each one after a tempo marking. That is the
-word on the screen; the domain says level, and the screens translate.
+word on the screen; the domain says level, and the screens translate — the six names live
+in `src/components/wording/study.ts`, and a test there keeps them in step with `LEVELS`.
 
 | Level | Treble | Bass  | Brings                      |
 | ----- | ------ | ----- | --------------------------- |

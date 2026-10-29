@@ -11,7 +11,7 @@ ordered: a layer may depend on the ones above it in this list, never on the ones
 | `src/domain`         | The problem itself: notes, clefs, what a correct answer is. Ports the domain needs are declared here.         |
 | `src/usecases`       | What the application does, one file per thing it does. A use case declares the port it needs and receives it. |
 | `src/infrastructure` | The adapters: Expo and React Native SDKs, the file system, the DI container.                                  |
-| `src/components`     | React components that render no route — the container provider, later the design system.                      |
+| `src/components`     | React components that render no route, and the wording the screens translate the domain into.                 |
 | `src/app`            | The Expo Router routes. A file here is a screen or a layout.                                                  |
 
 The direction is **inwards only**: a use case never imports an adapter, the domain never
