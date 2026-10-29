@@ -7,6 +7,7 @@ import type { AppVersionReader, GetAppVersion } from '@/usecases/get-app-version
 import type { GetProgress, ProgressStore } from '@/usecases/get-progress';
 import type { GetSettings, SettingsStore } from '@/usecases/get-settings';
 import type { RecordFinishedSession } from '@/usecases/record-finished-session';
+import type { ResetProgress } from '@/usecases/reset-progress';
 
 export const SYMBOLS = {
   infrastructure: {
@@ -27,5 +28,6 @@ export const SYMBOLS = {
     RecordFinishedSession: Symbol.for(
       'RecordFinishedSession',
     ) as ServiceIdentifier<RecordFinishedSession>,
+    ResetProgress: Symbol.for('ResetProgress') as ServiceIdentifier<ResetProgress>,
   },
 } as const;

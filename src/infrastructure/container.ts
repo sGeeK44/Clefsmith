@@ -13,6 +13,7 @@ import { createGetAppVersion } from '@/usecases/get-app-version';
 import { createGetProgress } from '@/usecases/get-progress';
 import { createGetSettings } from '@/usecases/get-settings';
 import { createRecordFinishedSession } from '@/usecases/record-finished-session';
+import { createResetProgress } from '@/usecases/reset-progress';
 
 export function createContainer(): Container {
   const container = new Container();
@@ -31,6 +32,9 @@ export function createContainer(): Container {
   container
     .bind(SYMBOLS.usecases.RecordFinishedSession)
     .toResolvedValue(createRecordFinishedSession, [SYMBOLS.infrastructure.ProgressStore]);
+  container
+    .bind(SYMBOLS.usecases.ResetProgress)
+    .toResolvedValue(createResetProgress, [SYMBOLS.infrastructure.ProgressStore]);
 
   container
     .bind(SYMBOLS.infrastructure.SettingsStore)
