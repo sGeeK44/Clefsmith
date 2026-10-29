@@ -1,13 +1,14 @@
 import { describe, expect, it } from 'bun:test';
 import { CLEFS } from '@/domain/notation/clef';
 import type { Degree } from '@/domain/notation/pitch';
-import type { Level } from '@/domain/training/level';
+import { LEVELS, type Level } from '@/domain/training/level';
 import {
   type Answer,
   accuracyOf,
   masteryOf,
   noProgress,
   type Progress,
+  reachOf,
   type SessionResult,
   sessionFinished,
   weakestOf,
@@ -174,5 +175,27 @@ describe('the degrees read worst', () => {
 
   it('hands back fewer than asked for rather than inventing one', () => {
     expect(weakestOf(noProgress(), 'treble', 2)).toEqual([]);
+  });
+});
+
+describe('where a level sits for a learner', () => {
+  it('puts everything behind the level they are on', () => {
+    const played = after(session(), session({ level: 2 }), session({ level: 3 }));
+
+    expect(LEVELS.map((level) => reachOf(played, 'treble', level))).toEqual([
+      'done',
+      'done',
+      'done',
+      'current',
+      'ahead',
+      'ahead',
+    ]);
+  });
+
+  it('reads each clef against its own progress', () => {
+    const played = after(session({ clef: 'bass' }));
+
+    expect(reachOf(played, 'bass', 2)).toBe('current');
+    expect(reachOf(played, 'treble', 2)).toBe('ahead');
   });
 });
