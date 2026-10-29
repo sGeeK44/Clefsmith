@@ -44,9 +44,27 @@ function fixtureTrack(responseMs: number, mishearEvery: number): Track {
       emit = onRecognition;
     },
     write: (pcm) => {
-      if (pcm.length > 0) {
-        heard = pcm[0];
+      if (pcm.length === 0) {
+        return;
       }
+
+      const note = pcm[0] as number;
+
+      /**
+       * Refused rather than read, because a real recording would still give a
+       * number here: whatever its first sample happens to be, indexed into the
+       * vocabulary. The bench would publish a confusion matrix built from that
+       * — figures that look like a measurement and are not one. This is the
+       * fixture encoding, and a file that does not carry it is not a file this
+       * track can answer from.
+       */
+      if (pcm.some((sample) => sample !== note)) {
+        throw new Error(
+          'a fixture track was fed audio that is not a fixture recording: every sample of a fixture recording holds the index of the note being said. Replay bench/fixture-corpus, or use a real track.',
+        );
+      }
+
+      heard = note;
     },
     flush: async () => {
       clock.advance(responseMs);

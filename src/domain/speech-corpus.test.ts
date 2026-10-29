@@ -22,12 +22,12 @@ const COMPLETE: Cell[] = [
   { speaker: 's2', notation: 'syllabic', note: 'do', condition: 'instrumental' },
 ];
 
-function recordingOf(cell: Cell): Recording {
-  return { ...cell, audio: 'take.wav', sha256: 'abc', utteranceEndMs: 800 };
+function recordingOf(cell: Cell, take = 1): Recording {
+  return { ...cell, audio: `take-${take}.wav`, sha256: `abc${take}`, utteranceEndMs: 800 };
 }
 
 function corpusOf(cells: Cell[]): Corpus {
-  return { ...AXES, recordings: cells.map(recordingOf) };
+  return { ...AXES, recordings: cells.map((cell) => recordingOf(cell)) };
 }
 
 describe('speech corpus', () => {
@@ -46,18 +46,14 @@ describe('speech corpus', () => {
     ]);
   });
 
-  it('names the cell recorded twice', () => {
-    const withARetake = [
-      ...COMPLETE,
-      { speaker: 's1', notation: 'syllabic', note: 'do', condition: 'silence' },
-    ];
+  it('takes a second recording of a cell as sample, not as a defect', () => {
+    const firstCell = COMPLETE[0] as Cell;
+    const withARetake: Corpus = {
+      ...AXES,
+      recordings: [...COMPLETE.map((cell) => recordingOf(cell)), recordingOf(firstCell, 2)],
+    };
 
-    expect(inspectCorpus(corpusOf(withARetake))).toEqual([
-      {
-        kind: 'duplicate',
-        cell: { speaker: 's1', notation: 'syllabic', note: 'do', condition: 'silence' },
-      },
-    ]);
+    expect(inspectCorpus(withARetake)).toEqual([]);
   });
 
   it('names a recording that falls outside the declared axes', () => {

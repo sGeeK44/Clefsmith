@@ -1,0 +1,775 @@
+{
+  "sampleRate": 16000,
+  "speakers": ["s1", "s2"],
+  "notations": {
+    "syllabic": ["do", "ré", "mi", "fa", "sol", "la", "si"]
+  },
+  "conditions": ["silence"],
+  "recordings": [
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s1-syllabic-do-silence-2.wav",
+      "sha256": "9888fddcebc9645be128de53ca088fd0bf92d9a1d3a1643ebae55543eac38086",
+      "utteranceEndMs": 780
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s1-syllabic-do-silence-3.wav",
+      "sha256": "bca001461a5936bf2d6b122849101bbada9aa4cb9086990a16608f52d3406d32",
+      "utteranceEndMs": 340
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s1-syllabic-do-silence-4.wav",
+      "sha256": "bbfd50b62bb314d847bcdeeaea5499752cb2fb4907f56cf3755d2ff2f396bf91",
+      "utteranceEndMs": 940
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s1-syllabic-do-silence-5.wav",
+      "sha256": "df3595ee0a4bed9e2945691de0836ef1e7302ad38ab815eec54a7d41d1119047",
+      "utteranceEndMs": 500
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s1-syllabic-do-silence-6.wav",
+      "sha256": "badd52e28f99f4965b216b49ee338e93f21479c06a996f2779381a3be85b494c",
+      "utteranceEndMs": 540
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s1-syllabic-do-silence.wav",
+      "sha256": "93f756c84f6e8964113365a5eb42aaf0875ef0883b2de07c600c163456abc633",
+      "utteranceEndMs": 360
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "fa",
+      "condition": "silence",
+      "audio": "s1-syllabic-fa-silence-2.wav",
+      "sha256": "e310f4841ec495960cb68abe7ce6567eee5a0c365e0b7678e455203e4b87c5e2",
+      "utteranceEndMs": 360
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "fa",
+      "condition": "silence",
+      "audio": "s1-syllabic-fa-silence-3.wav",
+      "sha256": "045b62c6f91fa36a5d7ea7aa2a27129606e16975423971eb01681c6df7525f7d",
+      "utteranceEndMs": 580
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "fa",
+      "condition": "silence",
+      "audio": "s1-syllabic-fa-silence-4.wav",
+      "sha256": "858c160543152c66d1eb874b0caeb302f52b95ffa42de58a3e1e4fce7af6d438",
+      "utteranceEndMs": 680
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "fa",
+      "condition": "silence",
+      "audio": "s1-syllabic-fa-silence-5.wav",
+      "sha256": "a789e872a33f3906b2338d5bdb8eafdb6477ba01221eb0a86417caaf981e4ace",
+      "utteranceEndMs": 380
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "fa",
+      "condition": "silence",
+      "audio": "s1-syllabic-fa-silence-6.wav",
+      "sha256": "c7d7c9fa54808cd395b791f8ee71a72c1e9ac43bbcb1f8fa42a9257f88eb67cf",
+      "utteranceEndMs": 320
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "fa",
+      "condition": "silence",
+      "audio": "s1-syllabic-fa-silence.wav",
+      "sha256": "6b3d88c35aa25645d8de5a1557cb1b748f8d4b9c8cd63243c908a8b0273319cb",
+      "utteranceEndMs": 300
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "la",
+      "condition": "silence",
+      "audio": "s1-syllabic-la-silence-2.wav",
+      "sha256": "64b7b08903b99dba87d014d26c6d79faf2f4c9bfc08febf9c9ad44f8ecef66a7",
+      "utteranceEndMs": 480
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "la",
+      "condition": "silence",
+      "audio": "s1-syllabic-la-silence-3.wav",
+      "sha256": "2618b37e03bb43399a132cd5eb2a2b195b74ba47453523cbb50e5b820a32dda5",
+      "utteranceEndMs": 680
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "la",
+      "condition": "silence",
+      "audio": "s1-syllabic-la-silence-4.wav",
+      "sha256": "c9e4a20dcdc355e69ce9e6fa691e2b049da4731285db7455131a632253c5a534",
+      "utteranceEndMs": 620
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "la",
+      "condition": "silence",
+      "audio": "s1-syllabic-la-silence-5.wav",
+      "sha256": "1f43b2fcca9da463f164f9fce2828d481a4740d391b8e5fab5292738ea985a30",
+      "utteranceEndMs": 440
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "la",
+      "condition": "silence",
+      "audio": "s1-syllabic-la-silence-6.wav",
+      "sha256": "803d5e3e451ae4ecd8d1b0ddeba2023cb98431458b38a82542889b2b8ab7bfbc",
+      "utteranceEndMs": 400
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "la",
+      "condition": "silence",
+      "audio": "s1-syllabic-la-silence.wav",
+      "sha256": "45ff050b1d07b1e4f61d8f0c484233ebae4f78b27cd9a3b26d661e8ff7c70cea",
+      "utteranceEndMs": 380
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s1-syllabic-mi-silence-2.wav",
+      "sha256": "8a694a088af7b9540e362b5d98cefebf96ef30553aa517d1343380dbcae227ab",
+      "utteranceEndMs": 500
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s1-syllabic-mi-silence-3.wav",
+      "sha256": "25a4075ae726301b8ea009842ca21a3b6ca6ed2227e2f8586b5da436a14efc56",
+      "utteranceEndMs": 700
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s1-syllabic-mi-silence-4.wav",
+      "sha256": "c5f52f4458ca8378e6be3e685e3d7f42d633cdf86f7fdfc7de1273c1d3c8953d",
+      "utteranceEndMs": 640
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s1-syllabic-mi-silence-5.wav",
+      "sha256": "848d2897f53c2f393c67f57b71a9590264d11ad25da28098c7b4e672c72f6b5c",
+      "utteranceEndMs": 400
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s1-syllabic-mi-silence-6.wav",
+      "sha256": "64b149a888f5ea59ef7a7d528c18b7f761890d953d3d5b89ea0ee1606963e3e3",
+      "utteranceEndMs": 400
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s1-syllabic-mi-silence.wav",
+      "sha256": "1bff0e108530e142d328960bf152fbb61e10a88c6d0e7f22845d58cce01c4086",
+      "utteranceEndMs": 680
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s1-syllabic-ré-silence-2.wav",
+      "sha256": "ba1e4b9dfe9ab88c49a4eeb901418cb39cec7141085b5b860cdcfd9d62138a71",
+      "utteranceEndMs": 480
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s1-syllabic-ré-silence-3.wav",
+      "sha256": "969344554dd161101a7bdbb34cbbc40d2e4f5bf441d111b51b16a9ba2264e8ee",
+      "utteranceEndMs": 600
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s1-syllabic-ré-silence-4.wav",
+      "sha256": "ed4251ee7ad5eecc2d5a243a308a1e07b15dc48e63107cd8f45b4a7c20400960",
+      "utteranceEndMs": 660
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s1-syllabic-ré-silence-5.wav",
+      "sha256": "a0d7872aac9541ef24cc02dde84fdbe50e990ee84a267c68ed4a2c6b37c311da",
+      "utteranceEndMs": 420
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s1-syllabic-ré-silence-6.wav",
+      "sha256": "20f222bfcddc92ff04885ac91202cd2fea53303a68d91b87f578e098e0ca5b50",
+      "utteranceEndMs": 420
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s1-syllabic-ré-silence.wav",
+      "sha256": "5d202a3ef263527877d1924109e0d27c7414c5637858805451dc32e620a2c1f0",
+      "utteranceEndMs": 540
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "si",
+      "condition": "silence",
+      "audio": "s1-syllabic-si-silence-2.wav",
+      "sha256": "a8f7e9ff3966b1bec522831b6ca39affa923302288ea5ad0ca2c55bbafb04e9e",
+      "utteranceEndMs": 480
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "si",
+      "condition": "silence",
+      "audio": "s1-syllabic-si-silence-3.wav",
+      "sha256": "d8f25102dfd196046efee886dc4369501cf8a5d81b26bf4167689c8fa755a655",
+      "utteranceEndMs": 1000
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "si",
+      "condition": "silence",
+      "audio": "s1-syllabic-si-silence-4.wav",
+      "sha256": "d537df95802659b8820d0a128b08ecaddf81ae81d40db695d7db4be47dc2b2be",
+      "utteranceEndMs": 920
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "si",
+      "condition": "silence",
+      "audio": "s1-syllabic-si-silence-5.wav",
+      "sha256": "b5531c9594bff6f61a002f90fb1d95f054a8232e2c9a7f9dc6e168b1b455b5f3",
+      "utteranceEndMs": 660
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "si",
+      "condition": "silence",
+      "audio": "s1-syllabic-si-silence.wav",
+      "sha256": "bfbc6a5a425c6216e6aac86fa35b9acbc3c35aa9160e11e77237935944404bd8",
+      "utteranceEndMs": 460
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s1-syllabic-sol-silence-2.wav",
+      "sha256": "cd2867553bcc0bf3e849f4fe8d0b0ea76d131378a22fcc3cba1ff34b4504662f",
+      "utteranceEndMs": 620
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s1-syllabic-sol-silence-3.wav",
+      "sha256": "e0c52274005b5a551abe406088a47b8904ad7267a090cc44732f16282afb3a1c",
+      "utteranceEndMs": 780
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s1-syllabic-sol-silence-4.wav",
+      "sha256": "7eb11b8192f0a4836a8c2d67da0d76ac673d0dd0c12b59580e587033bf5cedf0",
+      "utteranceEndMs": 760
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s1-syllabic-sol-silence-5.wav",
+      "sha256": "5667770faf9155227898ba68e5f345cdb99fb6021c1dc46aa2892fe40975ff7f",
+      "utteranceEndMs": 540
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s1-syllabic-sol-silence-6.wav",
+      "sha256": "b2a30f699f6b1a20ec9edba274d8779173f6382fe41abc88a6893ba32447627d",
+      "utteranceEndMs": 520
+    },
+    {
+      "speaker": "s1",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s1-syllabic-sol-silence.wav",
+      "sha256": "766d7fd8b5ac415ca79745369c9435ad95aa83580dd2b38b2cef03c2143e6d24",
+      "utteranceEndMs": 460
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s2-syllabic-do-silence-2.wav",
+      "sha256": "c955a6654a6554c1e9b76ef498d68dfa3407bc25d2b660d1ed129c50f8fd39cf",
+      "utteranceEndMs": 740
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s2-syllabic-do-silence-3.wav",
+      "sha256": "b84302a8e3b7975c38529ec35db907e0ef1bc0bfb42e5a7dcc13aa48327d5f5c",
+      "utteranceEndMs": 1040
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s2-syllabic-do-silence-4.wav",
+      "sha256": "c7dc46e42d6c74ed685aa3aed3fc7f225959eb8eede635764fadc8b6a3849860",
+      "utteranceEndMs": 700
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s2-syllabic-do-silence-5.wav",
+      "sha256": "7c3e0a48b94e4255f9cd0cb689792cadd6c87e8352e65910e480e77bdcce27b1",
+      "utteranceEndMs": 380
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s2-syllabic-do-silence-6.wav",
+      "sha256": "74b52988bb73d026a55c69c39df7fdffd82c97494784e5f4dc937510197a6fc9",
+      "utteranceEndMs": 460
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "do",
+      "condition": "silence",
+      "audio": "s2-syllabic-do-silence.wav",
+      "sha256": "75f286a6c2245caca49aa6ccb3a50b53381dd83cde1b6763e33b32bf0d1b8e72",
+      "utteranceEndMs": 1420
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "fa",
+      "condition": "silence",
+      "audio": "s2-syllabic-fa-silence-2.wav",
+      "sha256": "dee20622d248c4740f03c51ebd7fa3d402ab64b0f3dfa65e6d915c45a0508c25",
+      "utteranceEndMs": 1080
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "fa",
+      "condition": "silence",
+      "audio": "s2-syllabic-fa-silence-3.wav",
+      "sha256": "e54fd7dc42c9b254dd19e07133547387c0cafe594829596babb15962e4373650",
+      "utteranceEndMs": 1060
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "fa",
+      "condition": "silence",
+      "audio": "s2-syllabic-fa-silence-4.wav",
+      "sha256": "a255da1f240efba5f5d3c1d434af60c1e241e5a2fc8c1f9a374ad8ed25a445c7",
+      "utteranceEndMs": 340
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "fa",
+      "condition": "silence",
+      "audio": "s2-syllabic-fa-silence-5.wav",
+      "sha256": "ec5676d34b5e1cbff99d820e1e25d0c54405585df34c427c309d0989d9fb727c",
+      "utteranceEndMs": 500
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "fa",
+      "condition": "silence",
+      "audio": "s2-syllabic-fa-silence.wav",
+      "sha256": "201ae04b77f9551e71f2a458bad9cd044393198fb836b6aa767c57aaafa51b4a",
+      "utteranceEndMs": 480
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "la",
+      "condition": "silence",
+      "audio": "s2-syllabic-la-silence-2.wav",
+      "sha256": "e0213050bfd6a2003a8d4bb5aae4ad286c6228f3cd0bcb4493124a703a26d2ed",
+      "utteranceEndMs": 1100
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "la",
+      "condition": "silence",
+      "audio": "s2-syllabic-la-silence-3.wav",
+      "sha256": "dba556f972c821e9c4246f863a711b34f03127be6fc142da18ef4d1c6ce3ad09",
+      "utteranceEndMs": 1120
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "la",
+      "condition": "silence",
+      "audio": "s2-syllabic-la-silence-4.wav",
+      "sha256": "cd754afdc46a1e4dc89e3a478b96d2cb2a7052a12c26f949c7847d547629cdc5",
+      "utteranceEndMs": 880
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "la",
+      "condition": "silence",
+      "audio": "s2-syllabic-la-silence-5.wav",
+      "sha256": "f1dd27b350825a9b6f65a9b276878ff2ef6743fa4540659fd86b8ff0855b1855",
+      "utteranceEndMs": 900
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "la",
+      "condition": "silence",
+      "audio": "s2-syllabic-la-silence-6.wav",
+      "sha256": "d8f1d49560a592c6888b64787b6745c99a96a7e0a414fd0d66db5b568201f567",
+      "utteranceEndMs": 540
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "la",
+      "condition": "silence",
+      "audio": "s2-syllabic-la-silence.wav",
+      "sha256": "6e1632ae34e57b67408dc281c0d5f007740170075caae766a7b1c687926f33b4",
+      "utteranceEndMs": 560
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s2-syllabic-mi-silence-2.wav",
+      "sha256": "88e688497024510ba97d0e91cbd4e9d45773d10f4e0e261dc3489aaa8a4daae0",
+      "utteranceEndMs": 1220
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s2-syllabic-mi-silence-3.wav",
+      "sha256": "3e4c50c0d44e5ccfb1004413c611fb3e5ca682ccc0b1f1437a4d79da5feb5836",
+      "utteranceEndMs": 1180
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s2-syllabic-mi-silence-4.wav",
+      "sha256": "e683300646ba054ada6bc4011ebe51a5db5d7b76dc727302d1c9c8a4ee490dac",
+      "utteranceEndMs": 920
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s2-syllabic-mi-silence-5.wav",
+      "sha256": "da6b28ebe9063341847df443ceddc9728283e75d59645243417da6c8c6f1c833",
+      "utteranceEndMs": 680
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s2-syllabic-mi-silence-6.wav",
+      "sha256": "60d7910aaa628a2ff66202409a3ef24dc3f4faaa2543617775c58aa76e2f55ec",
+      "utteranceEndMs": 380
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "mi",
+      "condition": "silence",
+      "audio": "s2-syllabic-mi-silence.wav",
+      "sha256": "46c1a4629db69eb7c062b9109d8f539a717d7c6c3047ff8c7a99cd7a95c2b562",
+      "utteranceEndMs": 540
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s2-syllabic-ré-silence-2.wav",
+      "sha256": "4fa53d37992a86345773c24a2eead521ec655c410f8d010ecb52226e488abdad",
+      "utteranceEndMs": 1240
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s2-syllabic-ré-silence-3.wav",
+      "sha256": "6ad66d9c465010f94f43f28e26c9a9fdd6eee08c6f88843fb78954604ca4cf0f",
+      "utteranceEndMs": 1140
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s2-syllabic-ré-silence-4.wav",
+      "sha256": "27644aec7d4ac5847de796d1c2d0a4e2b652db7aff66adc0241f23c242612a55",
+      "utteranceEndMs": 980
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s2-syllabic-ré-silence-5.wav",
+      "sha256": "67d08db6d2eb58b46a2a5b3b96560c920beca880709924732d364f927b9057c0",
+      "utteranceEndMs": 860
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s2-syllabic-ré-silence-6.wav",
+      "sha256": "3c4f35c9ed5397e82eb23510c123e99308636bd035759b02d30770b970f0bcd8",
+      "utteranceEndMs": 380
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s2-syllabic-ré-silence-7.wav",
+      "sha256": "4cbf3d7b612558a2f1f7592954f9db97067cef9ac070dd168b492f2cc75a7d81",
+      "utteranceEndMs": 640
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "ré",
+      "condition": "silence",
+      "audio": "s2-syllabic-ré-silence.wav",
+      "sha256": "3cd3962069991ea7224ec93214ca076cc80fc0224dba6a43fc5a90fd0b9b3bbf",
+      "utteranceEndMs": 580
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "si",
+      "condition": "silence",
+      "audio": "s2-syllabic-si-silence-2.wav",
+      "sha256": "8d266bd972871765ebd7d4deb7d01c00687a86c5f43fcf571de05e85c0fc5e0e",
+      "utteranceEndMs": 740
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "si",
+      "condition": "silence",
+      "audio": "s2-syllabic-si-silence-3.wav",
+      "sha256": "f605e74c22d0efa976a1bf8ebedfd93067fd2bb2e539ad8a63bbfa530081779f",
+      "utteranceEndMs": 460
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "si",
+      "condition": "silence",
+      "audio": "s2-syllabic-si-silence-4.wav",
+      "sha256": "18facfe712f6f7b703daf69e19a5e2cd868e944d342f24c2d3dfb1aa51adbb9e",
+      "utteranceEndMs": 900
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "si",
+      "condition": "silence",
+      "audio": "s2-syllabic-si-silence-5.wav",
+      "sha256": "4fc7ec6e8a89629d340f2ee62fab376242e124aa6ce3552b152872e0c7817917",
+      "utteranceEndMs": 400
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "si",
+      "condition": "silence",
+      "audio": "s2-syllabic-si-silence-6.wav",
+      "sha256": "460af0c13eaafb0caa0c553f179bade0e0104b77fd3e5f92d0add709ddf9dac0",
+      "utteranceEndMs": 960
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "si",
+      "condition": "silence",
+      "audio": "s2-syllabic-si-silence-7.wav",
+      "sha256": "d29dc12e35b791fd97eb4a7da6e0303568cad652220a83f41108f43f2ab21bda",
+      "utteranceEndMs": 360
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "si",
+      "condition": "silence",
+      "audio": "s2-syllabic-si-silence.wav",
+      "sha256": "60f3928978c3eaafb99535367215669fc9e40b3c31b7501ef1b324f20886bf5f",
+      "utteranceEndMs": 480
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s2-syllabic-sol-silence-2.wav",
+      "sha256": "9226b9b7127a7ebeb044ae042bf812625e3133f062b44a78d2258c7470b89e9c",
+      "utteranceEndMs": 1180
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s2-syllabic-sol-silence-3.wav",
+      "sha256": "5ab83bd6810b3aaaca212f1857272e7d36ad7fafbf07f613b62541dfcf1d5a43",
+      "utteranceEndMs": 1340
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s2-syllabic-sol-silence-4.wav",
+      "sha256": "00f7876683cf0795ba0ddbff45d1a13435deb72624deb7f5bc60f5c4a12024e4",
+      "utteranceEndMs": 1400
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s2-syllabic-sol-silence-5.wav",
+      "sha256": "9e544a475bdb0b0ecdd7747c803b6bcc2bc846ffeb30b8556ffe5ed37f809d51",
+      "utteranceEndMs": 860
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s2-syllabic-sol-silence-6.wav",
+      "sha256": "21b4aed52a781681ec9727a2d5b9aa08efb06b1da411d20720656578383d075f",
+      "utteranceEndMs": 500
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s2-syllabic-sol-silence-7.wav",
+      "sha256": "f684f73cf6b63dd01224dc5bea0b43c0457506e8bdad729379349372b3c2cdc3",
+      "utteranceEndMs": 580
+    },
+    {
+      "speaker": "s2",
+      "notation": "syllabic",
+      "note": "sol",
+      "condition": "silence",
+      "audio": "s2-syllabic-sol-silence.wav",
+      "sha256": "1ef3e9de327665e8430f3781e7cc145a31713ad120a4941b3314524949627a72",
+      "utteranceEndMs": 580
+    }
+  ]
+}
