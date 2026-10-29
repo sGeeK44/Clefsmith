@@ -22,6 +22,10 @@ describe('a record that can be read', () => {
     expect(decode(encode(played))).toEqual(played);
   });
 
+  it('comes back with the degrees never met still missing, not zeroed', () => {
+    expect(decode(encode(played)).mastery.bass).toEqual({ g: 2, a: 0 });
+  });
+
   it('carries the levels both clefs are on', () => {
     expect(decode(written({ level: { treble: 4, bass: 6 } })).level).toEqual({
       treble: 4,
@@ -56,11 +60,22 @@ describe('a record that cannot be read', () => {
 
   it('starts over when a clef is missing', () => {
     expect(decode(written({ level: { treble: 2 } }))).toEqual(noProgress());
+    expect(decode(written({ mastery: { treble: {} } }))).toEqual(noProgress());
   });
 
   it('starts over on a level outside the six', () => {
     expect(decode(written({ level: { treble: 0, bass: 1 } }))).toEqual(noProgress());
     expect(decode(written({ level: { treble: 7, bass: 1 } }))).toEqual(noProgress());
     expect(decode(written({ level: { treble: '2', bass: 1 } }))).toEqual(noProgress());
+  });
+
+  it('starts over on a mastery key that is not a degree', () => {
+    expect(decode(written({ mastery: { treble: { h: 10 }, bass: {} } }))).toEqual(noProgress());
+  });
+
+  it('starts over on a score the rules could never have produced', () => {
+    expect(decode(written({ mastery: { treble: { c: 101 }, bass: {} } }))).toEqual(noProgress());
+    expect(decode(written({ mastery: { treble: { c: -1 }, bass: {} } }))).toEqual(noProgress());
+    expect(decode(written({ mastery: { treble: { c: 'high' }, bass: {} } }))).toEqual(noProgress());
   });
 });

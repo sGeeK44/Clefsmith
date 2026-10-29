@@ -5,10 +5,12 @@ import type { Level } from '@/domain/training/level';
 import {
   type Answer,
   accuracyOf,
+  masteryOf,
   noProgress,
   type Progress,
   type SessionResult,
   sessionFinished,
+  weakestOf,
 } from '@/domain/training/progress';
 
 /** One session, right unless `wrong` names the degree. */
@@ -30,7 +32,11 @@ function after(...results: readonly SessionResult[]): Progress {
 
 describe('a learner who has never played', () => {
   it('is on the first level of both clefs, with nothing behind them', () => {
-    expect(noProgress()).toEqual({ sessions: 0, level: { treble: 1, bass: 1 } });
+    expect(noProgress()).toEqual({
+      sessions: 0,
+      level: { treble: 1, bass: 1 },
+      mastery: { treble: {}, bass: {} },
+    });
   });
 });
 
@@ -91,5 +97,82 @@ describe('finishing a session', () => {
 
   it('opens one level at a time, however long the session', () => {
     expect(after(session({ answers: answers('cdecdecde') })).level.treble).toBe(2);
+  });
+});
+
+describe('the mastery of a degree', () => {
+  it('is unknown until the degree has been met, which is not a score of zero', () => {
+    expect(masteryOf(noProgress(), 'treble', 'c')).toBeUndefined();
+  });
+
+  it('rises by two for a degree met in the session', () => {
+    expect(masteryOf(after(session()), 'treble', 'c')).toBe(2);
+  });
+
+  it('rises by two whether it was met once or nine times', () => {
+    expect(masteryOf(after(session({ answers: answers('ccccccccc') })), 'treble', 'c')).toBe(2);
+  });
+
+  it('falls by four for each mistake, after the session has been credited', () => {
+    expect(after(session({ answers: answers('cdeCC') })).mastery.treble).toEqual({
+      c: 0,
+      d: 2,
+      e: 2,
+    });
+  });
+
+  it('costs four a mistake on a degree that has something to lose', () => {
+    const built = Array.from({ length: 5 }, () => session({ answers: answers('c'), level: 6 }));
+
+    // Five clean sessions make ten; the sixth adds two and takes four back.
+    expect(
+      masteryOf(after(...built, session({ answers: answers('cC'), level: 6 })), 'treble', 'c'),
+    ).toBe(8);
+  });
+
+  it('never falls below nothing, however bad the session', () => {
+    expect(masteryOf(after(session({ answers: answers('CCCC') })), 'treble', 'c')).toBe(0);
+  });
+
+  it('never climbs past a hundred, however many sessions', () => {
+    const many = Array.from({ length: 60 }, () => session({ level: 6 }));
+
+    expect(masteryOf(after(...many), 'treble', 'c')).toBe(100);
+  });
+
+  it('leaves a degree the session did not meet exactly where it was', () => {
+    expect(masteryOf(after(session(), session({ answers: answers('d') })), 'treble', 'c')).toBe(2);
+  });
+
+  it('is kept per clef, so reading "do" in bass is not reading it in treble', () => {
+    const played = after(session({ clef: 'bass' }));
+
+    expect([masteryOf(played, 'bass', 'c'), masteryOf(played, 'treble', 'c')]).toEqual([
+      2,
+      undefined,
+    ]);
+  });
+});
+
+describe('the degrees read worst', () => {
+  it('are the lowest scores, weakest first', () => {
+    const played = after(
+      session({ answers: answers('cdeCC') }),
+      session({ answers: answers('d') }),
+    );
+
+    expect(weakestOf(played, 'treble', 2)).toEqual(['c', 'e']);
+  });
+
+  it('leaves out a degree never met, which is unknown rather than weak', () => {
+    expect(weakestOf(after(session({ answers: answers('CD') })), 'treble', 7)).toEqual(['c', 'd']);
+  });
+
+  it('breaks a tie by the order the degrees climb an octave', () => {
+    expect(weakestOf(after(session({ answers: answers('edc') })), 'treble', 2)).toEqual(['c', 'd']);
+  });
+
+  it('hands back fewer than asked for rather than inventing one', () => {
+    expect(weakestOf(noProgress(), 'treble', 2)).toEqual([]);
   });
 });
