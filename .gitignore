@@ -45,3 +45,7 @@ example
 # nested tool package
 tools/*/node_modules/
 e2e/node_modules/
+
+# Vosk models: ~69 MB each, downloaded from alphacephei.com and placed by hand.
+# See bench/corpus/README.md.
+/assets/models/

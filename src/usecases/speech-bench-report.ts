@@ -66,3 +66,17 @@ export function speechBenchReport(
     confusion,
   };
 }
+
+/**
+ * The one way a report is written down.
+ *
+ * Shared between the host run and the device run because the two are compared
+ * against each other, and against the report of the other track: two spellings
+ * of the same figures would show up as a difference that is not one.
+ *
+ * `NaN` is not a JSON value and serialises to `null`, which reads as a figure
+ * rather than as the absence of one. It is spelled out instead.
+ */
+export function serializeSpeechBenchReport(report: SpeechBenchReport): string {
+  return JSON.stringify(report, (_, value) => (Number.isNaN(value) ? 'NaN' : value), 2);
+}

@@ -9,3 +9,6 @@ bench/corpus/**/*.wav filter=lfs diff=lfs merge=lfs -text
 
 # Written by `bun patch --commit`, never by hand.
 patches/*.patch linguist-generated=true
+
+# Written by `bun bench/make-corpus-assets.ts`, never by hand.
+src/components/speech-bench/corpus-assets.ts linguist-generated=true
