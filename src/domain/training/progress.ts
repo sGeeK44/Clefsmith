@@ -1,81 +1,64 @@
 import type { Clef } from '@/domain/notation/clef';
+import type { Degree } from '@/domain/notation/pitch';
 import { LEVELS, type Level } from '@/domain/training/level';
 
-/** How many of the latest answers a level is judged on. */
-export const WINDOW = 20;
+/** The share of a session that has to be right for the next level to open. */
+const PASS_MARK = 75;
 
-/** How many of those may be wrong and the level still be held. */
-const ALLOWED_MISTAKES = 2;
-
-/** The latest answers to each level, oldest first, at most `WINDOW` of them. */
-export type Answers = Readonly<Record<Level, readonly boolean[]>>;
-
-/**
- * Everything the application remembers of a learner.
- *
- * Only what cannot be worked out again: the latest answers, and how many sessions
- * were finished. Whether a level is held and how far the learner has got are read
- * off those answers every time they are asked for, because a stored flag and the
- * answers that produced it drift apart and nothing notices.
- */
 export interface Progress {
   readonly sessions: number;
-  readonly answers: Readonly<Record<Clef, Answers>>;
+  readonly level: Readonly<Record<Clef, Level>>;
 }
 
-/** A learner who has never played. */
+export interface Answer {
+  readonly degree: Degree;
+  readonly correct: boolean;
+}
+
+/** What one finished session reports: which level was played, under which clef, and how. */
+export interface SessionResult {
+  readonly clef: Clef;
+  readonly level: Level;
+  /** A session aimed at the weakest degrees. It practises, it never opens a level. */
+  readonly review: boolean;
+  readonly answers: readonly Answer[];
+}
+
 export function noProgress(): Progress {
-  return { sessions: 0, answers: { treble: nothingAnswered(), bass: nothingAnswered() } };
+  return { sessions: 0, level: { treble: 1, bass: 1 } };
 }
 
-function nothingAnswered(): Answers {
-  return { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+/** The share of the session answered correctly, rounded, out of a hundred. */
+export function accuracyOf(answers: readonly Answer[]): number {
+  if (answers.length === 0) {
+    return 0;
+  }
+
+  return Math.round((answers.filter((answer) => answer.correct).length / answers.length) * 100);
 }
 
 /**
- * The progress of a learner who has just answered one more exercise.
+ * The record a finished session leaves behind.
  *
- * The window slides: the twenty-first answer pushes the first one out. Practice
- * forgets, and a learner who has worked through a bad start should not carry it.
+ * The next level opens when four things hold at once: the session was not a
+ * review, it was read at or above the pass mark, it was the level the learner is
+ * on — replaying an easier one opens nothing — and there is a level above it.
+ *
+ * The level reached is **stored** rather than worked out. A session's accuracy is
+ * not kept, so nothing downstream could recompute it, and a rule that cannot be
+ * recomputed is one that has to be written down.
  */
-export function answered(progress: Progress, clef: Clef, level: Level, correct: boolean): Progress {
-  const latest = [...progress.answers[clef][level], correct].slice(-WINDOW);
+export function sessionFinished(progress: Progress, result: SessionResult): Progress {
+  const { clef, level, review, answers } = result;
+  const opens =
+    !review &&
+    answers.length > 0 &&
+    accuracyOf(answers) >= PASS_MARK &&
+    level === progress.level[clef] &&
+    level < (LEVELS.at(-1) as Level);
 
   return {
-    ...progress,
-    answers: {
-      ...progress.answers,
-      [clef]: { ...progress.answers[clef], [level]: latest },
-    },
+    sessions: progress.sessions + 1,
+    level: { ...progress.level, [clef]: opens ? ((level + 1) as Level) : progress.level[clef] },
   };
-}
-
-/** The progress of a learner who has just finished one more session. */
-export function sessionFinished(progress: Progress): Progress {
-  return { ...progress, sessions: progress.sessions + 1 };
-}
-
-/**
- * Whether the learner holds a level with this clef.
- *
- * A window that is not yet full is never held: three right answers say nothing
- * about a level, and an average over three would let one through on a lucky run.
- */
-export function isHeld(progress: Progress, clef: Clef, level: Level): boolean {
-  const latest = progress.answers[clef][level];
-
-  return (
-    latest.length === WINDOW && latest.filter((correct) => !correct).length <= ALLOWED_MISTAKES
-  );
-}
-
-/**
- * The highest level the learner may play with this clef.
- *
- * The first level they do not hold, which is level 1 for a learner who has never
- * played, and the last level once they hold every one of them. The two clefs are
- * two skills: neither opens anything for the other.
- */
-export function highestOpenLevel(progress: Progress, clef: Clef): Level {
-  return LEVELS.find((level) => !isHeld(progress, clef, level)) ?? (LEVELS.at(-1) as Level);
 }

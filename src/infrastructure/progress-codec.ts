@@ -1,15 +1,17 @@
 import { CLEFS } from '@/domain/notation/clef';
-import { LEVELS } from '@/domain/training/level';
-import { type Answers, noProgress, type Progress, WINDOW } from '@/domain/training/progress';
+import { LEVELS, type Level } from '@/domain/training/level';
+import { noProgress, type Progress } from '@/domain/training/progress';
 
 /**
  * The shape of what is written down.
  *
  * It travels with the application and outlives it: a record written by a newer
  * version is one this one cannot be trusted to read, so it is refused rather than
- * half-understood.
+ * half-understood. Schema 1 held a sliding
+ * window of answers per level, a rule this version no longer has — those records
+ * start the learner over.
  */
-const SCHEMA = 1;
+const SCHEMA = 2;
 
 export function encode(progress: Progress): string {
   return JSON.stringify({ schema: SCHEMA, ...progress });
@@ -39,41 +41,28 @@ function readProgress(value: unknown): Progress | undefined {
     return undefined;
   }
 
-  const answers = readClefs(value.answers);
+  const level = readPerClef(value.level, readLevel);
 
-  return answers === undefined ? undefined : { sessions: value.sessions, answers };
+  return level === undefined ? undefined : { sessions: value.sessions, level };
 }
 
-function readClefs(value: unknown): Progress['answers'] | undefined {
+function readPerClef<T>(
+  value: unknown,
+  readOne: (value: unknown) => T | undefined,
+): Readonly<Record<'treble' | 'bass', T>> | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
 
-  const read = CLEFS.map((clef) => [clef, readLevels(value[clef])] as const);
+  const read = CLEFS.map((clef) => [clef, readOne(value[clef])] as const);
 
-  return read.some(([, answers]) => answers === undefined)
+  return read.some(([, one]) => one === undefined)
     ? undefined
-    : (Object.fromEntries(read) as Progress['answers']);
+    : (Object.fromEntries(read) as Readonly<Record<'treble' | 'bass', T>>);
 }
 
-function readLevels(value: unknown): Answers | undefined {
-  if (!isRecord(value)) {
-    return undefined;
-  }
-
-  const read = LEVELS.map((level) => [level, readLatest(value[level])] as const);
-
-  return read.some(([, latest]) => latest === undefined)
-    ? undefined
-    : (Object.fromEntries(read) as Answers);
-}
-
-function readLatest(value: unknown): readonly boolean[] | undefined {
-  if (!Array.isArray(value) || value.length > WINDOW) {
-    return undefined;
-  }
-
-  return value.every((answer) => typeof answer === 'boolean') ? value : undefined;
+function readLevel(value: unknown): Level | undefined {
+  return LEVELS.find((level) => level === value);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
