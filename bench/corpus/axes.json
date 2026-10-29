@@ -1,9 +1,8 @@
 {
   "sampleRate": 16000,
-  "speakers": ["s1", "s2", "s3", "s4", "s5"],
+  "speakers": ["s1", "s2"],
   "notations": {
-    "syllabic": ["do", "ré", "mi", "fa", "sol", "la", "si"],
-    "letters": ["A", "B", "C", "D", "E", "F", "G"]
+    "syllabic": ["do", "ré", "mi", "fa", "sol", "la", "si"]
   },
-  "conditions": ["silence", "instrumental"]
+  "conditions": ["silence"]
 }
