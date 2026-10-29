@@ -1,5 +1,5 @@
 import { Storage } from 'expo-sqlite/kv-store';
-import type { KeyValueStore } from '@/infrastructure/progress-store';
+import type { KeyValueStore } from '@/infrastructure/key-value-store';
 
 /**
  * The key-value store Expo ships on top of SQLite.
