@@ -1,6 +1,5 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
-import { useService } from '@/components/container-provider';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Screen } from '@/components/ui/screen';
@@ -8,25 +7,23 @@ import { Staff } from '@/components/ui/staff';
 import { Text } from '@/components/ui/text';
 import type { Clef } from '@/domain/notation/clef';
 import type { Note } from '@/domain/score/layout';
-import { SYMBOLS } from '@/infrastructure/symbols';
 
 /**
  * The design system, on a screen.
  *
- * It stands in for the real home screen until CLE-14 builds one, and it is how
- * the two themes are looked at: switch the system setting and every role on
- * this page moves at once. It keeps the version on screen because the e2e suite
- * looks for it.
+ * It is no longer the home route: the three tabs are. It stays as a stacked
+ * route, reached by deep link and by nothing else, because it is how the two
+ * themes are looked at — switch the system setting and every role on this page
+ * moves at once. Being stacked, it also shows that a screen pushed over the
+ * tabs hides them.
+ *
+ * It goes away with CLE-36, which gives `Staff`, `Button` and `Card` the screen
+ * they were built for.
  */
-export default function RootScreen() {
-  const getAppVersion = useService(SYMBOLS.usecases.GetAppVersion);
-
+export default function GalleryScreen() {
   return (
     <Screen>
       <Text variant="display">Clefsmith</Text>
-      <Text testID="app-version" variant="caption" tone="muted">
-        {getAppVersion()}
-      </Text>
 
       <Card>
         <Text variant="title">Type scale</Text>

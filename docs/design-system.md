@@ -60,6 +60,12 @@ why it is declared in `knip.jsonc`.
 
 ## Looking at it
 
-The home route is the gallery: it shows the type scale, the status tones, both buttons and
-a card. Switch the system setting and every role on the page moves at once. CLE-14 replaces
-that route with the real home screen.
+The gallery is no longer the home route — the three tabs are — but it is still there, at
+`/gallery`, reached by a deep link and by nothing in the interface. It shows the type
+scale, the status tones, both buttons and a card: switch the system setting and every role
+on the page moves at once.
+
+It disappears with CLE-36, the screen `Staff`, `Button` and `Card` were built for.
+
+**Not checked by anything**: that the palette moves with the system setting. It needs a
+device, and the device suite only runs on the release pull request.
