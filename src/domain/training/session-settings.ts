@@ -14,8 +14,13 @@ const SLOWEST = 40;
 const FASTEST = 160;
 const STEP = 10;
 
-/** Four beats to a measure, one note to a beat. */
-const NOTES_PER_MEASURE = 4;
+/**
+ * Four beats to a measure, one note to a beat.
+ *
+ * Exported because a session's length and the point a mistake sends the learner
+ * back to are the same number. Two copies of it would drift the day it changes.
+ */
+export const NOTES_PER_MEASURE = 4;
 
 export interface SessionSettings {
   readonly tempo: number;

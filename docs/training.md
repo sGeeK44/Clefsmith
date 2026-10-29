@@ -61,6 +61,17 @@ code defending against a state nothing can produce.
 
 The session length is the caller's decision, not the domain's.
 
+Reading one is a **value, not an object**: naming a degree returns a new drill, so a whole
+session is a fold over what the learner said. A right answer moves on; a wrong one sends
+the reading back to the **start of the measure**, and the notes already read in it are
+read again — a measure is the unit a reader re-reads, with or without a metronome keeping
+time. Four notes to a measure, and `src/domain/training/session-settings.ts` is the only
+place that says so: a session's length and the point a mistake sends you back to are the
+same number.
+
+Every attempt is recorded, right or wrong. **Accuracy is counted over attempts, not over
+notes**: a measure re-read three times cost what it cost.
+
 Chance is a port, `src/core/random.ts`, beside the clock and for the same reason: a
 generator that reaches for `Math.random` can be tested for its shape and nothing else.
 The adapter arrives with the first real caller.
