@@ -9,7 +9,7 @@ import type { Corpus, Recording } from '@/domain/speech-corpus';
 import {
   type CorpusAudio,
   createReplaySpeechCorpus,
-  type ReplayOutcome,
+  type ReplayResult,
 } from '@/usecases/replay-speech-corpus';
 
 const SAMPLE_RATE = 16_000;
@@ -39,7 +39,7 @@ describe('replay a speech corpus', () => {
     const clock = virtualClock();
     const { recognizer } = recognizerAnswering(clock, ['do', 'si'], 120);
 
-    const outcomes: ReplayOutcome[] = await createReplaySpeechCorpus(
+    const { outcomes }: ReplayResult = await createReplaySpeechCorpus(
       clock,
       audioMatchingTheManifest,
     )(CORPUS, recognizer);
@@ -51,7 +51,7 @@ describe('replay a speech corpus', () => {
     const clock = virtualClock();
     const { recognizer } = recognizerAnswering(clock, ['do', 'mi'], 120);
 
-    const outcomes = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
+    const { outcomes } = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
       CORPUS,
       recognizer,
     );
@@ -72,7 +72,7 @@ describe('replay a speech corpus', () => {
     const clock = virtualClock();
     const { recognizer } = recognizerAnswering(clock, ['do', 'silent'], 120);
 
-    const outcomes = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
+    const { outcomes } = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
       CORPUS,
       recognizer,
     );
@@ -84,7 +84,7 @@ describe('replay a speech corpus', () => {
     const clock = virtualClock();
     const { recognizer } = recognizerAnswering(clock, [null, 'mi'], 120);
 
-    const outcomes = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
+    const { outcomes } = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
       CORPUS,
       recognizer,
     );
@@ -109,6 +109,46 @@ describe('replay a speech corpus', () => {
     await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(CORPUS, recognizer);
 
     expect(sessions).toEqual([['do', 'mi']]);
+  });
+
+  it('times how long each notation session took to open', async () => {
+    const clock = virtualClock();
+    const { recognizer } = recognizerAnswering(clock, ['do', 'mi'], 0);
+    const slowToOpen = {
+      ...recognizer,
+      start: async (
+        vocabulary: readonly string[],
+        onRecognition: Parameters<typeof recognizer.start>[1],
+      ) => {
+        clock.advance(450);
+
+        return recognizer.start(vocabulary, onRecognition);
+      },
+    };
+
+    const { sessions } = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
+      CORPUS,
+      slowToOpen,
+    );
+
+    expect(sessions).toEqual([{ notation: 'syllabic', startupMs: 450 }]);
+  });
+
+  it('times one session per notation, because the grammar is fixed when it opens', async () => {
+    const clock = virtualClock();
+    const twoNotations: Corpus = {
+      ...CORPUS,
+      notations: { syllabic: ['do'], letters: ['C'] },
+      recordings: [recordingOf('do'), { ...recordingOf('C'), notation: 'letters' }],
+    };
+    const { recognizer } = recognizerAnswering(clock, ['do', 'C'], 0);
+
+    const { sessions } = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
+      twoNotations,
+      recognizer,
+    );
+
+    expect(sessions.map((session) => session.notation)).toEqual(['syllabic', 'letters']);
   });
 
   it('refuses audio that is not the file the manifest annotated', async () => {

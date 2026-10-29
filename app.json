@@ -46,14 +46,24 @@
           ]
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "react-native-vosk",
+        {
+          "models": ["./assets/models/vosk-model-small-fr-0.22"]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
     "ios": {
-      "bundleIdentifier": "com.clefsmith.app"
+      "bundleIdentifier": "com.clefsmith.app",
+      "infoPlist": {
+        "UIFileSharingEnabled": true,
+        "LSSupportsOpeningDocumentsInPlace": true
+      }
     }
   }
 }

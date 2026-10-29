@@ -3,7 +3,7 @@ import { parseArgs } from 'node:util';
 import type { Corpus } from '@/domain/speech-corpus';
 import { createWavCorpusAudio } from '@/infrastructure/wav-corpus-audio';
 import { createReplaySpeechCorpus } from '@/usecases/replay-speech-corpus';
-import { speechBenchReport } from '@/usecases/speech-bench-report';
+import { serializeSpeechBenchReport, speechBenchReport } from '@/usecases/speech-bench-report';
 import { TRACKS } from './tracks';
 
 const { values } = parseArgs({
@@ -31,14 +31,10 @@ const audio = createWavCorpusAudio({
   sampleRate: corpus.sampleRate,
 });
 
-const outcomes = await createReplaySpeechCorpus(clock, audio)(corpus, recognizer);
-const report = speechBenchReport(corpus, outcomes);
+const result = await createReplaySpeechCorpus(clock, audio)(corpus, recognizer);
+const report = speechBenchReport(corpus, result);
 
-/**
- * `NaN` is not a JSON value and serialises to `null`, which reads as a figure
- * rather than as the absence of one. It is spelled out instead.
- */
-console.log(JSON.stringify(report, (_, value) => (Number.isNaN(value) ? 'NaN' : value), 2));
+console.log(serializeSpeechBenchReport(report));
 
 if (report.corpus.defects.length > 0) {
   console.error(

@@ -7,6 +7,9 @@
         "bench/run.ts",
         "bench/make-manifest.ts",
         "bench/make-fixture-corpus.ts",
+        // Writes src/components/speech-bench/corpus-assets.ts, run by hand when
+        // the corpus gains or loses a recording.
+        "bench/make-corpus-assets.ts",
         "tools/docs/check.ts",
         // Run by hand when a glyph is added, and its output is committed as
         // src/domain/score/bravura.ts. Nothing imports it, which is the point.

@@ -6,7 +6,7 @@ import {
   expectedCells,
   inspectCorpus,
 } from '@/domain/speech-corpus';
-import type { ReplayOutcome } from '@/usecases/replay-speech-corpus';
+import type { ReplayResult } from '@/usecases/replay-speech-corpus';
 
 export interface SpeechBenchReport {
   /**
@@ -32,12 +32,19 @@ export interface SpeechBenchReport {
   };
   /** One matrix per notation, in the order the corpus declares them. */
   readonly confusion: readonly ConfusionMatrix[];
+  /**
+   * What each notation's session cost to open.
+   *
+   * Published per notation rather than averaged: the first session of a run
+   * pays for loading the model and the later ones may not, and an average
+   * would hide which of the two a user actually waits through.
+   */
+  readonly sessions: readonly { readonly notation: string; readonly startupMs: number }[];
 }
 
-export function speechBenchReport(
-  corpus: Corpus,
-  outcomes: readonly ReplayOutcome[],
-): SpeechBenchReport {
+export function speechBenchReport(corpus: Corpus, result: ReplayResult): SpeechBenchReport {
+  const { outcomes, sessions } = result;
+
   const latencies = outcomes
     .map((outcome) => outcome.latencyMs)
     .filter((latency): latency is number => latency !== null);
@@ -64,5 +71,20 @@ export function speechBenchReport(
       unanswered: outcomes.length - latencies.length,
     },
     confusion,
+    sessions: sessions.map(({ notation, startupMs }) => ({ notation, startupMs })),
   };
+}
+
+/**
+ * The one way a report is written down.
+ *
+ * Shared between the host run and the device run because the two are compared
+ * against each other, and against the report of the other track: two spellings
+ * of the same figures would show up as a difference that is not one.
+ *
+ * `NaN` is not a JSON value and serialises to `null`, which reads as a figure
+ * rather than as the absence of one. It is spelled out instead.
+ */
+export function serializeSpeechBenchReport(report: SpeechBenchReport): string {
+  return JSON.stringify(report, (_, value) => (Number.isNaN(value) ? 'NaN' : value), 2);
 }
