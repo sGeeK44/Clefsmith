@@ -17,7 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # The recorded corpus is stored through Git LFS, and checkout fetches
+      # pointer files unless told otherwise. A pointer is 130 bytes of text
+      # where a recording is expected, so the bench would fail at the decoder
+      # — a long way from the checkout that actually caused it.
       - uses: actions/checkout@v7
+        with:
+          lfs: true
 
       # Installs what mise.toml pins, the same versions a developer runs.
       - uses: jdx/mise-action@v5

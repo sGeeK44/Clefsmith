@@ -33,6 +33,9 @@ jobs:
     timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
+        with:
+          # The app build embeds the recorded corpus; see verify.yml.
+          lfs: true
 
       # Installs what mise.toml pins, the same versions a developer runs.
       - uses: jdx/mise-action@v5
@@ -90,6 +93,9 @@ jobs:
     timeout-minutes: 90
     steps:
       - uses: actions/checkout@v7
+        with:
+          # The app build embeds the recorded corpus; see verify.yml.
+          lfs: true
 
       # Installs what mise.toml pins, the same versions a developer runs.
       - uses: jdx/mise-action@v5
