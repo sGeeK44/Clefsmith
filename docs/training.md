@@ -7,29 +7,40 @@ platform in sight — **checked** by the `inner-layers-are-platform-free` rule o
 
 ## Levels
 
-Six, the same six for both clefs. A level is a set of **positions on the staff**, in
-half-spaces from the bottom line — the unit `src/domain/notation/clef.ts` counts in. The
-clef turns a position into a pitch, which is why level 1 in bass is the same five numbers
-as level 1 in treble, and why adding a level is one line of a table.
+Six per clef, and **not the same six**. A level is a range of **positions on the staff**,
+in half-spaces from the bottom line — the unit `src/domain/notation/clef.ts` counts in.
 
-| Level | Positions     | What it is                  |
-| ----- | ------------- | --------------------------- |
-| 1     | 0, 2, 4, 6, 8 | the staff lines             |
-| 2     | 1, 3, 5, 7    | the spaces                  |
-| 3     | 0…8           | the whole staff             |
-| 4     | −2…10         | one leger line on each side |
-| 5     | −4…12         | two on each side            |
-| 6     | −6…14         | three on each side          |
+The mockup calls a level an _étude_ and names each one after a tempo marking. That is the
+word on the screen; the domain says level, and the screens translate.
 
-Level 4 is the anchor, and it is not a guess: it is the range the previous application
-shipped as its default, treble `C4–B5` and bass `D2–C4`. Below it the staff is being
-learnt; above it, left.
+| Level | Treble | Bass  | Brings                      |
+| ----- | ------ | ----- | --------------------------- |
+| 1     | −2…0   | 0…2   | the first three notes       |
+| 2     | −2…2   | 0…4   | two more                    |
+| 3     | −2…4   | 0…6   | two more                    |
+| 4     | −2…6   | 0…8   | two more                    |
+| 5     | −4…10  | −2…10 | the leger lines, both sides |
+| 6     | −4…10  | −2…10 | nothing                     |
+
+The two clefs diverge because both walk outwards from **middle C**, and middle C sits one
+leger line below the treble staff and one leger line above the bass staff. The treble
+starts on it and climbs away; the bass starts on its own bottom line and climbs until it
+reaches it, at level 5. Reading the same numbers under both clefs would have put the
+beginner on `e4`/`g2` — two notes that share nothing but a staff line.
+
+A level holds every note of the one below it: a learner never stops seeing what they have
+already learnt. Level 6 draws from the same notes as level 5 and brings none of its own —
+it is the same staff read faster, and the tempo is the caller's business, not the domain's.
+
+The notes a level **brings** are worked out rather than written down: a note is new when
+the level below does not draw it. That list is what a screen means by "two new notes",
+and it is derived so that the table above stays the only place a level is written down.
 
 A level knows nothing about unlocking or history on its own; what opens one is below.
 
-**Checked** by `bun test`: the pools are written out in full, each level from 3 up contains
-the one below it, and the extremes of level 6 lay out with exactly three leger lines —
-compared against the engine rather than against a constant.
+**Checked** by `bun test`: the pools of level 1 are written out in full, every level is
+shown to contain the one below it and to climb, and the extremes of level 5 are laid out
+by the engine and counted — two leger lines under the treble staff, one over it.
 
 ## Sessions
 

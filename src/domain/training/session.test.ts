@@ -31,13 +31,13 @@ describe('a session', () => {
   });
 
   it('never repeats a pitch, even when the chance always points at the same place', () => {
-    expect(named(sessionOf(pool, 4, replaying(0)))).toEqual(['e4', 'g4', 'e4', 'g4']);
+    expect(named(sessionOf(pool, 4, replaying(0)))).toEqual(['c4', 'd4', 'c4', 'd4']);
   });
 
   it('picks the pitch the chance points at, among those still allowed', () => {
-    // Half of five is b4; then half of the four that are left is d5; then half of
-    // the four that are left again is b4 once more.
-    expect(named(sessionOf(pool, 3, replaying(0.5)))).toEqual(['b4', 'd5', 'b4']);
+    // Half of three is d4; then half of the two that are left is e4; then half of
+    // the two that are left again is d4 once more.
+    expect(named(sessionOf(pool, 3, replaying(0.5)))).toEqual(['d4', 'e4', 'd4']);
   });
 
   it('replays identically from the same chance', () => {
@@ -55,7 +55,7 @@ describe('a session', () => {
   });
 
   it('still gives one exercise from a pool of one', () => {
-    expect(named(sessionOf(pool.slice(0, 1), 1, replaying(0)))).toEqual(['e4']);
+    expect(named(sessionOf(pool.slice(0, 1), 1, replaying(0)))).toEqual(['c4']);
   });
 
   it('is empty when nothing was asked for', () => {
