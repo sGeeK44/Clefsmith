@@ -28,12 +28,17 @@ const files = (await readdir(root)).filter((name) => name.endsWith('.wav')).sort
 
 /**
  * The file name is the only place a recording says which cell it fills, so it
- * is parsed rather than guessed: `<speaker>-<notation>-<note>-<condition>.wav`.
+ * is parsed rather than guessed:
+ * `<speaker>-<notation>-<note>-<condition>[-<take>].wav`.
+ *
+ * The take is what lets a cell hold more than one recording. It is not read
+ * back: it only has to make the file names differ, since the cell a file fills
+ * is already the first four parts.
  */
 function cellOf(name: string): Omit<Recording, 'audio' | 'sha256' | 'utteranceEndMs'> | undefined {
   const parts = name.replace(/\.wav$/, '').split('-');
 
-  if (parts.length !== 4) {
+  if (parts.length !== 4 && parts.length !== 5) {
     return undefined;
   }
 

@@ -50,7 +50,6 @@ export interface Corpus {
 
 export type CorpusDefect =
   | { readonly kind: 'missing'; readonly cell: Cell }
-  | { readonly kind: 'duplicate'; readonly cell: Cell }
   | { readonly kind: 'undeclared'; readonly cell: Cell };
 
 /**
@@ -81,31 +80,27 @@ export function expectedCells(corpus: Corpus): Cell[] {
 }
 
 /**
- * What the corpus is missing, holds twice, or holds outside its own axes.
+ * What the corpus is missing, or holds outside its own axes.
  *
  * Returned rather than thrown, and in full: a corpus short of forty cells is
  * one recording session to plan, not forty runs that each reveal the next one.
+ *
+ * A cell may hold several takes, and the more it holds the better: the figures
+ * this corpus produces are error rates, and an error rate read off one take
+ * per cell can only ever be none or all of it. Holding a cell to a single
+ * recording would cap the sample at the size of the grid.
  */
 export function inspectCorpus(corpus: Corpus): CorpusDefect[] {
   const defects: CorpusDefect[] = [];
-  const recorded = new Map<string, number>();
-
-  for (const recording of corpus.recordings) {
-    const key = keyOf(recording);
-    recorded.set(key, (recorded.get(key) ?? 0) + 1);
-  }
-
+  const recorded = new Set(corpus.recordings.map(keyOf));
   const declared = new Set<string>();
 
   for (const cell of expectedCells(corpus)) {
     const key = keyOf(cell);
     declared.add(key);
-    const count = recorded.get(key) ?? 0;
 
-    if (count === 0) {
+    if (!recorded.has(key)) {
       defects.push({ kind: 'missing', cell });
-    } else if (count > 1) {
-      defects.push({ kind: 'duplicate', cell });
     }
   }
 
