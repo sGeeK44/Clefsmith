@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Alert, Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
 import { useService } from '@/components/container-provider';
@@ -19,6 +19,10 @@ const NOTATIONS: readonly Option<Notation>[] = [
 
 const WELCOME = '/welcome';
 
+const RESET_TITLE = 'Réinitialiser la progression ?';
+const RESET_BODY =
+  'Les études ouvertes, la maîtrise de chaque note et le compte de séances sont effacés. Vos réglages sont conservés.';
+
 /**
  * The settings, and the version.
  *
@@ -30,6 +34,7 @@ export default function SettingsScreen() {
   const getAppVersion = useService(SYMBOLS.usecases.GetAppVersion);
   const getSettings = useService(SYMBOLS.usecases.GetSettings);
   const chooseNotation = useService(SYMBOLS.usecases.ChooseNotation);
+  const resetProgress = useService(SYMBOLS.usecases.ResetProgress);
   const [notation, setNotation] = useState<Notation>();
 
   useEffect(() => {
@@ -43,6 +48,19 @@ export default function SettingsScreen() {
     },
     [chooseNotation],
   );
+
+  /**
+   * The only irreversible thing the application does, so the platform is asked to
+   * put the question. A learner knows this dialog, its destructive button is
+   * already red, and it brings its own accessibility — the same reason `Toggle`
+   * lets the platform draw the switch.
+   */
+  const confirmReset = useCallback(() => {
+    Alert.alert(RESET_TITLE, RESET_BODY, [
+      { text: 'Annuler', style: 'cancel' },
+      { text: 'Réinitialiser', style: 'destructive', onPress: () => void resetProgress() },
+    ]);
+  }, [resetProgress]);
 
   return (
     <Screen>
@@ -58,6 +76,12 @@ export default function SettingsScreen() {
           <Text>Revoir l'introduction</Text>
           <View style={styles.spacer} />
           <Text tone="muted">›</Text>
+        </Pressable>
+      </Card>
+
+      <Card>
+        <Pressable onPress={confirmReset} testID="reset-progress">
+          <Text tone="bad">Réinitialiser la progression</Text>
         </Pressable>
       </Card>
 
