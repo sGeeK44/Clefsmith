@@ -1,5 +1,5 @@
 /** The seven diatonic degrees, in the order they climb an octave from C. */
-const DEGREES = ['c', 'd', 'e', 'f', 'g', 'a', 'b'] as const;
+export const DEGREES = ['c', 'd', 'e', 'f', 'g', 'a', 'b'] as const;
 
 export type Degree = (typeof DEGREES)[number];
 

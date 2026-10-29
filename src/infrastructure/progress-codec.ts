@@ -1,15 +1,21 @@
 import { CLEFS } from '@/domain/notation/clef';
-import { LEVELS } from '@/domain/training/level';
-import { type Answers, noProgress, type Progress, WINDOW } from '@/domain/training/progress';
+import { DEGREES, type Degree } from '@/domain/notation/pitch';
+import { LEVELS, type Level } from '@/domain/training/level';
+import { type Mastery, noProgress, type Progress } from '@/domain/training/progress';
 
 /**
  * The shape of what is written down.
  *
  * It travels with the application and outlives it: a record written by a newer
  * version is one this one cannot be trusted to read, so it is refused rather than
- * half-understood.
+ * half-understood. Schema 1 held a sliding
+ * window of answers per level, a rule this version no longer has — those records
+ * start the learner over.
  */
-const SCHEMA = 1;
+const SCHEMA = 2;
+
+const LOWEST = 0;
+const HIGHEST = 100;
 
 export function encode(progress: Progress): string {
   return JSON.stringify({ schema: SCHEMA, ...progress });
@@ -39,41 +45,49 @@ function readProgress(value: unknown): Progress | undefined {
     return undefined;
   }
 
-  const answers = readClefs(value.answers);
+  const level = readPerClef(value.level, readLevel);
+  const mastery = readPerClef(value.mastery, readMastery);
 
-  return answers === undefined ? undefined : { sessions: value.sessions, answers };
+  return level === undefined || mastery === undefined
+    ? undefined
+    : { sessions: value.sessions, level, mastery };
 }
 
-function readClefs(value: unknown): Progress['answers'] | undefined {
+function readPerClef<T>(
+  value: unknown,
+  readOne: (value: unknown) => T | undefined,
+): Readonly<Record<'treble' | 'bass', T>> | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
 
-  const read = CLEFS.map((clef) => [clef, readLevels(value[clef])] as const);
+  const read = CLEFS.map((clef) => [clef, readOne(value[clef])] as const);
 
-  return read.some(([, answers]) => answers === undefined)
+  return read.some(([, one]) => one === undefined)
     ? undefined
-    : (Object.fromEntries(read) as Progress['answers']);
+    : (Object.fromEntries(read) as Readonly<Record<'treble' | 'bass', T>>);
 }
 
-function readLevels(value: unknown): Answers | undefined {
+function readLevel(value: unknown): Level | undefined {
+  return LEVELS.find((level) => level === value);
+}
+
+/**
+ * A degree with no score is a degree never met, so an absent key is read as such
+ * rather than refused. A key that is not a degree, or a score outside the bounds
+ * the rules keep it in, is a record this version did not write.
+ */
+function readMastery(value: unknown): Mastery | undefined {
   if (!isRecord(value)) {
     return undefined;
   }
 
-  const read = LEVELS.map((level) => [level, readLatest(value[level])] as const);
+  const read = Object.entries(value);
+  const sound = read.every(
+    ([degree, score]) => DEGREES.includes(degree as Degree) && isScore(score),
+  );
 
-  return read.some(([, latest]) => latest === undefined)
-    ? undefined
-    : (Object.fromEntries(read) as Answers);
-}
-
-function readLatest(value: unknown): readonly boolean[] | undefined {
-  if (!Array.isArray(value) || value.length > WINDOW) {
-    return undefined;
-  }
-
-  return value.every((answer) => typeof answer === 'boolean') ? value : undefined;
+  return sound ? (Object.fromEntries(read) as Mastery) : undefined;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -82,4 +96,8 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function isCount(value: unknown): value is number {
   return typeof value === 'number' && Number.isInteger(value) && value >= 0;
+}
+
+function isScore(value: unknown): value is number {
+  return isCount(value) && value >= LOWEST && value <= HIGHEST;
 }

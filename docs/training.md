@@ -77,25 +77,18 @@ with five speakers.
 
 ## Progression
 
-A level is **held**, for one clef, when the **last 20 answers** to it count **at most 2
-mistakes**. A window that is not yet full is never held: an average over three answers
-lets a lucky run through.
+A session that is read at **75 % or better** opens the next level. Four things have to
+hold at once: the session was not a review, it reached the mark, it was the level the
+learner is on — replaying an easier one opens nothing — and there is a level above it.
+The two clefs are two skills and open independently.
 
-The window slides and forgets. Twenty mistakes followed by twenty right answers hold the
-level — a learner who has worked through a bad start should not carry it, and a cumulative
-ratio becomes unreachable after one.
+The percentage covers the **whole session**, not a window over the last answers. A session
+is the unit a learner recognises: they played it, they saw the score at the end, and the
+next level either opened or it did not.
 
-The highest level a learner may play is the **first one they do not hold**: level 1 for
-someone who has never played, level 6 once they hold them all. The two clefs are two
-skills and open independently.
-
-**Nothing derivable is written down.** A record holds the latest answers per clef and per
-level, and the number of finished sessions; whether a level is held and how far the learner
-has got are computed on every read. A stored `unlocked` flag and the answers that produced
-it drift apart, and nothing notices.
-
-**Checked** by `bun test`: the rules live in `src/domain/training/progress.ts` and are
-tested through the domain, with no store and no screen.
+The level reached is **written down**, not worked out. A session's accuracy is not kept,
+so nothing could recompute it — and a rule that cannot be recomputed is one that has to be
+stored.
 
 ## Keeping a record
 
@@ -106,10 +99,14 @@ in the app's document directory, which an over-the-air update does not touch: it
 the JavaScript bundle and nothing else.
 
 What is written carries a **schema number**. Anything that does not match — truncated,
-hand-edited, a clef or a level missing, an answer that is not a boolean, a window longer
-than the rule judges on, a schema this version does not know — reads back as a learner who
-has never played. Reading a record never throws: losing a practice history is not worth a
-crash at every launch, and there is nothing in one to recover.
+hand-edited, a clef missing, a level outside the six, a mastery key that is not a degree,
+a score the rules could never have produced, a schema this version does not know — reads
+back as a learner who has never played. Reading a record never throws: losing a practice
+history is not worth a crash at every launch, and there is nothing in one to recover.
+
+Schema 1 held a sliding window of the last twenty answers per level, a rule this version
+no longer has. Those records are not migrated; they start the learner over. There is no
+released build carrying one.
 
 **Checked** by `bun test`, on the two halves that do not need a device:
 `src/infrastructure/progress-codec.ts` and the key-value slice of
