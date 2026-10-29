@@ -1,4 +1,7 @@
+import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
+import { Pressable, View } from 'react-native';
+import { StyleSheet } from 'react-native-unistyles';
 
 import { useService } from '@/components/container-provider';
 import { Card } from '@/components/ui/card';
@@ -13,6 +16,8 @@ const NOTATIONS: readonly Option<Notation>[] = [
   { value: 'syllabic', label: 'do ré mi' },
   { value: 'letters', label: 'C D E' },
 ];
+
+const WELCOME = '/welcome';
 
 /**
  * The settings, and the version.
@@ -47,9 +52,23 @@ export default function SettingsScreen() {
         <Choice label="Nom des notes" options={NOTATIONS} chosen={notation} onChoose={choose} />
       </Card>
 
+      {/* Replaying it writes the mark again and never takes a study back. */}
+      <Card>
+        <Pressable onPress={() => router.push(WELCOME)} style={styles.row} testID="replay-welcome">
+          <Text>Revoir l'introduction</Text>
+          <View style={styles.spacer} />
+          <Text tone="muted">›</Text>
+        </Pressable>
+      </Card>
+
       <Text testID="app-version" variant="caption" tone="muted">
         {getAppVersion()}
       </Text>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create((theme) => ({
+  row: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
+  spacer: { flex: 1 },
+}));
