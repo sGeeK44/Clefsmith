@@ -28,4 +28,12 @@ describe('record finished session', () => {
 
     expect((await store.load()).level.treble).toBe(1);
   });
+
+  it('writes the mastery the session earned', async () => {
+    const store = storeHolding();
+
+    await createRecordFinishedSession(store)(read);
+
+    expect((await store.load()).mastery.treble).toEqual({ c: 2 });
+  });
 });

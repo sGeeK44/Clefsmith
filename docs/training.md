@@ -99,7 +99,8 @@ in the app's document directory, which an over-the-air update does not touch: it
 the JavaScript bundle and nothing else.
 
 What is written carries a **schema number**. Anything that does not match — truncated,
-hand-edited, a clef missing, a level outside the six, a schema this version does not know — reads
+hand-edited, a clef missing, a level outside the six, a mastery key that is not a degree,
+a score the rules could never have produced, a schema this version does not know — reads
 back as a learner who has never played. Reading a record never throws: losing a practice
 history is not worth a crash at every launch, and there is nothing in one to recover.
 
