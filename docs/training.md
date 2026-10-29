@@ -75,6 +75,10 @@ against. **Checked** by `bench/vocabulary.test.ts`: renaming a degree in the dom
 it red, because the recordings are named after those words and re-recording is a session
 with five speakers.
 
+The learner picks one, and `syllabic` is what they get until they do. The choice is not a
+display preference: it is the vocabulary the speech recogniser will be asked to listen
+for, which is why it is settled once and read by everything that names a note.
+
 ## Progression
 
 A session that is read at **75 % or better** opens the next level. Four things have to
@@ -92,7 +96,12 @@ stored.
 
 ## Keeping a record
 
-A record is written down as JSON under one key of the key-value store Expo ships on top of
+Two records, under two keys: what the learner has **learnt**, and what they have
+**chosen**. They are kept apart because they are erased apart — starting the progression
+over must not take the vocabulary with it — and each carries its own schema number, so
+neither moves when the other does.
+
+Both are written down as JSON in the key-value store Expo ships on top of
 SQLite — SQLite rather than a file because the write is atomic, so an app killed halfway
 through one leaves the previous record rather than half of the new one. The database sits
 in the app's document directory, which an over-the-air update does not touch: it replaces
@@ -108,10 +117,12 @@ Schema 1 held a sliding window of the last twenty answers per level, a rule this
 no longer has. Those records are not migrated; they start the learner over. There is no
 released build carrying one.
 
-**Checked** by `bun test`, on the two halves that do not need a device:
-`src/infrastructure/progress-codec.ts` and the key-value slice of
-`src/infrastructure/progress-store.ts`. **Not checked by anything**: that the record
-survives an over-the-air update. That needs a published build and an update pushed at it.
+**Checked** by `bun test`, on the halves that do not need a device: the two codecs,
+`src/infrastructure/progress-codec.ts` and `src/infrastructure/settings-codec.ts`, and the
+key-value slice of `src/infrastructure/progress-store.ts` and
+`src/infrastructure/settings-store.ts` — including that neither store touches the other's
+key. **Not checked by anything**: that the records survive an over-the-air update. That
+needs a published build and an update pushed at it.
 
 ## What is not here
 
