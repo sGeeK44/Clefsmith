@@ -1,11 +1,10 @@
 import { describe, expect, it } from 'bun:test';
 import { NOTATIONS, nameOf, vocabularyOf } from '@/domain/notation/naming';
 
-describe('naming a pitch', () => {
-  it('says the degree and never the octave', () => {
-    expect(nameOf({ degree: 'e', octave: 4 }, 'syllabic')).toBe('mi');
-    expect(nameOf({ degree: 'e', octave: 2 }, 'syllabic')).toBe('mi');
-    expect(nameOf({ degree: 'e', octave: 4 }, 'letters')).toBe('E');
+describe('naming a degree', () => {
+  it('says the same word in every octave the degree appears in', () => {
+    expect(nameOf('e', 'syllabic')).toBe('mi');
+    expect(nameOf('e', 'letters')).toBe('E');
   });
 
   it('names the seven degrees in syllabic notation', () => {

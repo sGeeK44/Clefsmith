@@ -36,7 +36,9 @@ export const STUDIES = LEVELS.length;
  */
 export function studyLine(level: Level, notation: Notation): string {
   const study = `Étude ${level}`;
-  const brought = newcomersOf('treble', level).map((pitch) => capitalised(nameOf(pitch, notation)));
+  const brought = newcomersOf('treble', level).map(({ degree }) =>
+    capitalised(nameOf(degree, notation)),
+  );
 
   return brought.length === 0 ? study : `${study} · ${brought.join(', ')}`;
 }
