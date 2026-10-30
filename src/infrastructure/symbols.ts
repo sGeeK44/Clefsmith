@@ -1,6 +1,4 @@
 import type { ServiceIdentifier } from 'inversify';
-
-import type { AskForMicrophone, MicrophonePermission } from '@/usecases/ask-for-microphone';
 import type { ChooseNotation } from '@/usecases/choose-notation';
 import type { DrawSession } from '@/usecases/draw-session';
 import type { FinishWelcome } from '@/usecases/finish-welcome';
@@ -9,6 +7,12 @@ import type { GetProgress, ProgressStore } from '@/usecases/get-progress';
 import type { GetSettings, SettingsStore } from '@/usecases/get-settings';
 import type { KeepReport, RecallReport, ReportStore } from '@/usecases/keep-report';
 import type { AnswerSource, ListenForAnswers } from '@/usecases/listen-for-answers';
+import type {
+  AskForMicrophone,
+  MayListen,
+  MicrophonePermission,
+  ShowMicrophoneSettings,
+} from '@/usecases/microphone-access';
 import type { RecordFinishedSession } from '@/usecases/record-finished-session';
 import type { ResetProgress } from '@/usecases/reset-progress';
 
@@ -25,6 +29,10 @@ export const SYMBOLS = {
   },
   usecases: {
     AskForMicrophone: Symbol.for('AskForMicrophone') as ServiceIdentifier<AskForMicrophone>,
+    MayListen: Symbol.for('MayListen') as ServiceIdentifier<MayListen>,
+    ShowMicrophoneSettings: Symbol.for(
+      'ShowMicrophoneSettings',
+    ) as ServiceIdentifier<ShowMicrophoneSettings>,
     ChooseNotation: Symbol.for('ChooseNotation') as ServiceIdentifier<ChooseNotation>,
     DrawSession: Symbol.for('DrawSession') as ServiceIdentifier<DrawSession>,
     FinishWelcome: Symbol.for('FinishWelcome') as ServiceIdentifier<FinishWelcome>,

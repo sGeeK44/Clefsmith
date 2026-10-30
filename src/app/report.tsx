@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
 import { useService } from '@/components/container-provider';
+import { exerciseRoute } from '@/components/exercise-route';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ProgressBar } from '@/components/ui/progress-bar';
@@ -25,9 +26,9 @@ import { type Notation, nameOf } from '@/domain/notation/naming';
 import type { Level } from '@/domain/training/level';
 import type { Report } from '@/domain/training/report';
 import { SYMBOLS } from '@/infrastructure/symbols';
+import type { MayListen } from '@/usecases/microphone-access';
 
 const PARCOURS = '/studies';
-const EXERCISE = '/exercise';
 
 /**
  * What the session just played was worth.
@@ -39,6 +40,7 @@ export default function ReportScreen() {
   const setup = useLocalSearchParams<Setup>();
   const recallReport = useService(SYMBOLS.usecases.RecallReport);
   const getSettings = useService(SYMBOLS.usecases.GetSettings);
+  const mayListen = useService(SYMBOLS.usecases.MayListen);
   const [notation, setNotation] = useState<Notation>();
   const report = recallReport();
 
@@ -89,13 +91,16 @@ export default function ReportScreen() {
 
       {opened !== undefined && <Opened level={opened} />}
 
-      <Button label={nextLine(opened)} onPress={() => start(setup, opened ?? report.level)} />
+      <Button
+        label={nextLine(opened)}
+        onPress={() => void start(mayListen, setup, opened ?? report.level)}
+      />
       <View style={styles.aside}>
         <View style={styles.half}>
           <Button
             emphasis="quiet"
             label={REPLAY}
-            onPress={() => start(setup, report.level, setup.degrees)}
+            onPress={() => void start(mayListen, setup, report.level, setup.degrees)}
           />
         </View>
         <View style={styles.half}>
@@ -154,11 +159,8 @@ interface Setup extends Record<string, string | undefined> {
  * Another session, on the study asked for. Replacing rather than pushing: a
  * report the learner has acted on is not somewhere to come back to.
  */
-function start(setup: Setup, level: Level, degrees = '') {
-  router.replace({
-    pathname: EXERCISE,
-    params: { ...setup, level: `${level}`, degrees },
-  });
+async function start(may: MayListen, setup: Setup, level: Level, degrees = '') {
+  router.replace(exerciseRoute(await may(), { ...setup, level: `${level}`, degrees }));
 }
 
 const styles = StyleSheet.create((theme) => ({
