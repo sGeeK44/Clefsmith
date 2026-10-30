@@ -10,8 +10,8 @@ import type { KeepTime } from '@/usecases/keep-time';
 import type { AnswerSource, ListenForAnswers } from '@/usecases/listen-for-answers';
 import type {
   AskForMicrophone,
-  MayListen,
   MicrophonePermission,
+  ReadMicrophoneAccess,
   ShowMicrophoneSettings,
 } from '@/usecases/microphone-access';
 import type { RecordFinishedSession } from '@/usecases/record-finished-session';
@@ -30,7 +30,9 @@ export const SYMBOLS = {
   },
   usecases: {
     AskForMicrophone: Symbol.for('AskForMicrophone') as ServiceIdentifier<AskForMicrophone>,
-    MayListen: Symbol.for('MayListen') as ServiceIdentifier<MayListen>,
+    ReadMicrophoneAccess: Symbol.for(
+      'ReadMicrophoneAccess',
+    ) as ServiceIdentifier<ReadMicrophoneAccess>,
     ShowMicrophoneSettings: Symbol.for(
       'ShowMicrophoneSettings',
     ) as ServiceIdentifier<ShowMicrophoneSettings>,

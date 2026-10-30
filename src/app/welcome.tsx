@@ -20,12 +20,16 @@ const SHOWN = { degree: 'g', octave: 4 } as const;
 const DESK = '/';
 
 /**
- * The introduction, shown once and replayable from the settings.
+ * The introduction, shown once and never again.
  *
  * Three steps, and two ways out of them: through the last one, which asks for
  * the microphone and opens what the learner said they could read, or over the
  * top, which opens nothing and asks for nothing. Both mark the introduction
  * seen — passing it over is still having seen it.
+ *
+ * Which is why this is not where the microphone is rescued: a learner who went
+ * over the top never met the question, and will not meet it here again. The
+ * screen a session stops on asks it instead.
  */
 export default function WelcomeScreen() {
   const askForMicrophone = useService(SYMBOLS.usecases.AskForMicrophone);

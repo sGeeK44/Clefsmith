@@ -26,7 +26,7 @@ import { type Notation, nameOf } from '@/domain/notation/naming';
 import type { Level } from '@/domain/training/level';
 import type { Report } from '@/domain/training/report';
 import { SYMBOLS } from '@/infrastructure/symbols';
-import type { MayListen } from '@/usecases/microphone-access';
+import type { ReadMicrophoneAccess } from '@/usecases/microphone-access';
 
 const PARCOURS = '/studies';
 
@@ -40,7 +40,7 @@ export default function ReportScreen() {
   const setup = useLocalSearchParams<Setup>();
   const recallReport = useService(SYMBOLS.usecases.RecallReport);
   const getSettings = useService(SYMBOLS.usecases.GetSettings);
-  const mayListen = useService(SYMBOLS.usecases.MayListen);
+  const readMicrophoneAccess = useService(SYMBOLS.usecases.ReadMicrophoneAccess);
   const [notation, setNotation] = useState<Notation>();
   const report = recallReport();
 
@@ -93,14 +93,14 @@ export default function ReportScreen() {
 
       <Button
         label={nextLine(opened)}
-        onPress={() => void start(mayListen, setup, opened ?? report.level)}
+        onPress={() => void start(readMicrophoneAccess, setup, opened ?? report.level)}
       />
       <View style={styles.aside}>
         <View style={styles.half}>
           <Button
             emphasis="quiet"
             label={REPLAY}
-            onPress={() => void start(mayListen, setup, report.level, setup.degrees)}
+            onPress={() => void start(readMicrophoneAccess, setup, report.level, setup.degrees)}
           />
         </View>
         <View style={styles.half}>
@@ -159,8 +159,8 @@ interface Setup extends Record<string, string | undefined> {
  * Another session, on the study asked for. Replacing rather than pushing: a
  * report the learner has acted on is not somewhere to come back to.
  */
-async function start(may: MayListen, setup: Setup, level: Level, degrees = '') {
-  router.replace(exerciseRoute(await may(), { ...setup, level: `${level}`, degrees }));
+async function start(read: ReadMicrophoneAccess, setup: Setup, level: Level, degrees = '') {
+  router.replace(exerciseRoute(await read(), { ...setup, level: `${level}`, degrees }));
 }
 
 const styles = StyleSheet.create((theme) => ({
