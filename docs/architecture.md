@@ -49,6 +49,15 @@ single line in the container.
 committed. Nothing is edited there: a change made by hand is lost at the next prebuild.
 Configuration goes to `app.json` or to a config plugin.
 
+There is **no web target**, and `app.json` says so with `web.output: "single"`. Under
+`"server"` the bundler runs a second, server-side pass that loads every route in Node —
+and `src/app/_layout.tsx` reaches a native module at import time, which in Node is
+`undefined`. The native bundle builds fine and the release build fails after it, on a
+render nothing in this project asks for. There are no API routes here to lose.
+
+**Not checked by anything**: only a release build on a device catches this, and the device
+suite only runs on the release pull request.
+
 ## The speech bench
 
 `bench/` is not part of the application and is never imported by it. It replays a corpus
