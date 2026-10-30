@@ -138,9 +138,43 @@ against. **Checked** by `bench/vocabulary.test.ts`: renaming a degree in the dom
 it red, because the recordings are named after those words and re-recording is a session
 with five speakers.
 
+The table is read **both ways**: naming a degree, and finding the degree a heard word
+stands for. One table rather than two, because two diverge the day either moves — and this
+one is what the corpus was recorded against, so the drift would stay silent until a learner
+said a note the application no longer recognised. A word that is not one of the seven
+returns **nothing**: it is not a wrong answer, it is no answer.
+
 The learner picks one, and `syllabic` is what they get until they do. The choice is not a
 display preference: it is the vocabulary the speech recogniser will be asked to listen
 for, which is why it is settled once and read by everything that names a note.
+
+## Hearing an answer
+
+The exercise asks for a **degree**, never a word: what the microphone heard and how it
+became a degree stays on the other side of the port, so nothing above it knows a
+recogniser exists.
+
+Two adapters sit over the same native module, on purpose. The one the bench uses is fed
+recorded samples so that a run is reproducible; the one the exercise uses lets the native
+side open the microphone itself. Folding them together would make the bench carry a mode
+it must never take, and the measurement would stop being a measurement.
+
+Only **settled** results are acted on. A partial is the decoder thinking out loud: acting
+on one would answer for the learner halfway through a word, and again when they finished
+saying it. A settled word that is not one of the seven is no answer at all.
+
+The vocabulary is fixed when listening starts — the decoder compiles a grammar at that
+point — so a session hears one notation from start to finish. Changing notation is a new
+exercise, which is a new session.
+
+The model is handed to the adapter by the **application root**, which is also the only
+place `react-native-vosk` is imported: an adapter that reached for it directly could not
+be run by a test.
+
+**Checked** by `bun test`: the adapter against a stand-in for the native module — the
+grammar it opens on, the degree it reports, what it refuses, and that it lets go of the
+microphone. **Not checked by anything**: that the native module does what the stand-in
+says it does. That needs a device, and the bench is what measures it.
 
 ## Progression
 

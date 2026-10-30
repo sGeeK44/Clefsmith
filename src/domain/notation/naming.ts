@@ -27,3 +27,20 @@ export function nameOf(degree: Degree, notation: Notation): string {
 export function vocabularyOf(notation: Notation): readonly string[] {
   return Object.values(NAMES[notation]);
 }
+
+/**
+ * The degree a name stands for, or nothing when the name is not one of the seven.
+ *
+ * The same table read the other way round. A second table mapping words back to
+ * degrees would diverge from this one the day either moves — and this one is what
+ * the speech corpus was recorded against, so the drift would be silent until a
+ * learner said a note the application no longer recognised.
+ *
+ * A word that is not a name is **not a wrong answer**: it is no answer at all, and
+ * the caller has nothing to hand on.
+ */
+export function degreeOf(name: string, notation: Notation): Degree | undefined {
+  const found = Object.entries(NAMES[notation]).find(([, word]) => word === name);
+
+  return found?.[0] as Degree | undefined;
+}
