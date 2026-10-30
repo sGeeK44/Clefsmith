@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, View } from 'react-native';
+import { Pressable, ScrollView, type ScrollViewInstance, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
 import { useService } from '@/components/container-provider';
@@ -30,11 +30,14 @@ import type { Degree } from '@/domain/notation/pitch';
 import { beatOf, timingOf } from '@/domain/training/beat';
 import { answered, beaten, type Drill, drillOf, isOver, scored } from '@/domain/training/drill';
 import type { Level } from '@/domain/training/level';
-import type { Measures } from '@/domain/training/session-settings';
+import { type Measures, NOTES_PER_MEASURE } from '@/domain/training/session-settings';
 import { SYMBOLS } from '@/infrastructure/symbols';
 
-/** The measure the learner is in, which is as much of the session as is drawn at once. */
-const SHOWN = 4;
+/** Two measures to a line, which is what the mockup fits across a phone. */
+const PER_LINE = NOTES_PER_MEASURE * 2;
+
+/** Smaller than the default: eight notes and a clef have to fit a phone's width. */
+const SPACE = 10;
 
 const REPORT = '/report';
 
@@ -195,8 +198,8 @@ export default function ExerciseScreen() {
 
       {rhythmic && <Beat current={beatOf(drill.at)} />}
 
-      <Card>
-        <Staff clef={brief.clef} notes={readingOf(drill)} />
+      <Card fills>
+        <Reading clef={brief.clef} drill={drill} />
         <Legend rhythmic={rhythmic} />
       </Card>
 
@@ -205,14 +208,56 @@ export default function ExerciseScreen() {
   );
 }
 
-/** The measure being read, each note shaded by what it has been worth — a line at a time. */
-function readingOf(drill: Drill) {
-  const from = Math.floor(drill.at / SHOWN) * SHOWN;
+/**
+ * The whole session, eight notes to a line, each note shaded by what it was worth.
+ *
+ * All of it rather than the measure in hand: a reader needs to see what is coming
+ * to read it in time, and what they have just done to know how it went. The lines
+ * behind the learner are held back rather than taken away — they are the shape of
+ * the reading so far, and the one being read has to win the eye.
+ */
+function Reading({ clef, drill }: { readonly clef: Clef; readonly drill: Drill }) {
+  const scroller = useRef<ScrollViewInstance>(null);
+  const tops = useRef<number[]>([]);
+  const lines = linesOf(drill);
+  const current = Math.floor(drill.at / PER_LINE);
 
-  return drill.notes.slice(from, from + SHOWN).map((pitch, index) => ({
-    pitch,
-    shade: shadeOf(from + index, drill.at, drill.marks[from + index]),
-  }));
+  useEffect(() => {
+    scroller.current?.scrollTo({ y: tops.current[current] ?? 0, animated: true });
+  }, [current]);
+
+  return (
+    <ScrollView ref={scroller} showsVerticalScrollIndicator={false}>
+      {lines.map((notes, line) => (
+        <View
+          key={notes.map(({ pitch }) => `${pitch.degree}${pitch.octave}`).join('-')}
+          onLayout={({ nativeEvent }) => {
+            tops.current[line] = nativeEvent.layout.y;
+          }}
+          style={[styles.line, line < current && styles.read]}
+        >
+          <Staff
+            barring={{ every: NOTES_PER_MEASURE, ends: line === lines.length - 1 }}
+            clef={clef}
+            notes={notes}
+            space={SPACE}
+          />
+        </View>
+      ))}
+    </ScrollView>
+  );
+}
+
+/** The session cut into lines, each note carrying the shade the reading gives it. */
+function linesOf(drill: Drill) {
+  const count = Math.ceil(drill.notes.length / PER_LINE);
+
+  return Array.from({ length: count }, (_, line) =>
+    drill.notes.slice(line * PER_LINE, (line + 1) * PER_LINE).map((pitch, index) => ({
+      pitch,
+      shade: shadeOf(line * PER_LINE + index, drill.at, drill.marks[line * PER_LINE + index]),
+    })),
+  );
 }
 
 /**
@@ -320,5 +365,9 @@ const styles = StyleSheet.create((theme) => ({
   hint: { flexDirection: 'row', justifyContent: 'space-between' },
   feedback: { alignItems: 'center', gap: theme.spacing.xs, paddingVertical: theme.spacing.l },
   legend: { flexDirection: 'row', gap: theme.spacing.m },
+  /** A clef reaches below its staff, so two lines set tight overlap. */
+  line: { paddingBottom: theme.spacing.s },
+  /** Still there, no longer asking to be read. */
+  read: { opacity: 0.45 },
   entry: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.xs },
 }));

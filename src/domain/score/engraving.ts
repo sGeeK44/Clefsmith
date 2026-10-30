@@ -19,6 +19,10 @@ export interface Engraving {
   readonly noteSpacing: number;
   /** Horizontal room the clef takes before the first notehead. */
   readonly clefWidth: number;
+  readonly thinBarlineThickness: number;
+  readonly thickBarlineThickness: number;
+  /** The gap between the two strokes of a double barline. */
+  readonly barlineSeparation: number;
 }
 
 /**
@@ -40,4 +44,7 @@ export const ENGRAVING: Engraving = {
   noteheadWidth: GLYPHS.noteheadBlack.advance,
   clefWidth: Math.max(GLYPHS.gClef.advance, GLYPHS.fClef.advance) + CLEF_GAP,
   noteSpacing: NOTE_SPACING,
+  thinBarlineThickness: ENGRAVING_DEFAULTS.thinBarlineThickness,
+  thickBarlineThickness: ENGRAVING_DEFAULTS.thickBarlineThickness,
+  barlineSeparation: ENGRAVING_DEFAULTS.barlineSeparation,
 };

@@ -4,7 +4,7 @@ import type { Colors } from '@/components/theme/tokens';
 import type { Clef } from '@/domain/notation/clef';
 import { GLYPHS } from '@/domain/score/bravura';
 import { ENGRAVING } from '@/domain/score/engraving';
-import { layoutStaff, type Note, type Shade } from '@/domain/score/layout';
+import { type Barring, layoutStaff, type Note, type Shade } from '@/domain/score/layout';
 
 const BRAVURA = require('../../../assets/fonts/Bravura.otf');
 
@@ -37,17 +37,19 @@ function colourOf(shade: Shade, colors: Colors): string {
 }
 
 export function Staff({
+  barring,
   clef,
   notes,
   space = 12,
 }: {
+  readonly barring?: Barring;
   readonly clef: Clef;
   readonly notes: readonly Note[];
   readonly space?: number;
 }) {
   const { theme } = useUnistyles();
   const font = useFont(BRAVURA, space * EM_IN_SPACES);
-  const layout = layoutStaff(clef, notes, ENGRAVING, GLYPHS);
+  const layout = layoutStaff(clef, notes, ENGRAVING, GLYPHS, barring);
 
   /** Staff coordinates grow upwards; a canvas grows downwards. */
   const at = (x: number, y: number) => vec(x * space, (layout.top - y) * space);

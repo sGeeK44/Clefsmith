@@ -29,6 +29,18 @@ The layout also publishes how far the drawing reaches above and below the bottom
 ink included — a canvas sized by the staff alone clips the clef, which is taller than it.
 The painter owns the one thing the layout does not know: a canvas grows downwards.
 
+## Barlines
+
+A staff drawn with a `Barring` — how many notes to a measure, and whether the piece ends
+there — carries a barline after each measure and SMuFL's final barline (thin, a gap,
+thick) on the last one when it does. The lines fall halfway between two noteheads: a
+barline on a note is a barline the note has to be read through.
+
+It is optional on purpose. The desk and the parcours draw the notes a study is made of,
+and a barline across a pool of notes would claim a rhythm nobody is reading.
+
+**Checked by** `src/domain/score/layout.test.ts`.
+
 ## Shades
 
 A note is handed to the layout with a **shade** — `ahead`, `current`, `ok`, `late`,

@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'bun:test';
 import { GLYPHS } from '@/domain/score/bravura';
 import type { Engraving } from '@/domain/score/engraving';
-import { layoutStaff, type Note, type Shade, type StaffLayout } from '@/domain/score/layout';
+import {
+  type Barring,
+  layoutStaff,
+  type Note,
+  type Shade,
+  type StaffLayout,
+} from '@/domain/score/layout';
 
 const engraving: Engraving = {
   staffLineThickness: 0.13,
@@ -11,14 +17,21 @@ const engraving: Engraving = {
   noteheadWidth: 1.18,
   noteSpacing: 3,
   clefWidth: 4,
+  thinBarlineThickness: 0.16,
+  thickBarlineThickness: 0.5,
+  barlineSeparation: 0.4,
 };
 
 function note(degree: Note['pitch']['degree'], octave: number, shade: Shade = 'ahead'): Note {
   return { pitch: { degree, octave }, shade };
 }
 
-function staff(clef: Parameters<typeof layoutStaff>[0], notes: readonly Note[]): StaffLayout {
-  return layoutStaff(clef, notes, engraving, GLYPHS);
+function staff(
+  clef: Parameters<typeof layoutStaff>[0],
+  notes: readonly Note[],
+  barring?: Barring,
+): StaffLayout {
+  return layoutStaff(clef, notes, engraving, GLYPHS, barring);
 }
 
 function noteheads({ glyphs: placed }: StaffLayout) {
@@ -184,5 +197,50 @@ describe('a stem', () => {
     const layout = staff('treble', [note('e', 4), note('g', 5)]);
 
     expect(verticals(layout).map((stem) => stem.thickness)).toEqual([0.12, 0.12]);
+  });
+});
+
+describe('the barlines of a reading', () => {
+  const four = [note('e', 4), note('f', 4), note('g', 4), note('a', 4)];
+
+  it('draws none where nothing says how long a measure is', () => {
+    expect(verticals(staff('treble', four))).toHaveLength(4);
+  });
+
+  it('closes each measure, halfway between the measure and what follows it', () => {
+    const layout = staff('treble', [...four, ...four], { every: 4, ends: false });
+    const bars = verticals(layout).filter((line) => line.to.y === 4);
+
+    expect(bars.map((line) => line.from.x)).toEqual([14.5, 26.5]);
+  });
+
+  it('closes a short last measure where the notes actually stop', () => {
+    const layout = staff('treble', [...four, note('e', 4)], { every: 4, ends: false });
+    const bars = verticals(layout).filter((line) => line.to.y === 4);
+
+    expect(bars.map((line) => line.from.x)).toEqual([14.5, 17.5]);
+  });
+
+  it('ends the piece on a thin stroke, a gap and a thick one', () => {
+    const layout = staff('treble', four, { every: 4, ends: true });
+    const bars = verticals(layout).filter((line) => line.to.y === 4);
+
+    expect(bars.map((line) => line.thickness)).toEqual([0.16, 0.5]);
+    expect((bars[1]?.from.x as number) - (bars[0]?.from.x as number)).toBeCloseTo(0.73);
+  });
+
+  it('leaves the measures before the last one closed like any other', () => {
+    const layout = staff('treble', [...four, ...four], { every: 4, ends: true });
+    const bars = verticals(layout).filter((line) => line.to.y === 4);
+
+    expect(bars.map((line) => line.thickness)).toEqual([0.16, 0.16, 0.5]);
+  });
+
+  it('spans the staff and nothing more, carrying no shade of its own', () => {
+    const layout = staff('treble', four, { every: 4, ends: false });
+    const [bar] = verticals(layout).filter((line) => line.to.y === 4);
+
+    expect(bar?.from.y).toBe(0);
+    expect(bar?.shade).toBe('ahead');
   });
 });
