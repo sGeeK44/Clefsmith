@@ -9,8 +9,8 @@ is not edited by hand.
 
 ## The grid
 
-`axes.json` currently declares 2 speakers × 7 syllabic notes × 1 condition = **14 cells**,
-held by 85 recordings.
+`axes.json` currently declares 3 speakers × 7 syllabic notes × 1 condition = **21 cells**,
+held by 149 recordings.
 
 That is not the grid this corpus is meant to reach. The target is 5 speakers × 14 notes
 (7 syllabic, 7 letters) × 2 conditions = **140 cells**; the axes were narrowed to what the
@@ -21,7 +21,7 @@ one recording session — and the bench will say exactly which cells are missing
 What the first session did not produce, and what it will take:
 
 - **`letters`** — not a single take. Half the note vocabulary.
-- **`s3`…`s5`** — three of the five speakers.
+- **`s4`, `s5`** — two of the five speakers.
 - **`instrumental`** — announced without an instrument in the room. Reachable by mixing,
   rather than by recording again.
 
@@ -56,12 +56,25 @@ so the rate the bench publishes is only as fine as the number of takes behind it
 - Speakers are pseudonyms (`s1`…`s5`). Consent is tracked outside this repository, and no
   name, no email and no voice sample of anyone identifiable belongs in it.
 
-**The first session did not meet the first of those rules.** It was captured on a phone
+**No session so far has met the first of those rules.** They were captured on a phone
 voice recorder, which writes lossy AAC at 48 kHz stereo, and the files here were converted
 down to 16 kHz mono PCM afterwards. The decoder sees what it expects, so nothing fails —
 but these recordings carry codec artefacts a direct 16 kHz capture would not, and a track
 measured against them is measured through that codec. Re-record in the recorder's lossless
-mode when the grid is widened, and do not mix the two in one cell.
+mode when the grid is widened, and do not mix the two in one cell. `s3` was added through
+the same lossy path knowingly: its cells are new, so nothing is mixed, and the whole
+corpus stays on one codec rather than half on each — which is the comparison that would
+have been unreadable.
+
+`s3` was also not recorded one word per file. It is a single take of the scale repeated,
+and the cells were cut out of it: the spoken sequence was supplied by the speaker, and
+every word was placed in time by aligning that sequence against a local transcription of
+the whole take. Words the speaker ran together — a scale sung in one breath — have no
+silence after them and are not in the corpus, which is why `s3` holds 64 cells and not the
+89 words that were spoken. Cutting a take this way is cheaper than a recording session and
+costs nothing in ground truth, because the labels come from the speaker rather than from a
+recogniser; what it does cost is the trailing silence, which is the recording's and not
+the room's.
 
 ## Building the manifest
 
