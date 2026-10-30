@@ -81,6 +81,36 @@ A **revision** narrows the pool to the degrees it aims at and brings nothing: th
 towards new notes exists to practise what a level adds, and a revision adds nothing. It
 goes back over what is already there.
 
+## What a session was worth
+
+A finished session reports its accuracy, the notes to go back over, and the study it
+opened. It is worked out from the record the session was played **against**, not from the
+one it left behind: whether a level opened is the progression rule replayed and compared,
+never a second rule of its own — two rules saying when a level opens diverge the day
+either one moves.
+
+At most **three** notes are named, most missed first, ties broken by the order the degrees
+climb an octave. More than a handful is not a list to go back over, it is the session
+again.
+
+The report of the session just finished is held **in memory** and nowhere else. A report
+reopened after the application was relaunched has nothing to show, and that is right: a
+report is about the session the learner has just played. Writing it down would be a second
+record of a session the progression already counts.
+
+Saying what a session was worth and writing it down are the **same read**: the report is
+worked out from the record the session was played against, so it has to be read before the
+new one is written.
+
+The screen that shows it **writes nothing**. The exercise has already recorded; a second
+writer on the same record would count the session twice. It is replaced rather than
+stacked on the exercise, and it replaces itself on the way out: a session that is over,
+and a report that has been acted on, are not places to come back to.
+
+**Checked** by `bun test`: `src/domain/training/report.ts`, the sentences put on it in
+`src/components/wording/report.ts`, and the slot it waits in. **Not checked by anything**:
+that the screen shows the three notes the report names. That needs a renderer.
+
 ## Reading one on screen
 
 The staff shows the **measure being read**, not the session: a mistake sends the reading

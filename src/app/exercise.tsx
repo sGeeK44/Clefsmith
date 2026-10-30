@@ -32,8 +32,11 @@ import { SYMBOLS } from '@/infrastructure/symbols';
 /** The measure the learner is in, which is as much of the session as is drawn at once. */
 const SHOWN = 4;
 
+const REPORT = '/report';
+
 export default function ExerciseScreen() {
-  const { clef, level, measures, degrees, tempo } = useLocalSearchParams<Params>();
+  const params = useLocalSearchParams<Params>();
+  const { clef, level, measures, degrees, tempo } = params;
   /** The route is what the parcours decided; it does not change under the screen. */
   const brief = useMemo(
     () => briefOf(clef, level, measures, degrees),
@@ -43,6 +46,7 @@ export default function ExerciseScreen() {
   const listenForAnswers = useService(SYMBOLS.usecases.ListenForAnswers);
   const getSettings = useService(SYMBOLS.usecases.GetSettings);
   const record = useService(SYMBOLS.usecases.RecordFinishedSession);
+  const keepReport = useService(SYMBOLS.usecases.KeepReport);
   const [drill, setDrill] = useState<Drill>();
   const [notation, setNotation] = useState<Notation>();
 
@@ -93,10 +97,13 @@ export default function ExerciseScreen() {
       return;
     }
 
-    record({ ...brief, review: brief.degrees.length > 0, answers: drill.answers }).then(() =>
-      router.back(),
+    record({ ...brief, review: brief.degrees.length > 0, answers: drill.answers }).then(
+      (report) => {
+        keepReport(report);
+        router.replace({ pathname: REPORT, params });
+      },
     );
-  }, [drill, record, brief]);
+  }, [drill, record, brief, keepReport, params]);
 
   /** Nothing is drawn before the notes are drawn: a staff guessed is someone else's. */
   if (drill === undefined || notation === undefined) {
