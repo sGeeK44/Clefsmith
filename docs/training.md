@@ -163,6 +163,15 @@ Only **settled** results are acted on. A partial is the decoder thinking out lou
 on one would answer for the learner halfway through a word, and again when they finished
 saying it. A settled word that is not one of the seven is no answer at all.
 
+**Permission is read, never remembered.** The operating system holds the verdict, it
+changes from the system settings without the application being told, and a copy kept here
+would be stale the first time it is read. Reading it puts no question to the learner,
+which is what makes it safe on every return to the foreground.
+
+The verdict is **binary**. A refusal that can be asked again and one that cannot lead to
+the same place with the same way out, and a permission never asked for is neither yet
+behaves like both.
+
 The vocabulary is fixed when listening starts — the decoder compiles a grammar at that
 point — so a session hears one notation from start to finish. Changing notation is a new
 exercise, which is a new session.
