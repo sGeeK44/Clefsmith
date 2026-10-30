@@ -2,14 +2,22 @@ import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import * as vosk from 'react-native-vosk';
 
 import '@/components/theme/unistyles';
 
 import { ContainerProvider, useService } from '@/components/container-provider';
 import { createContainer } from '@/infrastructure/container';
 import { SYMBOLS } from '@/infrastructure/symbols';
+import { createVoskAnswerSource } from '@/infrastructure/vosk-answer-source';
 
-const container = createContainer();
+/**
+ * The folder the Vosk model is unpacked from, placed into the native build by
+ * the `react-native-vosk` config plugin. The same model the bench measures on.
+ */
+const MODEL_PATH = 'vosk-model-small-fr-0.22';
+
+const container = createContainer(createVoskAnswerSource(vosk, MODEL_PATH));
 
 const WELCOME = '/welcome';
 

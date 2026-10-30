@@ -38,7 +38,7 @@ export interface VoskModule {
  * from outside the vocabulary comes back as a note — which is exactly what the
  * closed vocabulary is supposed to make impossible.
  */
-const UNKNOWN = '[unk]';
+export const UNKNOWN = '[unk]';
 
 /** Samples arrive as 16-bit, so two bytes leave for every one that arrives. */
 const BYTES_PER_SAMPLE = 2;

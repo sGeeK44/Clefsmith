@@ -8,7 +8,6 @@ import { expoMicrophonePermission } from '@/infrastructure/expo-microphone-permi
 import { createMemoryReportStore } from '@/infrastructure/memory-report-store';
 import { createProgressStore } from '@/infrastructure/progress-store';
 import { createSettingsStore } from '@/infrastructure/settings-store';
-import { silentAnswerSource } from '@/infrastructure/silent-answer-source';
 import { SYMBOLS } from '@/infrastructure/symbols';
 import { createAskForMicrophone } from '@/usecases/ask-for-microphone';
 import { createChooseNotation } from '@/usecases/choose-notation';
@@ -18,11 +17,18 @@ import { createGetAppVersion } from '@/usecases/get-app-version';
 import { createGetProgress } from '@/usecases/get-progress';
 import { createGetSettings } from '@/usecases/get-settings';
 import { createKeepReport, createRecallReport } from '@/usecases/keep-report';
-import { createListenForAnswers } from '@/usecases/listen-for-answers';
+import { type AnswerSource, createListenForAnswers } from '@/usecases/listen-for-answers';
 import { createRecordFinishedSession } from '@/usecases/record-finished-session';
 import { createResetProgress } from '@/usecases/reset-progress';
 
-export function createContainer(): Container {
+/**
+ * Everything the application is made of, assembled once.
+ *
+ * The answer source is handed in rather than built here: hearing one means
+ * importing `react-native-vosk`, a native module no test can load. The root
+ * supplies it, exactly as the bench supplies its own recogniser.
+ */
+export function createContainer(answerSource: AnswerSource): Container {
   const container = new Container();
 
   container.bind(SYMBOLS.infrastructure.AppVersionReader).toConstantValue(expoAppVersionReader);
@@ -67,7 +73,7 @@ export function createContainer(): Container {
       SYMBOLS.infrastructure.SettingsStore,
     ]);
 
-  container.bind(SYMBOLS.infrastructure.AnswerSource).toConstantValue(silentAnswerSource);
+  container.bind(SYMBOLS.infrastructure.AnswerSource).toConstantValue(answerSource);
   container
     .bind(SYMBOLS.usecases.ListenForAnswers)
     .toResolvedValue(createListenForAnswers, [SYMBOLS.infrastructure.AnswerSource]);
