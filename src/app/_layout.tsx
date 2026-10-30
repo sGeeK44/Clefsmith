@@ -1,12 +1,14 @@
 import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
+import { AudioContext } from 'react-native-audio-api';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as vosk from 'react-native-vosk';
 
 import '@/components/theme/unistyles';
 
 import { ContainerProvider, useService } from '@/components/container-provider';
+import { createAudioApiClickTracks } from '@/infrastructure/audio-api-click-track';
 import { createContainer } from '@/infrastructure/container';
 import { SYMBOLS } from '@/infrastructure/symbols';
 import { systemClock } from '@/infrastructure/system-clock';
@@ -18,7 +20,10 @@ import { createVoskAnswerSource } from '@/infrastructure/vosk-answer-source';
  */
 const MODEL_PATH = 'vosk-model-small-fr-0.22';
 
-const container = createContainer(createVoskAnswerSource(vosk, MODEL_PATH, systemClock));
+const container = createContainer(
+  createVoskAnswerSource(vosk, MODEL_PATH, systemClock),
+  createAudioApiClickTracks(() => new AudioContext()),
+);
 
 const WELCOME = '/welcome';
 

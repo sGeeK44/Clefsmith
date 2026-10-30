@@ -1,7 +1,6 @@
 import { Container } from 'inversify';
 
 import { mathRandom } from '@/core/math-random';
-
 import { expoAppVersionReader } from '@/infrastructure/expo-app-version-reader';
 import { expoKeyValueStore } from '@/infrastructure/expo-key-value-store';
 import { expoMicrophonePermission } from '@/infrastructure/expo-microphone-permission';
@@ -24,17 +23,21 @@ import {
   createReadMicrophoneAccess,
   createShowMicrophoneSettings,
 } from '@/usecases/microphone-access';
+import { createPlayClicks, type OpenClickTrack } from '@/usecases/play-clicks';
 import { createRecordFinishedSession } from '@/usecases/record-finished-session';
 import { createResetProgress } from '@/usecases/reset-progress';
 
 /**
  * Everything the application is made of, assembled once.
  *
- * The answer source is handed in rather than built here: hearing one means
- * importing `react-native-vosk`, a native module no test can load. The root
- * supplies it, exactly as the bench supplies its own recogniser.
+ * The answer source and the click track are handed in rather than built here:
+ * both mean importing a native module no test can load. The root supplies
+ * them, exactly as the bench supplies its own recogniser.
  */
-export function createContainer(answerSource: AnswerSource): Container {
+export function createContainer(
+  answerSource: AnswerSource,
+  openClickTrack: OpenClickTrack,
+): Container {
   const container = new Container();
 
   container.bind(SYMBOLS.infrastructure.AppVersionReader).toConstantValue(expoAppVersionReader);
@@ -92,6 +95,9 @@ export function createContainer(answerSource: AnswerSource): Container {
 
   container.bind(SYMBOLS.usecases.DrawSession).toConstantValue(createDrawSession(mathRandom));
   container.bind(SYMBOLS.usecases.KeepTime).toConstantValue(createKeepTime(systemClock));
+  container
+    .bind(SYMBOLS.usecases.PlayClicks)
+    .toConstantValue(createPlayClicks(openClickTrack, systemClock));
 
   container.bind(SYMBOLS.infrastructure.ReportStore).toConstantValue(createMemoryReportStore());
   container

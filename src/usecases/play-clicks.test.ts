@@ -67,7 +67,7 @@ describe('clicking the beat', () => {
   it('clicks once a second at sixty to the minute', () => {
     const track = trackFrom(0);
 
-    createPlayClicks(track, clockOnDemand())(60);
+    createPlayClicks(() => track, clockOnDemand())(60);
 
     expect(track.scheduled).toEqual([0]);
   });
@@ -75,7 +75,7 @@ describe('clicking the beat', () => {
   it('clicks four times as often at a hundred and sixty', () => {
     const track = trackFrom(0);
 
-    createPlayClicks(track, clockOnDemand())(160);
+    createPlayClicks(() => track, clockOnDemand())(160);
 
     expect(track.scheduled).toEqual([0, 375]);
   });
@@ -84,7 +84,7 @@ describe('clicking the beat', () => {
     const track = trackFrom(0);
     const clock = clockOnDemand();
 
-    createPlayClicks(track, clock)(60);
+    createPlayClicks(() => track, clock)(60);
     track.play(600);
     await clock.pass();
 
@@ -95,7 +95,7 @@ describe('clicking the beat', () => {
     const track = trackFrom(0);
     const clock = clockOnDemand();
 
-    createPlayClicks(track, clock)(60);
+    createPlayClicks(() => track, clock)(60);
     track.play(1000);
     await clock.pass();
 
@@ -105,7 +105,7 @@ describe('clicking the beat', () => {
   it('runs on the audio clock, not on the wall clock', () => {
     const track = trackFrom(8000);
 
-    createPlayClicks(track, clockOnDemand())(60);
+    createPlayClicks(() => track, clockOnDemand())(60);
 
     expect(track.scheduled).toEqual([8000]);
   });
@@ -114,7 +114,7 @@ describe('clicking the beat', () => {
     const track = trackFrom(0);
     const clock = clockOnDemand();
 
-    createPlayClicks(track, clock)(60);
+    createPlayClicks(() => track, clock)(60);
 
     for (const _ of Array.from({ length: 64 })) {
       track.play(250);
@@ -128,7 +128,7 @@ describe('clicking the beat', () => {
     const track = trackFrom(0);
     const clock = clockOnDemand();
 
-    const stop = createPlayClicks(track, clock)(60);
+    const stop = createPlayClicks(() => track, clock)(60);
     stop();
     track.play(1000);
     await clock.pass();

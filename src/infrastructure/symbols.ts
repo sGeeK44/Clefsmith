@@ -14,6 +14,7 @@ import type {
   ReadMicrophoneAccess,
   ShowMicrophoneSettings,
 } from '@/usecases/microphone-access';
+import type { PlayClicks } from '@/usecases/play-clicks';
 import type { RecordFinishedSession } from '@/usecases/record-finished-session';
 import type { ResetProgress } from '@/usecases/reset-progress';
 
@@ -44,6 +45,7 @@ export const SYMBOLS = {
     GetSettings: Symbol.for('GetSettings') as ServiceIdentifier<GetSettings>,
     KeepReport: Symbol.for('KeepReport') as ServiceIdentifier<KeepReport>,
     KeepTime: Symbol.for('KeepTime') as ServiceIdentifier<KeepTime>,
+    PlayClicks: Symbol.for('PlayClicks') as ServiceIdentifier<PlayClicks>,
     ListenForAnswers: Symbol.for('ListenForAnswers') as ServiceIdentifier<ListenForAnswers>,
     RecallReport: Symbol.for('RecallReport') as ServiceIdentifier<RecallReport>,
     RecordFinishedSession: Symbol.for(

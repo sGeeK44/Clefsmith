@@ -27,6 +27,12 @@ export interface ClickTrack {
  */
 const HORIZON = 500;
 
+/**
+ * A track is opened per session and closed with it: closing releases the audio
+ * hardware, and what is released cannot be scheduled on again.
+ */
+export type OpenClickTrack = () => ClickTrack;
+
 export type PlayClicks = (tempo: number) => () => void;
 
 /**
@@ -37,8 +43,9 @@ export type PlayClicks = (tempo: number) => () => void;
  * the instants themselves are computed from the start of the track on the audio
  * timeline — the same rule the screen beats are drawn by.
  */
-export function createPlayClicks(clicks: ClickTrack, clock: Clock): PlayClicks {
+export function createPlayClicks(openTrack: OpenClickTrack, clock: Clock): PlayClicks {
   return (tempo) => {
+    const clicks = openTrack();
     const startedAt = clicks.now();
     const wokeAt = clock.now();
     let stopped = false;

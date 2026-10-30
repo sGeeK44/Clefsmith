@@ -52,6 +52,7 @@ export default function ExerciseScreen() {
   const record = useService(SYMBOLS.usecases.RecordFinishedSession);
   const keepReport = useService(SYMBOLS.usecases.KeepReport);
   const keepTime = useService(SYMBOLS.usecases.KeepTime);
+  const playClicks = useService(SYMBOLS.usecases.PlayClicks);
   const [drill, setDrill] = useState<Drill>();
   const [notation, setNotation] = useState<Notation>();
   /** Whether the notes have been dealt — what the beat waits for, rather than the notes themselves. */
@@ -111,6 +112,21 @@ export default function ExerciseScreen() {
       }
     });
   }, [rhythmic, dealt, keepTime, tempo]);
+
+  /**
+   * The beat heard, on the same condition as the beat counted.
+   *
+   * Its own effect rather than a line in the one above: the clicks are written
+   * on the audio clock and the count on the wall clock, so joining them would
+   * tie the grid the learner hears to a render.
+   */
+  useEffect(() => {
+    if (!rhythmic || !dealt) {
+      return;
+    }
+
+    return playClicks(Number(tempo));
+  }, [rhythmic, dealt, playClicks, tempo]);
 
   /**
    * Listening outlives the screen if it is only stopped on the way out: the
