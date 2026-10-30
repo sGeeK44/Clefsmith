@@ -58,6 +58,15 @@ render nothing in this project asks for. There are no API routes here to lose.
 **Not checked by anything**: only a release build on a device catches this, and the device
 suite only runs on the release pull request.
 
+The Expo modules are **built from source**, not taken as precompiled `.xcframework`s:
+`expo-build-properties` carries `ios.usePrecompiledModules: false`. The precompiled ones
+are built against their own version of `ExpoModulesCore`, and a bundle that mixes two of
+them links fine and then dies at launch on a missing Swift symbol — nothing reports it
+until the application is started on a device. Source costs build time and buys a bundle
+whose modules agree with each other.
+
+**Not checked by anything**: same reason — a running build on a device is what sees it.
+
 ## The speech bench
 
 `bench/` is not part of the application and is never imported by it. It replays a corpus
