@@ -27,8 +27,8 @@ document is wrong and that is worth reporting.
 
 ## The checks
 
-`tools/verify` is the whole chain: format and lint, typecheck, tests, architecture, dead
-code, documentation references, bench reproducibility. The pre-commit hook runs
+`tools/verify` is the whole chain: format and lint, route types, typecheck, tests,
+architecture, dead code, documentation references, bench reproducibility. The pre-commit hook runs
 `tools/verify staged`, the CI runs `tools/verify` over the whole repository. There is no
 second list anywhere, and adding a check means adding it there.
 

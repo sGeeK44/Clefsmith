@@ -36,6 +36,9 @@ run() {
 }
 
 run 'format and lint' bun run check $scope
+# Before the typecheck, never after: the typed routes are generated into .expo/,
+# which is not committed, and without them router.push takes anything.
+run 'route types' bun tools/routes/generate.ts
 run 'typecheck' bun run typecheck
 run 'tests' bun test
 run 'architecture' bun run arch
