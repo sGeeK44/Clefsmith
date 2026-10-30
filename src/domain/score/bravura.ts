@@ -11,6 +11,9 @@ export const ENGRAVING_DEFAULTS = {
   legerLineThickness: 0.16,
   legerLineExtension: 0.4,
   stemThickness: 0.12,
+  thinBarlineThickness: 0.16,
+  thickBarlineThickness: 0.5,
+  barlineSeparation: 0.4,
 } as const;
 
 export const GLYPHS: Glyphs = {

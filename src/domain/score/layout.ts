@@ -73,11 +73,26 @@ export interface Note {
   readonly shade: Shade;
 }
 
+/**
+ * How a staff is divided into measures, when it is one.
+ *
+ * Optional, because not every staff is a reading: the desk and the parcours draw
+ * the notes a study is made of, and a barline across a pool of notes would claim
+ * a rhythm nobody is reading.
+ */
+export interface Barring {
+  /** How many notes to a measure. A barline follows each one. */
+  readonly every: number;
+  /** Whether what is drawn is the end of the piece, which takes a double barline. */
+  readonly ends: boolean;
+}
+
 export function layoutStaff(
   clef: Clef,
   notes: readonly Note[],
   engraving: Engraving,
   glyphs: Glyphs,
+  barring?: Barring,
 ): StaffLayout {
   const positions = notes.map((note) => staffPosition(clef, note.pitch));
   const width = engraving.clefWidth + notes.length * engraving.noteSpacing;
@@ -94,6 +109,7 @@ export function layoutStaff(
     ...notes.map((note, index) =>
       stem(positions[index] as number, index, note.shade, engraving, glyphs),
     ),
+    ...barlines(notes.length, engraving, barring),
   ];
   const reach = [
     ...lines.flatMap((line) => [line.from.y, line.to.y]),
@@ -207,4 +223,50 @@ function legerLines(
       shade,
     };
   });
+}
+
+/**
+ * A barline after every measure, and a thick one closing the piece.
+ *
+ * The lines fall **between** two noteheads rather than on the second: a barline
+ * drawn on a note is a barline the note has to be read through. The last measure
+ * of a staff is closed like any other unless the piece ends there, where SMuFL's
+ * final barline — thin, a gap, thick — says that it does.
+ */
+function barlines(
+  count: number,
+  engraving: Engraving,
+  barring: Barring | undefined,
+): LineSegment[] {
+  if (barring === undefined) {
+    return [];
+  }
+
+  const measures = Math.ceil(count / barring.every);
+
+  return Array.from({ length: measures }, (_, measure) => {
+    const notes = Math.min((measure + 1) * barring.every, count);
+    const x = engraving.clefWidth + notes * engraving.noteSpacing - engraving.noteSpacing / 2;
+    const last = measure === measures - 1;
+
+    return last && barring.ends ? ending(x, engraving) : [bar(x, engraving.thinBarlineThickness)];
+  }).flat();
+}
+
+function ending(x: number, engraving: Engraving): LineSegment[] {
+  const thin = engraving.thinBarlineThickness;
+  const thick = engraving.thickBarlineThickness;
+  const gap = engraving.barlineSeparation;
+
+  return [bar(x - gap - thick / 2 - thin / 2, thin), bar(x, thick)];
+}
+
+/** A barline spans the staff and nothing more: it is not a note and carries no shade. */
+function bar(x: number, thickness: number): LineSegment {
+  return {
+    from: { x, y: 0 },
+    to: { x, y: TOP_POSITION / 2 },
+    thickness,
+    shade: 'ahead',
+  };
 }

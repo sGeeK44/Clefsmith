@@ -21,6 +21,9 @@ const DEFAULTS = [
   'legerLineThickness',
   'legerLineExtension',
   'stemThickness',
+  'thinBarlineThickness',
+  'thickBarlineThickness',
+  'barlineSeparation',
 ] as const;
 
 const [fontPath, namesPath] = process.argv.slice(2);
