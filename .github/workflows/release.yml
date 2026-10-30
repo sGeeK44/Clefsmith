@@ -45,9 +45,11 @@ jobs:
       - if: ${{ steps.release.outputs.pr }}
         run: bun install --frozen-lockfile
 
+      # No `env:` reading the action's output here: a step-level `env` is
+      # evaluated even when the step is skipped, so a run that opened no release
+      # pull request would fail on the template rather than skip. The checkout
+      # above already left us on the branch, which is what `git push` needs.
       - if: ${{ steps.release.outputs.pr }}
-        env:
-          BRANCH: ${{ fromJson(steps.release.outputs.pr).headBranchName }}
         run: |
           bunx biome format --write app.json
           if git diff --quiet; then
@@ -56,4 +58,4 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git commit -am 'chore: format app.json after release-please'
-          git push origin "HEAD:$BRANCH"
+          git push
