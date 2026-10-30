@@ -101,6 +101,25 @@ bun run bench --corpus bench/corpus --track <track>
 Tracks are declared in `bench/tracks.ts`. The `fixture-*` ones replay `bench/fixture-corpus`
 and exist to check the bench itself; they prove nothing about speech.
 
+## The two latencies
+
+The `latency` block times the decoder twice, from the same instant — the annotated end of
+the utterance — and the two answer different questions.
+
+- `p95Ms` is when the decoder **settled**: the final result, the transcript the exercise
+  acts on. `measured` counts the utterances it produced one for, `unanswered` the rest.
+- `firstHeardP95Ms` is when the decoder **first said anything**: the first non-empty
+  partial, and only it. Later partials refine the same word and do not move the figure.
+  `firstHeard` counts the utterances it emitted one for, `unheard` the rest.
+
+An utterance can settle without ever being heard start, and the other way round, which is
+why the two pairs are counted separately rather than sharing one denominator. An unheard
+utterance is left out of `firstHeardP95Ms` rather than timed at zero: a partial that never
+came is not a partial that came instantly, and averaging it in would flatter the figure.
+
+`p95Ms` and `measured` are untouched by this, so the numbers CLE-20 published stay
+comparable line for line.
+
 ## Running it on a device
 
 The figures CLE-17 decides on cannot be measured on the host: the point is how the

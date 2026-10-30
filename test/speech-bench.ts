@@ -39,10 +39,17 @@ export type Answer = string | null | 'silent';
  * A recogniser whose answers and response time are known in advance, so that
  * what the bench publishes can be compared against what it was fed.
  */
+export interface Partial {
+  /** Milliseconds after the utterance was flushed. */
+  readonly afterMs: number;
+  readonly transcript: string;
+}
+
 export function recognizerAnswering(
   clock: VirtualClock,
   answers: readonly Answer[],
   responseMs: number,
+  partials: readonly Partial[] = [],
 ): { recognizer: SpeechRecognizer; sessions: string[][]; fedAt: number[] } {
   const sessions: string[][] = [];
   const fedAt: number[] = [];
@@ -56,9 +63,16 @@ export function recognizerAnswering(
     },
     write: () => fedAt.push(clock.now()),
     flush: async () => {
-      clock.advance(responseMs);
+      const flushedAt = clock.now();
       const answer = answers[utterance];
       utterance += 1;
+
+      for (const partial of partials) {
+        clock.advance(flushedAt + partial.afterMs - clock.now());
+        emit({ kind: 'partial', transcript: partial.transcript, at: clock.now() });
+      }
+
+      clock.advance(flushedAt + responseMs - clock.now());
 
       if (answer !== 'silent') {
         emit({ kind: 'final', transcript: answer ?? null, at: clock.now() });

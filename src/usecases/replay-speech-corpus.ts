@@ -24,6 +24,17 @@ interface ReplayOutcome {
    * nothing is published on its own.
    */
   readonly latencyMs: number | null;
+  /**
+   * Milliseconds from the annotated end of the utterance to the **first
+   * non-empty partial result**, or `null` when the decoder said nothing at all
+   * before it settled.
+   *
+   * The same origin as `latencyMs` on purpose: the two are read against each
+   * other, and an origin of its own would make the difference meaningless. A
+   * partial is the earliest moment the decoder commits to anything, which is
+   * the closest this track comes to saying when the learner spoke.
+   */
+  readonly firstHeardMs: number | null;
 }
 
 /**
@@ -73,11 +84,24 @@ export function createReplaySpeechCorpus(clock: Clock, audio: CorpusAudio): Repl
 
     for (const [notation, notes] of Object.entries(corpus.notations)) {
       const finals: Extract<Recognition, { kind: 'final' }>[] = [];
+      let firstHeard: number | undefined;
       const askedAt = clock.now();
 
       await recognizer.start(notes, (recognition) => {
         if (recognition.kind === 'final') {
           finals.push(recognition);
+          return;
+        }
+
+        /**
+         * The first non-empty partial, and only it. An empty transcript is the
+         * decoder having heard nothing yet rather than an utterance starting,
+         * and timing it would publish a latency of zero for every recording.
+         * Later partials are the same utterance being refined; they do not move
+         * the moment it began.
+         */
+        if (firstHeard === undefined && recognition.transcript !== '') {
+          firstHeard = recognition.at;
         }
       });
 
@@ -85,6 +109,7 @@ export function createReplaySpeechCorpus(clock: Clock, audio: CorpusAudio): Repl
 
       for (const recording of corpus.recordings.filter((it) => it.notation === notation)) {
         finals.length = 0;
+        firstHeard = undefined;
 
         const spokenUntil = await feed(recording, corpus.sampleRate, clock, audio, recognizer);
         await recognizer.flush();
@@ -95,6 +120,7 @@ export function createReplaySpeechCorpus(clock: Clock, audio: CorpusAudio): Repl
           recording,
           heard: final === undefined ? null : final.transcript,
           latencyMs: final === undefined ? null : final.at - spokenUntil,
+          firstHeardMs: firstHeard === undefined ? null : firstHeard - spokenUntil,
         });
       }
 
