@@ -14,7 +14,14 @@ import { Text } from '@/components/ui/text';
 import { Toggle } from '@/components/ui/toggle';
 import { modeOf } from '@/components/wording/mode';
 import { lengthLine, measuresLine, tempoLine } from '@/components/wording/session';
-import { broughtLine, clefName, studyLine, tempoOf } from '@/components/wording/study';
+import {
+  broughtLine,
+  clefName,
+  nodeLabel,
+  reachLine,
+  studyLine,
+  tempoOf,
+} from '@/components/wording/study';
 import { CLEFS, type Clef } from '@/domain/notation/clef';
 import type { Notation } from '@/domain/notation/naming';
 import { LEVELS, type Level, poolOf } from '@/domain/training/level';
@@ -104,6 +111,9 @@ export default function StudiesScreen() {
           <SessionPanel onChange={setSession} session={session} />
 
           <ScrollView contentContainerStyle={styles.ladder}>
+            {/* One rail behind the six nodes rather than a segment per study: a
+                segment per study breaks where the open card pushes them apart. */}
+            <View style={styles.rail} />
             {LEVELS.map((level) => (
               <Study
                 key={level}
@@ -141,6 +151,7 @@ function Study({
   readonly session: SessionSettings;
 }) {
   const ahead = reach === 'ahead';
+  styles.useVariants({ reach });
 
   return (
     <View style={styles.study}>
@@ -150,13 +161,15 @@ function Study({
         style={styles.head}
         testID={`study-${level}`}
       >
-        <Text style={ahead ? styles.ahead : styles.reached}>{level}</Text>
-        <Text variant="title">{tempoOf(level)}</Text>
-        {reach === 'done' && (
-          <Text variant="caption" tone="ok">
-            Terminé
-          </Text>
-        )}
+        <View style={styles.node}>
+          <Text style={styles.number}>{nodeLabel(reach, level)}</Text>
+        </View>
+        <Text style={styles.name} variant="title" tone={ahead ? 'muted' : 'ink'}>
+          {tempoOf(level)}
+        </Text>
+        <Text variant="caption" tone={reach === 'current' ? 'accent' : 'muted'}>
+          {reachLine(reach)}
+        </Text>
       </Pressable>
 
       {chosen && !ahead && <Open clef={clef} level={level} notation={notation} session={session} />}
@@ -219,15 +232,55 @@ function Open({
   );
 }
 
+const NODE = 36;
+const RAIL = 2;
+
 const styles = StyleSheet.create((theme) => ({
   header: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
   ladder: { gap: theme.spacing.s, paddingBottom: theme.spacing.l },
+  rail: {
+    backgroundColor: theme.colors.line,
+    bottom: NODE / 2,
+    left: (NODE - RAIL) / 2,
+    position: 'absolute',
+    top: NODE / 2,
+    width: RAIL,
+  },
   study: { gap: theme.spacing.xs },
   head: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
+  node: {
+    alignItems: 'center',
+    borderRadius: NODE / 2,
+    borderWidth: 1.5,
+    height: NODE,
+    justifyContent: 'center',
+    width: NODE,
+    variants: {
+      reach: {
+        done: { backgroundColor: theme.colors.ink, borderColor: theme.colors.ink },
+        current: { backgroundColor: theme.colors.accent, borderColor: theme.colors.accent },
+        /** The one node drawn hollow: nothing is behind it yet, and it does not answer. */
+        ahead: {
+          backgroundColor: theme.colors.bg,
+          borderColor: theme.colors.line,
+          borderStyle: 'dashed',
+        },
+      },
+    },
+  },
+  number: {
+    variants: {
+      reach: {
+        done: { color: theme.colors.surf },
+        current: { color: theme.colors.surf },
+        ahead: { color: theme.colors.muted },
+      },
+    },
+  },
+  /** The name takes the slack, so the meta is pinned to the right edge. */
+  name: { flex: 1 },
   marks: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.m },
   panel: { gap: theme.spacing.xs },
-  reached: { color: theme.colors.accent },
-  ahead: { color: theme.colors.muted },
 }));
 
 /**

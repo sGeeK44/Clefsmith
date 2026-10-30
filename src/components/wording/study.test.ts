@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'bun:test';
-import { broughtLine, clefName, STUDIES, studyLine, tempoOf } from '@/components/wording/study';
+import {
+  broughtLine,
+  clefName,
+  nodeLabel,
+  reachLine,
+  STUDIES,
+  studyLine,
+  tempoOf,
+} from '@/components/wording/study';
 import { LEVELS } from '@/domain/training/level';
 
 describe('what a level is called on screen', () => {
@@ -59,5 +67,29 @@ describe('what a study brings, in words', () => {
 describe('what a clef is called', () => {
   it('names both', () => {
     expect([clefName('treble'), clefName('bass')]).toEqual(['Clé de sol', 'Clé de fa']);
+  });
+});
+
+describe('where a study stands', () => {
+  it('names the three reaches', () => {
+    expect([reachLine('done'), reachLine('current'), reachLine('ahead')]).toEqual([
+      'Terminé',
+      'En cours',
+      'À venir',
+    ]);
+  });
+});
+
+describe('what a node carries', () => {
+  it('ticks a study already behind the learner', () => {
+    expect(nodeLabel('done', 3)).toBe('✓');
+  });
+
+  it('numbers the one they are on', () => {
+    expect(nodeLabel('current', 3)).toBe('3');
+  });
+
+  it('numbers the ones still ahead', () => {
+    expect(nodeLabel('ahead', 5)).toBe('5');
   });
 });
