@@ -33,6 +33,12 @@ import { createResetProgress } from '@/usecases/reset-progress';
  * The answer source is handed in rather than built here: hearing one means
  * importing `react-native-vosk`, a native module no test can load. The root
  * supplies it, exactly as the bench supplies its own recogniser.
+ *
+ * Every resolved binding is a singleton. `toResolvedValue` is transient by
+ * default, so without it a screen asking for the same use case twice gets two
+ * functions — and a screen asking on every render gets a new one every render.
+ * An effect that depends on one then re-runs forever, which on the device means
+ * the recogniser being started and stopped as fast as React can redraw.
  */
 export function createContainer(answerSource: AnswerSource): Container {
   const container = new Container();
@@ -40,55 +46,66 @@ export function createContainer(answerSource: AnswerSource): Container {
   container.bind(SYMBOLS.infrastructure.AppVersionReader).toConstantValue(expoAppVersionReader);
   container
     .bind(SYMBOLS.usecases.GetAppVersion)
-    .toResolvedValue(createGetAppVersion, [SYMBOLS.infrastructure.AppVersionReader]);
+    .toResolvedValue(createGetAppVersion, [SYMBOLS.infrastructure.AppVersionReader])
+    .inSingletonScope();
 
   container
     .bind(SYMBOLS.infrastructure.ProgressStore)
     .toConstantValue(createProgressStore(expoKeyValueStore));
   container
     .bind(SYMBOLS.usecases.GetProgress)
-    .toResolvedValue(createGetProgress, [SYMBOLS.infrastructure.ProgressStore]);
+    .toResolvedValue(createGetProgress, [SYMBOLS.infrastructure.ProgressStore])
+    .inSingletonScope();
   container
     .bind(SYMBOLS.usecases.RecordFinishedSession)
-    .toResolvedValue(createRecordFinishedSession, [SYMBOLS.infrastructure.ProgressStore]);
+    .toResolvedValue(createRecordFinishedSession, [SYMBOLS.infrastructure.ProgressStore])
+    .inSingletonScope();
   container
     .bind(SYMBOLS.usecases.ResetProgress)
-    .toResolvedValue(createResetProgress, [SYMBOLS.infrastructure.ProgressStore]);
+    .toResolvedValue(createResetProgress, [SYMBOLS.infrastructure.ProgressStore])
+    .inSingletonScope();
 
   container
     .bind(SYMBOLS.infrastructure.SettingsStore)
     .toConstantValue(createSettingsStore(expoKeyValueStore));
   container
     .bind(SYMBOLS.usecases.GetSettings)
-    .toResolvedValue(createGetSettings, [SYMBOLS.infrastructure.SettingsStore]);
+    .toResolvedValue(createGetSettings, [SYMBOLS.infrastructure.SettingsStore])
+    .inSingletonScope();
   container
     .bind(SYMBOLS.usecases.ChooseNotation)
-    .toResolvedValue(createChooseNotation, [SYMBOLS.infrastructure.SettingsStore]);
+    .toResolvedValue(createChooseNotation, [SYMBOLS.infrastructure.SettingsStore])
+    .inSingletonScope();
 
   container
     .bind(SYMBOLS.infrastructure.MicrophonePermission)
     .toConstantValue(expoMicrophonePermission);
   container
     .bind(SYMBOLS.usecases.AskForMicrophone)
-    .toResolvedValue(createAskForMicrophone, [SYMBOLS.infrastructure.MicrophonePermission]);
+    .toResolvedValue(createAskForMicrophone, [SYMBOLS.infrastructure.MicrophonePermission])
+    .inSingletonScope();
   container
     .bind(SYMBOLS.usecases.ReadMicrophoneAccess)
-    .toResolvedValue(createReadMicrophoneAccess, [SYMBOLS.infrastructure.MicrophonePermission]);
+    .toResolvedValue(createReadMicrophoneAccess, [SYMBOLS.infrastructure.MicrophonePermission])
+    .inSingletonScope();
   container
     .bind(SYMBOLS.usecases.ShowMicrophoneSettings)
-    .toResolvedValue(createShowMicrophoneSettings, [SYMBOLS.infrastructure.MicrophonePermission]);
+    .toResolvedValue(createShowMicrophoneSettings, [SYMBOLS.infrastructure.MicrophonePermission])
+    .inSingletonScope();
 
   container
     .bind(SYMBOLS.usecases.FinishWelcome)
     .toResolvedValue(createFinishWelcome, [
       SYMBOLS.infrastructure.ProgressStore,
       SYMBOLS.infrastructure.SettingsStore,
-    ]);
+    ])
+    .inSingletonScope();
 
   container.bind(SYMBOLS.infrastructure.AnswerSource).toConstantValue(answerSource);
   container
     .bind(SYMBOLS.usecases.ListenForAnswers)
-    .toResolvedValue(createListenForAnswers, [SYMBOLS.infrastructure.AnswerSource]);
+    .toResolvedValue(createListenForAnswers, [SYMBOLS.infrastructure.AnswerSource])
+    .inSingletonScope();
 
   container.bind(SYMBOLS.usecases.DrawSession).toConstantValue(createDrawSession(mathRandom));
   container.bind(SYMBOLS.usecases.KeepTime).toConstantValue(createKeepTime(systemClock));
@@ -96,10 +113,12 @@ export function createContainer(answerSource: AnswerSource): Container {
   container.bind(SYMBOLS.infrastructure.ReportStore).toConstantValue(createMemoryReportStore());
   container
     .bind(SYMBOLS.usecases.KeepReport)
-    .toResolvedValue(createKeepReport, [SYMBOLS.infrastructure.ReportStore]);
+    .toResolvedValue(createKeepReport, [SYMBOLS.infrastructure.ReportStore])
+    .inSingletonScope();
   container
     .bind(SYMBOLS.usecases.RecallReport)
-    .toResolvedValue(createRecallReport, [SYMBOLS.infrastructure.ReportStore]);
+    .toResolvedValue(createRecallReport, [SYMBOLS.infrastructure.ReportStore])
+    .inSingletonScope();
 
   return container;
 }
