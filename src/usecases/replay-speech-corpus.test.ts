@@ -68,6 +68,62 @@ describe('replay a speech corpus', () => {
     expect(clock.now()).toBe(2000);
   });
 
+  it('times the first word the recogniser said, from the annotated end of the utterance', async () => {
+    const clock = virtualClock();
+    const { recognizer } = recognizerAnswering(clock, ['do', 'mi'], 120, [
+      { afterMs: 40, transcript: 'd' },
+    ]);
+
+    const { outcomes } = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
+      CORPUS,
+      recognizer,
+    );
+
+    expect(outcomes.map((outcome) => outcome.firstHeardMs)).toEqual([40, 40]);
+  });
+
+  it('keeps the first partial and not the ones that refine it', async () => {
+    const clock = virtualClock();
+    const { recognizer } = recognizerAnswering(clock, ['do', 'mi'], 120, [
+      { afterMs: 40, transcript: 'd' },
+      { afterMs: 90, transcript: 'do' },
+    ]);
+
+    const { outcomes } = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
+      CORPUS,
+      recognizer,
+    );
+
+    expect(outcomes.map((outcome) => outcome.firstHeardMs)).toEqual([40, 40]);
+  });
+
+  it('passes over an empty partial: nothing was heard, no word was started', async () => {
+    const clock = virtualClock();
+    const { recognizer } = recognizerAnswering(clock, ['do', 'mi'], 120, [
+      { afterMs: 10, transcript: '' },
+      { afterMs: 40, transcript: 'd' },
+    ]);
+
+    const { outcomes } = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
+      CORPUS,
+      recognizer,
+    );
+
+    expect(outcomes.map((outcome) => outcome.firstHeardMs)).toEqual([40, 40]);
+  });
+
+  it('times nothing for an utterance the recogniser never started saying', async () => {
+    const clock = virtualClock();
+    const { recognizer } = recognizerAnswering(clock, ['do', 'mi'], 120);
+
+    const { outcomes } = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
+      CORPUS,
+      recognizer,
+    );
+
+    expect(outcomes.map((outcome) => outcome.firstHeardMs)).toEqual([null, null]);
+  });
+
   it('times nothing for an utterance the recogniser never answered', async () => {
     const clock = virtualClock();
     const { recognizer } = recognizerAnswering(clock, ['do', 'silent'], 120);
