@@ -11,23 +11,13 @@ import { Screen } from '@/components/ui/screen';
 import { Staff } from '@/components/ui/staff';
 import { Text } from '@/components/ui/text';
 import { badgeLine, progressOf } from '@/components/wording/desk';
+import { MODES, type Mode } from '@/components/wording/mode';
 import { studyLine, tempoOf } from '@/components/wording/study';
 import type { Notation } from '@/domain/notation/naming';
 import { type Level, newcomersOf } from '@/domain/training/level';
 import { SYMBOLS } from '@/infrastructure/symbols';
 
 const PARCOURS = '/studies';
-
-/**
- * In the mockup's order, each with the glyph the mockup gives it. The last two
- * have nothing behind them yet.
- */
-const MODES = [
-  { id: 'reading', label: 'Lecture de notes', glyph: '♩', open: true },
-  { id: 'rhythmic-reading', label: 'Lecture rythmée', glyph: '♫', open: true },
-  { id: 'rhythm', label: 'Rythme seul', glyph: '♪', open: false },
-  { id: 'dictation', label: 'Dictée musicale', glyph: '♬', open: false },
-] as const;
 
 /**
  * The desk: where the learner is, and what they can do about it.
@@ -72,7 +62,7 @@ export default function DeskScreen() {
       </Text>
       <View style={styles.modes}>
         {MODES.map((mode) => (
-          <Mode key={mode.id} level={level} mode={mode} onClosed={setComing} />
+          <Exercise key={mode.id} level={level} mode={mode} onClosed={setComing} />
         ))}
       </View>
 
@@ -131,20 +121,24 @@ function Current({ level, notation }: { readonly level: Level; readonly notation
  * them are not. A line carries its own progress, and the bar is what tells the
  * open ones apart from the ones with nothing behind them.
  */
-function Mode({
+function Exercise({
   level,
   mode,
   onClosed,
 }: {
   readonly level: Level | undefined;
-  readonly mode: (typeof MODES)[number];
+  readonly mode: Mode;
   readonly onClosed: (message: string) => void;
 }) {
   const { id, label, glyph, open } = mode;
 
   return (
     <Pressable
-      onPress={() => (open ? router.push(PARCOURS) : onClosed(`${label} arrive bientôt`))}
+      onPress={() =>
+        open
+          ? router.push({ pathname: PARCOURS, params: { mode: id } })
+          : onClosed(`${label} arrive bientôt`)
+      }
       style={styles.mode}
       testID={`mode-${id}`}
     >

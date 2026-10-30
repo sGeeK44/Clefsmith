@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
@@ -12,6 +12,7 @@ import { Screen } from '@/components/ui/screen';
 import { Staff } from '@/components/ui/staff';
 import { Text } from '@/components/ui/text';
 import { Toggle } from '@/components/ui/toggle';
+import { modeOf } from '@/components/wording/mode';
 import { lengthLine, measuresLine, tempoLine } from '@/components/wording/session';
 import { broughtLine, clefName, studyLine, tempoOf } from '@/components/wording/study';
 import { CLEFS, type Clef } from '@/domain/notation/clef';
@@ -52,7 +53,16 @@ export default function StudiesScreen() {
   const [notation, setNotation] = useState<Notation>();
   const [clef, setClef] = useState<Clef>('treble');
   const [chosen, setChosen] = useState<Level>();
-  const [session, setSession] = useState<SessionSettings>(defaultSessionSettings);
+  /**
+   * The exercise the learner came in through decides whether time is beaten —
+   * that is the only thing telling the two readings apart. It is a starting
+   * point and not a lock: the switch is still there, inside the study.
+   */
+  const mode = modeOf(useLocalSearchParams<{ mode?: string }>().mode);
+  const [session, setSession] = useState<SessionSettings>(() => ({
+    ...defaultSessionSettings(),
+    metronome: mode.timed,
+  }));
 
   useEffect(() => {
     getProgress().then((read) => {
@@ -78,7 +88,14 @@ export default function StudiesScreen() {
 
   return (
     <Screen>
-      <Text variant="display">Parcours</Text>
+      <View style={styles.header}>
+        <Pressable onPress={() => router.back()} testID="studies-back">
+          <Text variant="display" tone="muted">
+            ‹
+          </Text>
+        </Pressable>
+        <Text variant="title">{mode.label}</Text>
+      </View>
 
       {read && (
         <>
@@ -203,6 +220,7 @@ function Open({
 }
 
 const styles = StyleSheet.create((theme) => ({
+  header: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
   ladder: { gap: theme.spacing.s, paddingBottom: theme.spacing.l },
   study: { gap: theme.spacing.xs },
   head: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
