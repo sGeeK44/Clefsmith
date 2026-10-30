@@ -38,6 +38,28 @@ Android. The patch exposes it, and nothing more:
 A microphone session behaves exactly as it did before the patch: every change is
 behind `pushAudio`.
 
+### The audio session the microphone opens
+
+Upstream asks iOS for `AVAudioSessionCategoryRecord`. That category carries no
+output route, and a session has only one category: with it set, nothing the
+application plays is rendered at all — a player's clock does not even advance,
+which looks like a frozen metronome rather than a silenced one.
+
+The patch asks for `AVAudioSessionCategoryPlayAndRecord` with
+`AVAudioSessionCategoryOptionDefaultToSpeaker`, keeping `Measurement` mode so
+the decoder still gets the microphone signal with as little system processing on
+it as possible. The option is needed because `playAndRecord` otherwise plays out
+of the receiver.
+
+`src/app/_layout.tsx` declares the same category, mode and option to
+`react-native-audio-api`, which configures the session itself when a context is
+created. The two must say the same thing or each reconfiguration tears the other
+side down.
+
+**Checked by**: nothing automated — see the paragraph above on native code. It
+is verified by playing a session with the metronome on and hearing the clicks
+while the notes are still recognised.
+
 ## On a version bump
 
 The patch is pinned to `2.1.7`. Raising the version makes `bun install` fail

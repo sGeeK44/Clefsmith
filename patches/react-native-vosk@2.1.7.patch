@@ -1,3 +1,6 @@
+diff --git a/node_modules/react-native-vosk/.bun-tag-99c593fd3dcb8c2c b/.bun-tag-99c593fd3dcb8c2c
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/android/src/main/java/com/vosk/VoskModule.kt b/android/src/main/java/com/vosk/VoskModule.kt
 index c2c4d64938e8da3bd5396c3c7178024d4e90cb6c..31eebff6a306e3e8ca2b74b074700f8470b7b2ba 100644
 --- a/android/src/main/java/com/vosk/VoskModule.kt
@@ -106,7 +109,7 @@ index c2c4d64938e8da3bd5396c3c7178024d4e90cb6c..31eebff6a306e3e8ca2b74b074700f84
    }
  
 diff --git a/ios/Vosk.mm b/ios/Vosk.mm
-index 4556403d00596ffe8d187845b45470020774ee26..da1ac53a2cb8733817b0ab786e13f5f11172b28d 100644
+index 4556403d00596ffe8d187845b45470020774ee26..897bb3ca537bf40372e62e9a9da81ec781b7b0cf 100644
 --- a/ios/Vosk.mm
 +++ b/ios/Vosk.mm
 @@ -8,6 +8,11 @@
@@ -137,7 +140,7 @@ index 4556403d00596ffe8d187845b45470020774ee26..da1ac53a2cb8733817b0ab786e13f5f1
    }
    return self;
  }
-@@ -124,6 +131,33 @@ RCT_EXPORT_MODULE()
+@@ -124,17 +131,50 @@ RCT_EXPORT_MODULE()
      timeoutMs = *(options->timeout());
    }
  
@@ -170,8 +173,28 @@ index 4556403d00596ffe8d187845b45470020774ee26..da1ac53a2cb8733817b0ab786e13f5f1
 +
    CFAbsoluteTime tStart = CFAbsoluteTimeGetCurrent();
    // Configure session category first (allowed even before permission)
++  //
++  // `playAndRecord` rather than `record`: the application sounds a metronome
++  // while it listens, and `record` carries no output route at all — a player
++  // started under it never renders, and its clock never advances. The speaker
++  // is asked for explicitly because `playAndRecord` otherwise comes out of the
++  // receiver, which is not where a metronome is of any use.
    NSError *catErr = nil;
-@@ -291,6 +325,87 @@ RCT_EXPORT_MODULE()
+   @try {
+     if (@available(iOS 10.0, *)) {
+-      [audioSession setCategory:AVAudioSessionCategoryRecord
++      [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord
+                            mode:AVAudioSessionModeMeasurement
+-                        options:0
++                        options:AVAudioSessionCategoryOptionDefaultToSpeaker
+                           error:&catErr];
+     } else {
+-      [audioSession setCategory:AVAudioSessionCategoryRecord error:&catErr];
++      [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord error:&catErr];
+     }
+     if (catErr) {
+       NSString *msg = [NSString stringWithFormat:@"Audio session category error: %@", catErr.localizedDescription];
+@@ -291,6 +331,87 @@ RCT_EXPORT_MODULE()
    }
  }
  
@@ -259,7 +282,7 @@ index 4556403d00596ffe8d187845b45470020774ee26..da1ac53a2cb8733817b0ab786e13f5f1
  - (void)stop {
    if (!_isRunning)
      return; // idempotent
-@@ -360,6 +475,14 @@ RCT_EXPORT_MODULE()
+@@ -360,6 +481,14 @@ RCT_EXPORT_MODULE()
      _timeoutSource = nil;
    }
  
@@ -275,7 +298,7 @@ index 4556403d00596ffe8d187845b45470020774ee26..da1ac53a2cb8733817b0ab786e13f5f1
    NSError *err = nil;
    if (@available(iOS 10.0, *)) {
 diff --git a/lib/commonjs/index.js b/lib/commonjs/index.js
-index 7239f346dc40bd9a59704cd6ac4049db8274c370..c55b0c98c01aa291c71bde65aa7ec59c0a0ae35b 100644
+index 7239f346dc40bd9a59704cd6ac4049db8274c370..0f54d74e2676d9a451faed3263b0e93680575ac4 100644
 --- a/lib/commonjs/index.js
 +++ b/lib/commonjs/index.js
 @@ -9,6 +9,8 @@ exports.onFinalResult = onFinalResult;
@@ -307,8 +330,9 @@ index 7239f346dc40bd9a59704cd6ac4049db8274c370..c55b0c98c01aa291c71bde65aa7ec59c
 +function finish() {
 +  return Vosk.finish();
 +}
+\ No newline at end of file
 diff --git a/lib/module/index.js b/lib/module/index.js
-index f0b7f23b186845f9884b3b4c19e8cf3b38fccb28..2a7800092d6beb9a486550d14877da88ac8802a7 100644
+index f0b7f23b186845f9884b3b4c19e8cf3b38fccb28..a5776f027c3cccd9dafced25aec51e11caa934bf 100644
 --- a/lib/module/index.js
 +++ b/lib/module/index.js
 @@ -56,6 +56,9 @@ async function requestRecordPermission() {
@@ -331,6 +355,7 @@ index f0b7f23b186845f9884b3b4c19e8cf3b38fccb28..2a7800092d6beb9a486550d14877da88
 +export function finish() {
 +  return Vosk.finish();
 +}
+\ No newline at end of file
 diff --git a/lib/typescript/src/NativeVosk.d.ts b/lib/typescript/src/NativeVosk.d.ts
 index 735a55aad64f188b10d1df3e3793b1785dcf1080..6f4907315a26167724bc487f6dbb1bd8c6ee63bd 100644
 --- a/lib/typescript/src/NativeVosk.d.ts

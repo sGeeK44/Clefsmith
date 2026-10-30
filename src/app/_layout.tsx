@@ -1,7 +1,7 @@
 import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useState } from 'react';
-import { AudioContext } from 'react-native-audio-api';
+import { AudioContext, AudioManager } from 'react-native-audio-api';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import * as vosk from 'react-native-vosk';
 
@@ -20,6 +20,26 @@ import { createVoskAnswerSource } from '@/infrastructure/vosk-answer-source';
  * the `react-native-vosk` config plugin. The same model the bench measures on.
  */
 const MODEL_PATH = 'vosk-model-small-fr-0.22';
+
+/**
+ * The one audio session both engines share.
+ *
+ * The recogniser configures the session when it starts listening, and the
+ * player configures it when a context is created. Left to their defaults they
+ * contradict each other — the player asks for `playback`, which carries no
+ * input, and the recogniser asked for `record`, which carries no output and
+ * under which a player's clock never advances. Declared identically on both
+ * sides, neither reconfiguration is a change, so neither tears the other down.
+ *
+ * `defaultToSpeaker` because `playAndRecord` otherwise comes out of the
+ * receiver, and `measurement` because the recogniser wants the microphone
+ * signal with as little system processing on it as possible.
+ */
+AudioManager.setAudioSessionOptions({
+  iosCategory: 'playAndRecord',
+  iosMode: 'measurement',
+  iosOptions: ['defaultToSpeaker'],
+});
 
 const container = createContainer(
   createVoskAnswerSource(vosk, MODEL_PATH, systemClock),
