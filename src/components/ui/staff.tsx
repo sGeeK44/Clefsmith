@@ -1,9 +1,10 @@
-import { Canvas, Text as Glyph, Line, useFont, vec } from '@shopify/react-native-skia';
+import { Canvas, Text as Glyph, Line, RoundedRect, useFont, vec } from '@shopify/react-native-skia';
 import { useUnistyles } from 'react-native-unistyles';
+import type { Colors } from '@/components/theme/tokens';
 import type { Clef } from '@/domain/notation/clef';
 import { GLYPHS } from '@/domain/score/bravura';
 import { ENGRAVING } from '@/domain/score/engraving';
-import { layoutStaff, type Note } from '@/domain/score/layout';
+import { layoutStaff, type Note, type Shade } from '@/domain/score/layout';
 
 const BRAVURA = require('../../../assets/fonts/Bravura.otf');
 
@@ -13,6 +14,27 @@ const BRAVURA = require('../../../assets/fonts/Bravura.otf');
  * the whole component holds one number.
  */
 const EM_IN_SPACES = 4;
+
+/** How wide the ground behind the note being read is, in staff spaces. */
+const HIGHLIGHT = 2.4;
+
+/**
+ * What each shade is drawn in.
+ *
+ * `ahead` is the ink everything else is measured against — the staff lines are
+ * shaded that way too, which is why it is the one that is not a verdict.
+ */
+function colourOf(shade: Shade, colors: Colors): string {
+  const palette: Record<Shade, string> = {
+    ahead: colors.ink,
+    current: colors.accent,
+    ok: colors.ok,
+    late: colors.late,
+    wrong: colors.bad,
+  };
+
+  return palette[shade];
+}
 
 export function Staff({
   clef,
@@ -36,10 +58,23 @@ export function Staff({
 
   return (
     <Canvas style={{ width: layout.width * space, height: (layout.top - layout.bottom) * space }}>
+      {layout.glyphs
+        .filter((glyph) => glyph.shade === 'current' && glyph.glyph === 'noteheadBlack')
+        .map((glyph) => (
+          <RoundedRect
+            color={theme.colors.soft}
+            height={(layout.top - layout.bottom) * space}
+            key={`highlight-${glyph.x}`}
+            r={space}
+            width={HIGHLIGHT * space}
+            x={(glyph.x - HIGHLIGHT / 2) * space}
+            y={0}
+          />
+        ))}
       {layout.lines.map((line) => (
         <Line
           key={`${line.from.x},${line.from.y}-${line.to.x},${line.to.y}`}
-          color={line.current ? theme.colors.accent : theme.colors.ink}
+          color={colourOf(line.shade, theme.colors)}
           p1={at(line.from.x, line.from.y)}
           p2={at(line.to.x, line.to.y)}
           strokeWidth={line.thickness * space}
@@ -51,7 +86,7 @@ export function Staff({
         return (
           <Glyph
             key={`${glyph.glyph}-${glyph.x}-${glyph.y}`}
-            color={glyph.current ? theme.colors.accent : theme.colors.ink}
+            color={colourOf(glyph.shade, theme.colors)}
             font={font}
             text={String.fromCodePoint(Number.parseInt(GLYPHS[glyph.glyph].codepoint.slice(2), 16))}
             x={origin.x}

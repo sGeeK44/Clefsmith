@@ -14,8 +14,17 @@ interface GlyphPlacement {
   readonly glyph: GlyphName;
   readonly x: number;
   readonly y: number;
-  readonly current: boolean;
+  readonly shade: Shade;
 }
+
+/**
+ * How a note is to be drawn — what the reading has made of it.
+ *
+ * It is not the drill's `Mark`: a mark says what an answer was worth, and three
+ * of these five are not answers at all. The layout knows nothing about answers;
+ * it knows that a note is drawn one of five ways, and the screen decides which.
+ */
+export type Shade = 'ahead' | 'current' | 'ok' | 'late' | 'wrong';
 
 interface Point {
   readonly x: number;
@@ -26,8 +35,8 @@ interface LineSegment {
   readonly from: Point;
   readonly to: Point;
   readonly thickness: number;
-  /** True when the segment belongs to the current note, like its notehead. */
-  readonly current: boolean;
+  /** The shade of the note the segment belongs to — its stem, its leger lines. */
+  readonly shade: Shade;
 }
 
 export interface StaffLayout {
@@ -61,7 +70,7 @@ const STEM_LENGTH = 3.5;
 
 export interface Note {
   readonly pitch: Pitch;
-  readonly current: boolean;
+  readonly shade: Shade;
 }
 
 export function layoutStaff(
@@ -80,10 +89,10 @@ export function layoutStaff(
   const lines = [
     ...staffLines(width, engraving),
     ...notes.flatMap((note, index) =>
-      legerLines(positions[index] as number, index, note.current, engraving),
+      legerLines(positions[index] as number, index, note.shade, engraving),
     ),
     ...notes.map((note, index) =>
-      stem(positions[index] as number, index, note.current, engraving, glyphs),
+      stem(positions[index] as number, index, note.shade, engraving, glyphs),
     ),
   ];
   const reach = [
@@ -104,7 +113,7 @@ export function layoutStaff(
 }
 
 function clefGlyph(clef: Clef): GlyphPlacement {
-  return { glyph: CLEF_GLYPHS[clef], x: 0, y: anchorOf(clef), current: false };
+  return { glyph: CLEF_GLYPHS[clef], x: 0, y: anchorOf(clef), shade: 'ahead' };
 }
 
 /**
@@ -130,7 +139,7 @@ function notehead(
     glyph: 'noteheadBlack',
     x: noteX(index, engraving),
     y: position / 2,
-    current: note.current,
+    shade: note.shade,
   };
 }
 
@@ -143,7 +152,7 @@ function staffLines(width: number, engraving: Engraving): LineSegment[] {
     from: { x: 0, y: line },
     to: { x: width, y: line },
     thickness: engraving.staffLineThickness,
-    current: false,
+    shade: 'ahead',
   }));
 }
 
@@ -155,7 +164,7 @@ function staffLines(width: number, engraving: Engraving): LineSegment[] {
 function stem(
   position: number,
   index: number,
-  current: boolean,
+  shade: Shade,
   engraving: Engraving,
   glyphs: Glyphs,
 ): LineSegment {
@@ -170,7 +179,7 @@ function stem(
     from: foot,
     to: { x: foot.x, y: foot.y + (up ? STEM_LENGTH : -STEM_LENGTH) },
     thickness: engraving.stemThickness,
-    current,
+    shade,
   };
 }
 
@@ -181,7 +190,7 @@ function stem(
 function legerLines(
   position: number,
   index: number,
-  current: boolean,
+  shade: Shade,
   engraving: Engraving,
 ): LineSegment[] {
   const outside = position > TOP_POSITION ? position - TOP_POSITION : Math.min(position, 0);
@@ -195,7 +204,7 @@ function legerLines(
       from: { x: x - half, y },
       to: { x: x + half, y },
       thickness: engraving.legerLineThickness,
-      current,
+      shade,
     };
   });
 }

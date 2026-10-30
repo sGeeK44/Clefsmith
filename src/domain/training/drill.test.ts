@@ -108,3 +108,39 @@ describe('a session being read', () => {
     });
   });
 });
+
+describe('what each note has been worth', () => {
+  it('starts with nothing said about any of them', () => {
+    expect(drillOf(NOTES).marks).toEqual([undefined, undefined, undefined, undefined, undefined]);
+  });
+
+  it('marks a note said right, and leaves it marked as the reading moves on', () => {
+    expect(reading(['c', 'd']).marks).toEqual(['ok', 'ok', undefined, undefined, undefined]);
+  });
+
+  it('marks a right note said off the beat as late rather than as a mistake', () => {
+    expect(scored(drillOf(NOTES), 'c', 'off-beat').marks[0]).toBe('late');
+  });
+
+  it('marks a right note said on the beat', () => {
+    expect(scored(drillOf(NOTES), 'c', 'in-time').marks[0]).toBe('ok');
+  });
+
+  it('marks a wrong note under a metronome, where the reading does not rewind', () => {
+    expect(scored(drillOf(NOTES), 'a', 'in-time').marks[0]).toBe('wrong');
+  });
+
+  it('clears the measure it sends the learner back to, keeping the note they missed', () => {
+    expect(reading(['c', 'd', 'a']).marks).toEqual([
+      undefined,
+      undefined,
+      'wrong',
+      undefined,
+      undefined,
+    ]);
+  });
+
+  it('leaves an earlier measure alone when a later one is missed', () => {
+    expect(reading(['c', 'd', 'e', 'f', 'a']).marks).toEqual(['ok', 'ok', 'ok', 'ok', 'wrong']);
+  });
+});

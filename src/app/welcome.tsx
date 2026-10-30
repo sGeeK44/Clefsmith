@@ -100,7 +100,7 @@ export default function WelcomeScreen() {
 function Read({ notation }: { readonly notation: Notation }) {
   return (
     <Card>
-      <Staff clef="treble" notes={[{ pitch: SHOWN, current: true }]} />
+      <Staff clef="treble" notes={[{ pitch: SHOWN, shade: 'current' }]} />
       <Text testID="welcome-note" variant="title" tone="accent">
         {`« ${nameOf(SHOWN.degree, notation)} »`}
       </Text>

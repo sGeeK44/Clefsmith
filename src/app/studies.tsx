@@ -223,7 +223,7 @@ function Open({
       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <Staff
           clef={clef}
-          notes={poolOf(clef, level).map((pitch) => ({ pitch, current: false }))}
+          notes={poolOf(clef, level).map((pitch) => ({ pitch, shade: 'ahead' }) as const)}
           space={8}
         />
       </ScrollView>

@@ -13,6 +13,15 @@ interface Attempt {
 }
 
 /**
+ * What one note of the session turned out to be worth.
+ *
+ * A note nobody has answered carries nothing, which is not the same as a note
+ * answered wrong: the staff draws the two differently, and `undefined` is what
+ * tells them apart.
+ */
+export type Mark = 'ok' | 'late' | 'wrong';
+
+/**
  * A session being read, note by note.
  *
  * It is a value, not an object: answering returns a new drill. A whole session
@@ -25,11 +34,13 @@ export interface Drill {
   readonly at: number;
   /** Every attempt, in order — the thing accuracy is counted over. */
   readonly answers: readonly Answer[];
+  /** What each note has been worth so far, aligned with `notes`. */
+  readonly marks: readonly (Mark | undefined)[];
   readonly last: Attempt | undefined;
 }
 
 export function drillOf(notes: readonly Pitch[]): Drill {
-  return { notes, at: 0, answers: [], last: undefined };
+  return { notes, at: 0, answers: [], marks: notes.map(() => undefined), last: undefined };
 }
 
 export function isOver(drill: Drill): boolean {
@@ -60,7 +71,25 @@ export function answered(drill: Drill, said: Degree): Drill {
 
   const right = said === expected.degree;
 
-  return { ...scored(drill, said, undefined), at: right ? drill.at + 1 : measureOf(drill.at) };
+  if (right) {
+    return { ...scored(drill, said, undefined), at: drill.at + 1 };
+  }
+
+  /**
+   * The measure is read again, so it is shown again as unread — except the note
+   * that was missed, which keeps its mark until it is said right. Clearing that
+   * one too would make a mistake vanish in the same frame it was made, and the
+   * learner would be sent back up the staff with nothing saying why.
+   */
+  const from = measureOf(drill.at);
+
+  return {
+    ...scored(drill, said, undefined),
+    at: from,
+    marks: drill.marks.map((mark, index) =>
+      index >= from && index < drill.at ? undefined : index === drill.at ? 'wrong' : mark,
+    ),
+  };
 }
 
 /**
@@ -83,6 +112,7 @@ export function scored(drill: Drill, said: Degree, timing: Timing | undefined): 
   return {
     ...drill,
     answers: [...drill.answers, { degree: expected.degree, correct: right }],
+    marks: drill.marks.map((mark, index) => (index === drill.at ? markOf(right, timing) : mark)),
     /**
      * The note comes first: a wrong one is wrong whenever it was said, and
      * telling a learner their mistake was off the beat buries the mistake.
@@ -106,4 +136,13 @@ export function beaten(drill: Drill): Drill {
 
 function measureOf(at: number): number {
   return Math.floor(at / NOTES_PER_MEASURE) * NOTES_PER_MEASURE;
+}
+
+/** A right note said off the beat is right, and said so — it is not a mistake. */
+function markOf(right: boolean, timing: Timing | undefined): Mark {
+  if (!right) {
+    return 'wrong';
+  }
+
+  return timing === 'off-beat' ? 'late' : 'ok';
 }

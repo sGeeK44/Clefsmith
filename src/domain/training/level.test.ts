@@ -16,7 +16,7 @@ function legerLines(clef: Clef, level: Level): number[] {
 
   return [pool[0] as Pitch, pool.at(-1) as Pitch].map(
     (pitch) =>
-      layoutStaff(clef, [{ pitch, current: false }], ENGRAVING, GLYPHS).lines.filter(
+      layoutStaff(clef, [{ pitch, shade: 'ahead' }], ENGRAVING, GLYPHS).lines.filter(
         (line) => line.from.y === line.to.y && line.from.x !== 0,
       ).length,
   );
