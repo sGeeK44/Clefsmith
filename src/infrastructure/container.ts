@@ -5,6 +5,7 @@ import { mathRandom } from '@/core/math-random';
 import { expoAppVersionReader } from '@/infrastructure/expo-app-version-reader';
 import { expoKeyValueStore } from '@/infrastructure/expo-key-value-store';
 import { expoMicrophonePermission } from '@/infrastructure/expo-microphone-permission';
+import { createMemoryReportStore } from '@/infrastructure/memory-report-store';
 import { createProgressStore } from '@/infrastructure/progress-store';
 import { createSettingsStore } from '@/infrastructure/settings-store';
 import { silentAnswerSource } from '@/infrastructure/silent-answer-source';
@@ -16,6 +17,7 @@ import { createFinishWelcome } from '@/usecases/finish-welcome';
 import { createGetAppVersion } from '@/usecases/get-app-version';
 import { createGetProgress } from '@/usecases/get-progress';
 import { createGetSettings } from '@/usecases/get-settings';
+import { createKeepReport, createRecallReport } from '@/usecases/keep-report';
 import { createListenForAnswers } from '@/usecases/listen-for-answers';
 import { createRecordFinishedSession } from '@/usecases/record-finished-session';
 import { createResetProgress } from '@/usecases/reset-progress';
@@ -71,6 +73,14 @@ export function createContainer(): Container {
     .toResolvedValue(createListenForAnswers, [SYMBOLS.infrastructure.AnswerSource]);
 
   container.bind(SYMBOLS.usecases.DrawSession).toConstantValue(createDrawSession(mathRandom));
+
+  container.bind(SYMBOLS.infrastructure.ReportStore).toConstantValue(createMemoryReportStore());
+  container
+    .bind(SYMBOLS.usecases.KeepReport)
+    .toResolvedValue(createKeepReport, [SYMBOLS.infrastructure.ReportStore]);
+  container
+    .bind(SYMBOLS.usecases.RecallReport)
+    .toResolvedValue(createRecallReport, [SYMBOLS.infrastructure.ReportStore]);
 
   return container;
 }

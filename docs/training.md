@@ -93,7 +93,17 @@ At most **three** notes are named, most missed first, ties broken by the order t
 climb an octave. More than a handful is not a list to go back over, it is the session
 again.
 
-**Checked** by `bun test`: `src/domain/training/report.ts`.
+The report of the session just finished is held **in memory** and nowhere else. A report
+reopened after the application was relaunched has nothing to show, and that is right: a
+report is about the session the learner has just played. Writing it down would be a second
+record of a session the progression already counts.
+
+Saying what a session was worth and writing it down are the **same read**: the report is
+worked out from the record the session was played against, so it has to be read before the
+new one is written.
+
+**Checked** by `bun test`: `src/domain/training/report.ts`, the sentences put on it in
+`src/components/wording/report.ts`, and the slot it waits in.
 
 ## Reading one on screen
 
