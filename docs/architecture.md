@@ -76,6 +76,20 @@ plugin writes nothing and says so on the prebuild.
 
 **Not checked by anything**: run a prebuild and read `ios/Clefsmith.xcodeproj` to see it.
 
+React Native's core is **built from source** on iOS, through
+`ios.buildReactNativeFromSource`. The prebuilt core it ships instead is compiled without
+the debug symbols that `react-native-gesture-handler`, `react-native-reanimated` and
+`react-native-screens` reference in a Debug build — `Sealable`, `ShadowNode::getDebugName`
+— so a Debug build for a device fails to link, and a device could only ever run a Release
+build, which does not load from Metro. No fast refresh on the one machine where the
+microphone, Vosk and the audio are real.
+
+The property is global: there is no building from source in Debug and taking the prebuilt
+core in Release. The first build after a prebuild is long in both, and that is the price
+of the reload loop.
+
+**Not checked by anything**: the CI does not build for a device.
+
 ## The speech bench
 
 `bench/` is not part of the application and is never imported by it. It replays a corpus
