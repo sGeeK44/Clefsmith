@@ -6,8 +6,8 @@ type Session = Record<string, string>;
 /**
  * Both are `as const`: a plain `const` holds a widening literal type, which an
  * object literal widens back to `string` — and the typed routes then reject a
- * `pathname` they can no longer recognise. Nothing catches it until the route
- * types are generated, which `tools/verify` does not do.
+ * `pathname` they can no longer recognise. Caught by the typecheck, which
+ * `tools/verify` now runs against freshly generated route declarations.
  */
 export const EXERCISE = '/exercise' as const;
 const MICROPHONE = '/microphone' as const;

@@ -14,6 +14,14 @@ ordered: a layer may depend on the ones above it in this list, never on the ones
 | `src/components`     | React components that render no route, and the wording the screens translate the domain into.                 |
 | `src/app`            | The Expo Router routes. A file here is a screen or a layout.                                                  |
 
+A route is named by its file, and `typedRoutes` turns that into a type: `router.push`
+only accepts a path `src/app` actually has. The declarations it reads are generated into
+`.expo/`, which is not committed — so `tools/verify` writes them itself, before the
+typecheck, with `tools/routes/generate.ts`. Without that step the typecheck sees no routes
+at all, the path parameter stays `string`, and a typo in a route reaches the device.
+
+**Checked by**: `tools/verify`, which fails on the typecheck.
+
 The direction is **inwards only**: a use case never imports an adapter, the domain never
 imports a use case, `src/core` imports nothing of the others. A use case that needs the
 outside world declares the shape it needs — `SpeechRecognizer`, `AppVersionReader` — and

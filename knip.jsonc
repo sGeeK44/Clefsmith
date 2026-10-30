@@ -11,6 +11,9 @@
         // the corpus gains or loses a recording.
         "bench/make-corpus-assets.ts",
         "tools/docs/check.ts",
+        // Run by tools/verify before the typecheck, to write the typed-route
+        // declarations into .expo/. Nothing imports it, which is the point.
+        "tools/routes/generate.ts",
         // Run by hand when a glyph is added, and its output is committed as
         // src/domain/score/bravura.ts. Nothing imports it, which is the point.
         "tools/smufl/extract.ts"
