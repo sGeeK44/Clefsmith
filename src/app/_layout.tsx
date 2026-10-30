@@ -9,6 +9,7 @@ import '@/components/theme/unistyles';
 import { ContainerProvider, useService } from '@/components/container-provider';
 import { createContainer } from '@/infrastructure/container';
 import { SYMBOLS } from '@/infrastructure/symbols';
+import { systemClock } from '@/infrastructure/system-clock';
 import { createVoskAnswerSource } from '@/infrastructure/vosk-answer-source';
 
 /**
@@ -17,7 +18,7 @@ import { createVoskAnswerSource } from '@/infrastructure/vosk-answer-source';
  */
 const MODEL_PATH = 'vosk-model-small-fr-0.22';
 
-const container = createContainer(createVoskAnswerSource(vosk, MODEL_PATH));
+const container = createContainer(createVoskAnswerSource(vosk, MODEL_PATH, systemClock));
 
 const WELCOME = '/welcome';
 

@@ -6,6 +6,9 @@ import { createKeepTime } from '@/usecases/keep-time';
  * that what is asserted is the instant asked for rather than how busy the
  * machine running the suite happens to be.
  */
+/** How late a platform timer fires, in this test's milliseconds. */
+const OVERSLEPT = 7;
+
 function clockOnDemand() {
   const waiting: { instant: number; wake: () => void }[] = [];
   let current = 0;
@@ -28,7 +31,11 @@ function clockOnDemand() {
         throw new Error('nothing is waiting');
       }
 
-      current = next.instant;
+      /**
+       * Woken a little after the instant asked for, which is what a timer does:
+       * a beat dated on the wake-up rather than on the grid would show it.
+       */
+      current = next.instant + OVERSLEPT;
       next.wake();
       await Promise.resolve();
       await Promise.resolve();
@@ -41,11 +48,11 @@ describe('keeping time', () => {
     const clock = clockOnDemand();
     const beats: number[] = [];
 
-    createKeepTime(clock)(60, () => beats.push(clock.now()));
+    createKeepTime(clock)(60, (_, at) => beats.push(at));
     await clock.pass();
     await clock.pass();
 
-    expect(beats).toEqual([1000, 2000]);
+    expect(beats).toEqual([0, 1000, 2000]);
   });
 
   it('beats four times as often at a hundred and sixty', async () => {
@@ -72,11 +79,30 @@ describe('keeping time', () => {
     const clock = clockOnDemand();
     const beats: number[] = [];
 
-    const stop = createKeepTime(clock)(60, () => beats.push(clock.now()));
+    const stop = createKeepTime(clock)(60, (passed) => beats.push(passed));
     await clock.pass();
     stop();
     await clock.pass();
 
-    expect(beats).toEqual([1000]);
+    expect(beats).toEqual([0, 1]);
+  });
+
+  it('hands over the start of the session as beat zero, before anything is waited for', async () => {
+    const clock = clockOnDemand();
+    const beats: number[] = [];
+
+    createKeepTime(clock)(60, (passed, at) => beats.push(passed, at));
+
+    expect(beats).toEqual([0, 0]);
+  });
+
+  it('dates a beat on the grid rather than on when it was woken up', async () => {
+    const clock = clockOnDemand();
+    const dated: number[] = [];
+
+    createKeepTime(clock)(60, (_, at) => dated.push(at));
+    await clock.pass();
+
+    expect(dated.at(-1)).toBe(1000);
   });
 });
