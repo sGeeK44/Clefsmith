@@ -10,8 +10,11 @@ import { Text } from '@/components/ui/text';
  * does not need a word above it saying so again.
  *
  * It is not a `Button`: a button asks to be acted on, a choice shows which of
- * several states is the current one. That is why the selected option is the one
- * that carries the accent, and why nothing here is primary.
+ * several states is the current one. Nothing here is primary.
+ *
+ * It is drawn as one track with the current option raised out of it, rather than
+ * as a row of separate pills: separate pills say "press one of these", a track
+ * says "it is set to this one", and only the second is true of a choice.
  */
 
 export interface Option<T extends string> {
@@ -75,18 +78,27 @@ function Item<T extends string>({
   );
 }
 
+/** The track's own padding, and what the raised option's corner loses to it. */
+const LIP = 3;
+
 const styles = StyleSheet.create((theme) => ({
   choice: { gap: theme.spacing.xs },
-  options: { flexDirection: 'row', gap: theme.spacing.s },
+  options: {
+    backgroundColor: theme.colors.soft,
+    borderRadius: theme.radii.m,
+    flexDirection: 'row',
+    padding: LIP,
+  },
   option: {
-    borderRadius: theme.radii.pill,
-    borderWidth: 1,
-    paddingHorizontal: theme.spacing.m,
-    paddingVertical: theme.spacing.xs,
+    alignItems: 'center',
+    borderRadius: theme.radii.m - LIP,
+    /** Equal shares: a track whose halves are the width of their words is not a track. */
+    flex: 1,
+    paddingVertical: theme.spacing.s,
     variants: {
       selected: {
-        true: { backgroundColor: theme.colors.soft, borderColor: theme.colors.accent },
-        false: { backgroundColor: theme.colors.bg, borderColor: theme.colors.line },
+        true: { backgroundColor: theme.colors.surf },
+        false: {},
       },
     },
   },
@@ -94,7 +106,7 @@ const styles = StyleSheet.create((theme) => ({
     fontFamily: theme.typography.family.medium,
     variants: {
       selected: {
-        true: { color: theme.colors.accent },
+        true: { color: theme.colors.ink },
         false: { color: theme.colors.muted },
       },
     },

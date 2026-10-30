@@ -18,3 +18,13 @@ export function measuresLine(measures: Measures): string {
 export function lengthLine(measures: Measures): string {
   return `${exercisesIn(measures)} notes`;
 }
+
+/**
+ * `60 bpm`, or `Sans tempo` when nothing is beating.
+ *
+ * The two readings of the desk differ by this alone, so the chip says which one
+ * the learner is about to play rather than a tempo that would not be heard.
+ */
+export function beatLine(metronome: boolean, tempo: number): string {
+  return metronome ? tempoLine(tempo) : 'Sans tempo';
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { lengthLine, measuresLine, tempoLine } from '@/components/wording/session';
+import { beatLine, lengthLine, measuresLine, tempoLine } from '@/components/wording/session';
 
 describe('what the session panel says', () => {
   it('reads a tempo out in beats to the minute', () => {
@@ -16,5 +16,15 @@ describe('what the session panel says', () => {
 
   it('follows the domain when the length changes', () => {
     expect(lengthLine(16)).toBe('64 notes');
+  });
+});
+
+describe('what the session is beaten at', () => {
+  it('gives the tempo when the metronome is on', () => {
+    expect(beatLine(true, 90)).toBe('90 bpm');
+  });
+
+  it('says there is no tempo when it is off', () => {
+    expect(beatLine(false, 90)).toBe('Sans tempo');
   });
 });

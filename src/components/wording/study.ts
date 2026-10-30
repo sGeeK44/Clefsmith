@@ -1,6 +1,7 @@
 import type { Clef } from '@/domain/notation/clef';
 import { type Notation, nameOf } from '@/domain/notation/naming';
 import { LEVELS, type Level, newcomersOf } from '@/domain/training/level';
+import type { Reach } from '@/domain/training/progress';
 
 /**
  * What a level is called on screen.
@@ -65,4 +66,26 @@ export function broughtLine(clef: Clef, level: Level): string {
   const brought = newcomersOf(clef, level).length;
 
   return brought === 0 ? 'Révision' : `${brought} nouvelles notes`;
+}
+
+/**
+ * Where a study stands for the learner, said beside its node on the parcours.
+ *
+ * A finished study says so rather than showing what it was read at: nothing
+ * records a study's score — only the mastery per note survives a session — and
+ * a figure the record cannot produce is a figure that would have to be invented.
+ */
+export function reachLine(reach: Reach): string {
+  return REACHES[reach];
+}
+
+const REACHES: Record<Reach, string> = {
+  done: 'Terminé',
+  current: 'En cours',
+  ahead: 'À venir',
+};
+
+/** What a node carries: a tick once the study is behind the learner, its number before. */
+export function nodeLabel(reach: Reach, level: Level): string {
+  return reach === 'done' ? '✓' : `${level}`;
 }
