@@ -69,7 +69,8 @@
             "usePrecompiledModules": false
           }
         }
-      ]
+      ],
+      "./plugins/with-signing"
     ],
     "experiments": {
       "typedRoutes": true,
