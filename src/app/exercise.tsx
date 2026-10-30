@@ -4,6 +4,7 @@ import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
 import { useService } from '@/components/container-provider';
+import { Beat } from '@/components/ui/beat';
 import { Card } from '@/components/ui/card';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Screen } from '@/components/ui/screen';
@@ -24,7 +25,8 @@ import { tempoLine } from '@/components/wording/session';
 import type { Clef } from '@/domain/notation/clef';
 import { type Notation, nameOf } from '@/domain/notation/naming';
 import type { Degree } from '@/domain/notation/pitch';
-import { answered, type Drill, drillOf, isOver } from '@/domain/training/drill';
+import { beatOf } from '@/domain/training/beat';
+import { answered, beaten, type Drill, drillOf, isOver, scored } from '@/domain/training/drill';
 import type { Level } from '@/domain/training/level';
 import type { Measures } from '@/domain/training/session-settings';
 import { SYMBOLS } from '@/infrastructure/symbols';
@@ -36,7 +38,9 @@ const REPORT = '/report';
 
 export default function ExerciseScreen() {
   const params = useLocalSearchParams<Params>();
-  const { clef, level, measures, degrees, tempo } = params;
+  const { clef, level, measures, degrees, tempo, metronome } = params;
+  /** The rhythmic mode of the desk: the session is read at the tempo rather than at the learner's pace. */
+  const rhythmic = metronome === 'true';
   /** The route is what the parcours decided; it does not change under the screen. */
   const brief = useMemo(
     () => briefOf(clef, level, measures, degrees),
@@ -47,8 +51,11 @@ export default function ExerciseScreen() {
   const getSettings = useService(SYMBOLS.usecases.GetSettings);
   const record = useService(SYMBOLS.usecases.RecordFinishedSession);
   const keepReport = useService(SYMBOLS.usecases.KeepReport);
+  const keepTime = useService(SYMBOLS.usecases.KeepTime);
   const [drill, setDrill] = useState<Drill>();
   const [notation, setNotation] = useState<Notation>();
+  /** Whether the notes have been dealt — what the beat waits for, rather than the notes themselves. */
+  const dealt = drill !== undefined;
 
   useEffect(() => {
     setDrill(drillOf(drawSession(brief)));
@@ -58,9 +65,35 @@ export default function ExerciseScreen() {
    * One answer at a time, and the drill decides what it is worth. The port hands
    * over a degree rather than a word: what was heard is CLE-18's problem.
    */
-  const heard = useCallback((degree: Degree) => {
-    setDrill((reading) => (reading === undefined ? reading : answered(reading, degree)));
-  }, []);
+  const heard = useCallback(
+    (degree: Degree) => {
+      setDrill((reading) => {
+        if (reading === undefined) {
+          return reading;
+        }
+
+        return rhythmic ? scored(reading, degree) : answered(reading, degree);
+      });
+    },
+    [rhythmic],
+  );
+
+  /**
+   * Under a metronome the beat is what moves the reading on, said or not.
+   *
+   * It is started once the notes are drawn and not before: a beat counted while
+   * the session is still being dealt would be counted against a staff nobody
+   * has seen yet.
+   */
+  useEffect(() => {
+    if (!rhythmic || !dealt) {
+      return;
+    }
+
+    return keepTime(Number(tempo), () => {
+      setDrill((reading) => (reading === undefined ? reading : beaten(reading)));
+    });
+  }, [rhythmic, dealt, keepTime, tempo]);
 
   /**
    * Listening outlives the screen if it is only stopped on the way out: the
@@ -141,11 +174,13 @@ export default function ExerciseScreen() {
         </Text>
       </View>
 
+      {rhythmic && <Beat current={beatOf(drill.at)} />}
+
       <Card>
         <Staff clef={brief.clef} notes={readingOf(drill)} />
       </Card>
 
-      <Feedback drill={drill} notation={notation} />
+      <Feedback drill={drill} notation={notation} rewinds={!rhythmic} />
     </Screen>
   );
 }
@@ -166,7 +201,16 @@ function readingOf(drill: Drill) {
  * mockup gives the three the same place on purpose: the learner's eyes do not
  * move between saying a note and being told about it.
  */
-function Feedback({ drill, notation }: { readonly drill: Drill; readonly notation: Notation }) {
+function Feedback({
+  drill,
+  notation,
+  rewinds,
+}: {
+  readonly drill: Drill;
+  readonly notation: Notation;
+  /** Under a metronome a mistake sends nobody back: the beat keeps the place. */
+  readonly rewinds: boolean;
+}) {
   const verdict = verdictOf(drill.last);
 
   if (drill.last === undefined) {
@@ -193,9 +237,11 @@ function Feedback({ drill, notation }: { readonly drill: Drill; readonly notatio
       {verdict === 'wrong' && (
         <>
           <Text>{expectedLine(expected, notation)}</Text>
-          <Text variant="caption" tone="muted">
-            {REWIND}
-          </Text>
+          {rewinds && (
+            <Text variant="caption" tone="muted">
+              {REWIND}
+            </Text>
+          )}
         </>
       )}
     </View>
@@ -207,6 +253,7 @@ interface Params extends Record<string, string | undefined> {
   readonly level?: string;
   readonly measures?: string;
   readonly tempo?: string;
+  readonly metronome?: string;
   readonly degrees?: string;
 }
 
