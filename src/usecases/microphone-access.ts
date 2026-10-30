@@ -17,6 +17,9 @@
  */
 export type MicrophoneAccess = 'granted' | 'askable' | 'blocked';
 
+/** A verdict that stops a session — which is every verdict but one. */
+export type MicrophoneRefusal = Exclude<MicrophoneAccess, 'granted'>;
+
 /** A platform's answer about a permission, in the two facts every platform states. */
 export interface PermissionAnswer {
   readonly granted: boolean;
