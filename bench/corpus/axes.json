@@ -1,6 +1,6 @@
 {
   "sampleRate": 16000,
-  "speakers": ["s1", "s2"],
+  "speakers": ["s1", "s2", "s3"],
   "notations": {
     "syllabic": ["do", "ré", "mi", "fa", "sol", "la", "si"]
   },
