@@ -81,6 +81,20 @@ A **revision** narrows the pool to the degrees it aims at and brings nothing: th
 towards new notes exists to practise what a level adds, and a revision adds nothing. It
 goes back over what is already there.
 
+## What a session was worth
+
+A finished session reports its accuracy, the notes to go back over, and the study it
+opened. It is worked out from the record the session was played **against**, not from the
+one it left behind: whether a level opened is the progression rule replayed and compared,
+never a second rule of its own — two rules saying when a level opens diverge the day
+either one moves.
+
+At most **three** notes are named, most missed first, ties broken by the order the degrees
+climb an octave. More than a handful is not a list to go back over, it is the session
+again.
+
+**Checked** by `bun test`: `src/domain/training/report.ts`.
+
 ## Reading one on screen
 
 The staff shows the **measure being read**, not the session: a mistake sends the reading
