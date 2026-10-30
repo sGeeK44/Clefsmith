@@ -1,7 +1,7 @@
+import type { Clock } from '@/core/clock';
 import { degreeOf, type Notation, vocabularyOf } from '@/domain/notation/naming';
-import type { Degree } from '@/domain/notation/pitch';
 import { UNKNOWN, type VoskModule } from '@/infrastructure/vosk-speech-recognizer';
-import type { AnswerSource } from '@/usecases/listen-for-answers';
+import type { AnswerSource, Heard } from '@/usecases/listen-for-answers';
 
 /**
  * The answers of a session, heard.
@@ -16,28 +16,56 @@ import type { AnswerSource } from '@/usecases/listen-for-answers';
  * at that point — so a session hears one notation from start to finish. Changing
  * notation is a new exercise, which is a new session.
  */
-export function createVoskAnswerSource(vosk: VoskModule, modelPath: string): AnswerSource {
+export function createVoskAnswerSource(
+  vosk: VoskModule,
+  modelPath: string,
+  clock: Clock,
+): AnswerSource {
   return {
-    async listen(notation: Notation, heard: (degree: Degree) => void) {
+    async listen(notation: Notation, heard: Heard) {
       await vosk.loadModel(modelPath);
+
+      /**
+       * When the learner started saying the word the decoder is still chewing on.
+       *
+       * The first non-empty partial since the last answer, and only it: the
+       * later ones refine the same word, and the decoder says nothing at all
+       * until it has heard enough to guess. It is the closest thing to the start
+       * of the utterance this module exposes — there are no timestamps in it —
+       * and it is what keeps the decoder's own latency out of the verdict.
+       */
+      let startedAt: number | undefined;
 
       /**
        * Only final results are acted on. A partial is the decoder thinking out
        * loud: acting on one would answer for the learner halfway through a word,
        * and then answer again when they finished saying it.
        */
-      const subscription = vosk.onResult((transcript) => {
-        const degree = degreeOf(transcript, notation);
+      const subscriptions = [
+        vosk.onPartialResult((transcript) => {
+          if (startedAt === undefined && transcript !== '') {
+            startedAt = clock.now();
+          }
+        }),
+        vosk.onResult((transcript) => {
+          const degree = degreeOf(transcript, notation);
+          const began = startedAt ?? clock.now();
 
-        if (degree !== undefined) {
-          heard(degree);
-        }
-      });
+          startedAt = undefined;
+
+          if (degree !== undefined) {
+            heard(degree, began);
+          }
+        }),
+      ];
 
       await vosk.start({ grammar: [...vocabularyOf(notation), UNKNOWN], pushAudio: false });
 
       return async () => {
-        subscription.remove();
+        for (const subscription of subscriptions) {
+          subscription.remove();
+        }
+
         vosk.stop();
         vosk.unload();
       };
