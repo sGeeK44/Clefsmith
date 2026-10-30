@@ -9,7 +9,6 @@ import { createMemoryReportStore } from '@/infrastructure/memory-report-store';
 import { createProgressStore } from '@/infrastructure/progress-store';
 import { createSettingsStore } from '@/infrastructure/settings-store';
 import { SYMBOLS } from '@/infrastructure/symbols';
-import { createAskForMicrophone } from '@/usecases/ask-for-microphone';
 import { createChooseNotation } from '@/usecases/choose-notation';
 import { createDrawSession } from '@/usecases/draw-session';
 import { createFinishWelcome } from '@/usecases/finish-welcome';
@@ -18,6 +17,11 @@ import { createGetProgress } from '@/usecases/get-progress';
 import { createGetSettings } from '@/usecases/get-settings';
 import { createKeepReport, createRecallReport } from '@/usecases/keep-report';
 import { type AnswerSource, createListenForAnswers } from '@/usecases/listen-for-answers';
+import {
+  createAskForMicrophone,
+  createMayListen,
+  createShowMicrophoneSettings,
+} from '@/usecases/microphone-access';
 import { createRecordFinishedSession } from '@/usecases/record-finished-session';
 import { createResetProgress } from '@/usecases/reset-progress';
 
@@ -65,6 +69,12 @@ export function createContainer(answerSource: AnswerSource): Container {
   container
     .bind(SYMBOLS.usecases.AskForMicrophone)
     .toResolvedValue(createAskForMicrophone, [SYMBOLS.infrastructure.MicrophonePermission]);
+  container
+    .bind(SYMBOLS.usecases.MayListen)
+    .toResolvedValue(createMayListen, [SYMBOLS.infrastructure.MicrophonePermission]);
+  container
+    .bind(SYMBOLS.usecases.ShowMicrophoneSettings)
+    .toResolvedValue(createShowMicrophoneSettings, [SYMBOLS.infrastructure.MicrophonePermission]);
 
   container
     .bind(SYMBOLS.usecases.FinishWelcome)
