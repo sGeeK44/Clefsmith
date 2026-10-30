@@ -3,8 +3,14 @@ import type { MicrophoneAccess } from '@/usecases/microphone-access';
 /** The session setup, as a route carries it: strings, because a route has nothing else. */
 type Session = Record<string, string>;
 
-export const EXERCISE = '/exercise';
-const MICROPHONE = '/microphone';
+/**
+ * Both are `as const`: a plain `const` holds a widening literal type, which an
+ * object literal widens back to `string` — and the typed routes then reject a
+ * `pathname` they can no longer recognise. Nothing catches it until the route
+ * types are generated, which `tools/verify` does not do.
+ */
+export const EXERCISE = '/exercise' as const;
+const MICROPHONE = '/microphone' as const;
 
 /**
  * Where starting a session goes.
