@@ -4,6 +4,7 @@ import { Pressable, ScrollView, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
 import { useService } from '@/components/container-provider';
+import { exerciseRoute } from '@/components/exercise-route';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Choice, type Option } from '@/components/ui/choice';
@@ -159,6 +160,13 @@ function Open({
   readonly session: SessionSettings;
 }) {
   const { tempo, measures, metronome } = session;
+  const mayListen = useService(SYMBOLS.usecases.MayListen);
+
+  const start = useCallback(async () => {
+    const setup = { clef, level: `${level}`, tempo: `${tempo}`, measures: `${measures}` };
+
+    router.push(exerciseRoute(await mayListen(), { ...setup, metronome: String(metronome) }));
+  }, [clef, level, mayListen, measures, metronome, tempo]);
 
   return (
     <Card>
@@ -187,16 +195,7 @@ function Open({
         </Text>
       </View>
 
-      <Button
-        label="Commencer"
-        onPress={() =>
-          router.push({
-            pathname: '/exercise',
-            params: { clef, level, tempo, measures, metronome: String(metronome) },
-          })
-        }
-        testID="start"
-      />
+      <Button label="Commencer" onPress={() => void start()} testID="start" />
     </Card>
   );
 }

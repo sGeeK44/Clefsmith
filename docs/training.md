@@ -185,6 +185,20 @@ grammar it opens on, the degree it reports, what it refuses, and that it lets go
 microphone. **Not checked by anything**: that the native module does what the stand-in
 says it does. That needs a device, and the bench is what measures it.
 
+**A refused microphone stops a session rather than degrading it.** The voice is the only
+way to answer — a note keyboard would contradict the mode — so starting a session without
+the permission opens an explanation and the way to the system settings instead.
+
+The explanation **carries the session it stopped**. Granting the permission and coming
+back is then the whole of what the learner has to do, and the verdict is re-read when the
+application returns to the foreground because that is the only moment it can have changed.
+
+Where starting a session goes is **one function**, not a check on each screen that starts
+one: two copies of that rule diverge the day either moves, and the one that moved last is
+the one the learner meets. **Checked** by `bun test`:
+`src/components/exercise-route.ts`. **Not checked by anything**: that the settings button
+opens the settings, and that coming back starts the exercise. Both need a device.
+
 ## Progression
 
 A session that is read at **75 % or better** opens the next level. Four things have to
