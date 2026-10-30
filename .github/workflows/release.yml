@@ -19,7 +19,41 @@ jobs:
       # itself — and the release pull request would carry no checks, which is
       # exactly what it needs the day a check becomes required.
       - uses: googleapis/release-please-action@v5
+        id: release
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      # release-please rewrites app.json through JSON.stringify(..., 2), which
+      # re-expands the arrays the formatter keeps on one line — and the format
+      # check then refuses the very pull request meant to cut the release.
+      # Reformatting it here rather than carving app.json out of the formatter:
+      # the file is hand-edited too, and an exception would hold for every
+      # edit to buy back the one release-please makes.
+      - if: ${{ steps.release.outputs.pr }}
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ fromJson(steps.release.outputs.pr).headBranchName }}
+          token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+
+      - if: ${{ steps.release.outputs.pr }}
+        uses: jdx/mise-action@v5
+
+      # The repository's own formatter, at the version the lockfile pins: a
+      # version named here would disagree with it the day either moves.
+      - if: ${{ steps.release.outputs.pr }}
+        run: bun install --frozen-lockfile
+
+      - if: ${{ steps.release.outputs.pr }}
+        env:
+          BRANCH: ${{ fromJson(steps.release.outputs.pr).headBranchName }}
+        run: |
+          bunx biome format --write app.json
+          if git diff --quiet; then
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -am 'chore: format app.json after release-please'
+          git push origin "HEAD:$BRANCH"
