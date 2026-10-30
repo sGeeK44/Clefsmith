@@ -32,3 +32,21 @@ export function beatAt(startedAt: number, beat: number, tempo: number): number {
 export function beatOf(at: number): number {
   return at % NOTES_PER_MEASURE;
 }
+
+/**
+ * How far from its beat an answer may start and still be in time, as a share of
+ * the beat rather than a number of milliseconds.
+ *
+ * Half a beat either side, which is the whole beat and nothing of its
+ * neighbours. A window written in milliseconds would be half a beat at forty to
+ * the minute and more than a whole one at a hundred and sixty — the same window
+ * would mean "strict" at one tempo and "anything goes" at the other.
+ */
+const TOLERANCE = 0.5;
+
+export type Timing = 'in-time' | 'off-beat';
+
+/** Whether an utterance started close enough to the beat it answers. */
+export function timingOf(startedAt: number, beat: number, tempo: number): Timing {
+  return Math.abs(startedAt - beat) <= TOLERANCE * beatIntervalMs(tempo) ? 'in-time' : 'off-beat';
+}

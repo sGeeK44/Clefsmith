@@ -1,3 +1,4 @@
+import type { Tone } from '@/components/ui/text';
 import { type Notation, nameOf } from '@/domain/notation/naming';
 import type { Degree } from '@/domain/notation/pitch';
 import type { Drill } from '@/domain/training/drill';
@@ -16,15 +17,21 @@ export const HINT = 'Dites la note surlignée';
 export const RIGHT = 'Juste';
 export const WRONG = 'Faux';
 export const REWIND = 'On reprend au début de la mesure';
+export const OFF_BEAT = 'Juste, mais à côté du temps';
 
-export type Verdict = 'waiting' | 'right' | 'wrong';
+export type Verdict = 'waiting' | 'right' | 'off-beat' | 'wrong';
 
 export function verdictOf(last: Drill['last']): Verdict {
   if (last === undefined) {
     return 'waiting';
   }
 
-  return last.right ? 'right' : 'wrong';
+  if (!last.right) {
+    return 'wrong';
+  }
+
+  /** The note was right, so the only thing left to say about it is when it was said. */
+  return last.timing === 'off-beat' ? 'off-beat' : 'right';
 }
 
 /**
@@ -50,4 +57,27 @@ export function shareOf(at: number, total: number): number {
 /** `C'était un do` — the note the learner missed, named rather than pointed at. */
 export function expectedLine(degree: Degree, notation: Notation): string {
   return `C'était un ${nameOf(degree, notation)}`;
+}
+
+/**
+ * The colour a verdict is said in.
+ *
+ * Off the beat has a tone of its own rather than the wrong one's: the note was
+ * read right, and a learner shown red for a right note learns to distrust red.
+ */
+export function toneOf(verdict: Verdict): Tone {
+  if (verdict === 'right') {
+    return 'ok';
+  }
+
+  return verdict === 'off-beat' ? 'late' : 'bad';
+}
+
+/** What the feedback zone says under the note, once something has been said. */
+export function verdictLine(verdict: Verdict): string {
+  if (verdict === 'right') {
+    return RIGHT;
+  }
+
+  return verdict === 'off-beat' ? OFF_BEAT : WRONG;
 }

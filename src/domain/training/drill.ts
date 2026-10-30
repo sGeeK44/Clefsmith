@@ -1,4 +1,5 @@
 import type { Degree, Pitch } from '@/domain/notation/pitch';
+import type { Timing } from '@/domain/training/beat';
 import type { Answer } from '@/domain/training/progress';
 import { NOTES_PER_MEASURE } from '@/domain/training/session-settings';
 
@@ -7,6 +8,8 @@ interface Attempt {
   readonly said: Degree;
   readonly expected: Degree;
   readonly right: boolean;
+  /** Nothing under no metronome: without a beat there is no moment to be late for. */
+  readonly timing: Timing | undefined;
 }
 
 /**
@@ -57,7 +60,7 @@ export function answered(drill: Drill, said: Degree): Drill {
 
   const right = said === expected.degree;
 
-  return { ...scored(drill, said), at: right ? drill.at + 1 : measureOf(drill.at) };
+  return { ...scored(drill, said, undefined), at: right ? drill.at + 1 : measureOf(drill.at) };
 }
 
 /**
@@ -68,7 +71,7 @@ export function answered(drill: Drill, said: Degree): Drill {
  * beat owns the position — rewinding to the start of the measure while the beat
  * keeps counting would put the two out of step for the rest of the session.
  */
-export function scored(drill: Drill, said: Degree): Drill {
+export function scored(drill: Drill, said: Degree, timing: Timing | undefined): Drill {
   const expected = expectedOf(drill);
 
   if (expected === undefined) {
@@ -80,7 +83,13 @@ export function scored(drill: Drill, said: Degree): Drill {
   return {
     ...drill,
     answers: [...drill.answers, { degree: expected.degree, correct: right }],
-    last: { said, expected: expected.degree, right },
+    /**
+     * The note comes first: a wrong one is wrong whenever it was said, and
+     * telling a learner their mistake was off the beat buries the mistake.
+     * Accuracy counts a late right note as right — being behind the metronome
+     * is something to be told, not something to be marked down for.
+     */
+    last: { said, expected: expected.degree, right, timing: right ? timing : undefined },
   };
 }
 
