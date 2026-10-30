@@ -65,7 +65,10 @@ which is the rule working rather than an exception to it.
 is passing is the session's business.
 
 `ProgressBar` holds no number of its own. What the share means — notes read, files sent —
-is the screen's business, and a bar that knew would be a bar per screen.
+is the screen's business, and a bar that knew would be a bar per screen. It has two
+weights: the regular one measures the screen, the thin one measures the line of a list it
+sits under — at the regular weight a bar under a list line reads as a second element
+rather than as a measure of the line above it.
 
 **Not checked by anything**: that a screen uses a token rather than a literal colour. It is
 a convention, held up at review.

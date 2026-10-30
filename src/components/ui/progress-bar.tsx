@@ -9,8 +9,19 @@ const WHOLE = 100;
  *
  * It holds no number of its own: what the share means — notes read, files sent —
  * is the screen's business, and a bar that knew would be a bar per screen.
+ *
+ * `thin` is for a bar that sits under a line of a list, where the regular weight
+ * reads as a second element rather than as a measure of the line above it.
  */
-export function ProgressBar({ share }: { readonly share: number }) {
+export function ProgressBar({
+  share,
+  weight = 'regular',
+}: {
+  readonly share: number;
+  readonly weight?: 'regular' | 'thin';
+}) {
+  styles.useVariants({ weight });
+
   return (
     <View style={styles.track}>
       <View style={[styles.fill, { width: `${share * WHOLE}%` }]} />
@@ -23,8 +34,8 @@ const styles = StyleSheet.create((theme) => ({
     backgroundColor: theme.colors.soft,
     borderRadius: theme.radii.s,
     flex: 1,
-    height: 6,
     overflow: 'hidden',
+    variants: { weight: { regular: { height: 6 }, thin: { height: 3 } } },
   },
   fill: { backgroundColor: theme.colors.ink, height: '100%' },
 }));
