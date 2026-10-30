@@ -1,23 +1,25 @@
 import { describe, expect, it } from 'bun:test';
 
 import {
+  accessOf,
   createAskForMicrophone,
-  createMayListen,
+  createReadMicrophoneAccess,
   createShowMicrophoneSettings,
+  type MicrophoneAccess,
   type MicrophonePermission,
 } from '@/usecases/microphone-access';
 
-function permission(granted: boolean) {
+function permission(access: MicrophoneAccess) {
   const done: string[] = [];
 
   const port: MicrophonePermission = {
     request: async () => {
       done.push('request');
-      return granted;
+      return access;
     },
-    granted: async () => {
-      done.push('granted');
-      return granted;
+    read: async () => {
+      done.push('read');
+      return access;
     },
     openSettings: async () => {
       done.push('openSettings');
@@ -29,40 +31,53 @@ function permission(granted: boolean) {
 
 describe('asking for the microphone', () => {
   it('puts the question and hands back what the learner answered', async () => {
-    const { port, done } = permission(true);
+    const { port, done } = permission('granted');
 
-    expect(await createAskForMicrophone(port)()).toBe(true);
+    expect(await createAskForMicrophone(port)()).toBe('granted');
     expect(done).toEqual(['request']);
   });
 
   it('hands back a refusal rather than swallowing it', async () => {
-    const { port } = permission(false);
+    const { port } = permission('blocked');
 
-    expect(await createAskForMicrophone(port)()).toBe(false);
+    expect(await createAskForMicrophone(port)()).toBe('blocked');
   });
 });
 
 describe('whether a session can be started', () => {
   it('reads the standing verdict without putting the question again', async () => {
-    const { port, done } = permission(true);
+    const { port, done } = permission('granted');
 
-    expect(await createMayListen(port)()).toBe(true);
-    expect(done).toEqual(['granted']);
+    expect(await createReadMicrophoneAccess(port)()).toBe('granted');
+    expect(done).toEqual(['read']);
   });
 
-  it('says no when the microphone is not granted', async () => {
-    const { port } = permission(false);
-
-    expect(await createMayListen(port)()).toBe(false);
+  it('tells a refusal that can be asked again from one that cannot', async () => {
+    expect(await createReadMicrophoneAccess(permission('askable').port)()).toBe('askable');
+    expect(await createReadMicrophoneAccess(permission('blocked').port)()).toBe('blocked');
   });
 });
 
 describe('the way out of a refusal', () => {
   it('opens the settings, and asks nothing on the way', async () => {
-    const { port, done } = permission(false);
+    const { port, done } = permission('blocked');
 
     await createShowMicrophoneSettings(port)();
 
     expect(done).toEqual(['openSettings']);
+  });
+});
+
+describe('reading a platform answer', () => {
+  it('is granted when the platform granted it', () => {
+    expect(accessOf({ granted: true, canAskAgain: false })).toBe('granted');
+  });
+
+  it('is askable while the system would still put its question', () => {
+    expect(accessOf({ granted: false, canAskAgain: true })).toBe('askable');
+  });
+
+  it('is blocked once the system has stopped asking', () => {
+    expect(accessOf({ granted: false, canAskAgain: false })).toBe('blocked');
   });
 });
