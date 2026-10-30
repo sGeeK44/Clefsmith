@@ -47,8 +47,10 @@ Eleven, in `src/components/ui/`:
 | `Beat`    | Which of the four beats of a measure is passing.          |
 | `Chip`    | One fact about what is about to be played, on a fill.     |
 
-`Choice` is not a `Button`: a button asks to be acted on, a choice shows a state. The
-selected option carries the accent, and nothing in it is primary.
+`Choice` is not a `Button`: a button asks to be acted on, a choice shows a state. It is
+drawn as one track with the current option raised out of it, in equal shares — separate
+pills say "press one of these", a track says "it is set to this one", and only the second
+is true of a choice.
 
 `Flash` is not a dialog: nothing has to be dismissed and nothing is blocked while it is
 up. A message that needs an answer is a screen, not a flash.
