@@ -9,6 +9,7 @@ import { createMemoryReportStore } from '@/infrastructure/memory-report-store';
 import { createProgressStore } from '@/infrastructure/progress-store';
 import { createSettingsStore } from '@/infrastructure/settings-store';
 import { SYMBOLS } from '@/infrastructure/symbols';
+import { systemClock } from '@/infrastructure/system-clock';
 import { createChooseNotation } from '@/usecases/choose-notation';
 import { createDrawSession } from '@/usecases/draw-session';
 import { createFinishWelcome } from '@/usecases/finish-welcome';
@@ -16,6 +17,7 @@ import { createGetAppVersion } from '@/usecases/get-app-version';
 import { createGetProgress } from '@/usecases/get-progress';
 import { createGetSettings } from '@/usecases/get-settings';
 import { createKeepReport, createRecallReport } from '@/usecases/keep-report';
+import { createKeepTime } from '@/usecases/keep-time';
 import { type AnswerSource, createListenForAnswers } from '@/usecases/listen-for-answers';
 import {
   createAskForMicrophone,
@@ -89,6 +91,7 @@ export function createContainer(answerSource: AnswerSource): Container {
     .toResolvedValue(createListenForAnswers, [SYMBOLS.infrastructure.AnswerSource]);
 
   container.bind(SYMBOLS.usecases.DrawSession).toConstantValue(createDrawSession(mathRandom));
+  container.bind(SYMBOLS.usecases.KeepTime).toConstantValue(createKeepTime(systemClock));
 
   container.bind(SYMBOLS.infrastructure.ReportStore).toConstantValue(createMemoryReportStore());
   container
