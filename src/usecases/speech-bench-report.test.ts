@@ -2,13 +2,14 @@ import { describe, expect, it } from 'bun:test';
 import {
   type Answer,
   audioMatchingTheManifest,
+  type Partial,
   recognizerAnswering,
   virtualClock,
 } from '#test/speech-bench';
 import { confusions } from '@/domain/confusion-matrix';
 import type { Corpus, Recording } from '@/domain/speech-corpus';
 import { createReplaySpeechCorpus } from '@/usecases/replay-speech-corpus';
-import { speechBenchReport } from '@/usecases/speech-bench-report';
+import { type SpeechBenchReport, speechBenchReport } from '@/usecases/speech-bench-report';
 
 const NOTES = ['do', 'mi'];
 
@@ -40,9 +41,13 @@ const CORPUS: Corpus = {
 /** Twenty utterances: five speakers, two notes, two conditions. */
 const UTTERANCES = CORPUS.recordings.length;
 
-async function benchAgainst(answers: readonly Answer[], responseMs: number) {
+async function benchAgainst(
+  answers: readonly Answer[],
+  responseMs: number,
+  partials: readonly Partial[] = [],
+) {
   const clock = virtualClock();
-  const { recognizer } = recognizerAnswering(clock, answers, responseMs);
+  const { recognizer } = recognizerAnswering(clock, answers, responseMs, partials);
   const result = await createReplaySpeechCorpus(clock, audioMatchingTheManifest)(
     CORPUS,
     recognizer,
@@ -53,6 +58,20 @@ async function benchAgainst(answers: readonly Answer[], responseMs: number) {
 
 /** What a recogniser that always gets it right would answer, in replay order. */
 const ALWAYS_RIGHT: Answer[] = CORPUS.recordings.map((recording) => recording.note);
+
+/** The half of the latency block that times the decoder settling. */
+function settling({ latency }: SpeechBenchReport) {
+  const { p95Ms, measured, unanswered } = latency;
+
+  return { p95Ms, measured, unanswered };
+}
+
+/** The half that times it first saying anything. */
+function speaking({ latency }: SpeechBenchReport) {
+  const { firstHeardP95Ms, firstHeard, unheard } = latency;
+
+  return { firstHeardP95Ms, firstHeard, unheard };
+}
 
 describe('speech bench report', () => {
   it('publishes a diagonal matrix for a recogniser that always gets it right', async () => {
@@ -77,7 +96,7 @@ describe('speech bench report', () => {
   it('publishes the response time of a recogniser whose response time is known', async () => {
     const report = await benchAgainst(ALWAYS_RIGHT, 137);
 
-    expect(report.latency).toEqual({ p95Ms: 137, measured: UTTERANCES, unanswered: 0 });
+    expect(settling(report)).toEqual({ p95Ms: 137, measured: UTTERANCES, unanswered: 0 });
   });
 
   it('counts the utterances that produced no result instead of timing them', async () => {
@@ -85,7 +104,35 @@ describe('speech bench report', () => {
 
     const report = await benchAgainst(oneSilence, 137);
 
-    expect(report.latency).toEqual({ p95Ms: 137, measured: UTTERANCES - 1, unanswered: 1 });
+    expect(settling(report)).toEqual({ p95Ms: 137, measured: UTTERANCES - 1, unanswered: 1 });
+  });
+
+  it('publishes how early the decoder first said something, beside when it settled', async () => {
+    const report = await benchAgainst(ALWAYS_RIGHT, 137, [{ afterMs: 40, transcript: 'do' }]);
+
+    expect(speaking(report)).toEqual({
+      firstHeardP95Ms: 40,
+      firstHeard: UTTERANCES,
+      unheard: 0,
+    });
+  });
+
+  it('counts the utterances it never heard start, rather than timing them at zero', async () => {
+    const report = await benchAgainst(ALWAYS_RIGHT, 137);
+
+    expect(speaking(report)).toEqual({
+      firstHeardP95Ms: Number.NaN,
+      firstHeard: 0,
+      unheard: UTTERANCES,
+    });
+  });
+
+  it('counts an utterance heard but never settled in one figure and not the other', async () => {
+    const oneSilence: Answer[] = [...ALWAYS_RIGHT.slice(0, -1), 'silent'];
+
+    const report = await benchAgainst(oneSilence, 137, [{ afterMs: 40, transcript: 'do' }]);
+
+    expect([report.latency.unanswered, report.latency.unheard]).toEqual([1, 0]);
   });
 
   it('publishes what the corpus declares against what it holds', async () => {
@@ -119,8 +166,13 @@ describe('speech bench report', () => {
     const twoNotations = { ...CORPUS, notations: { syllabic: NOTES, letters: ['A'] } };
     const inLetters = { ...recordingOf('s1', 'A', 'silence'), notation: 'letters' };
     const outcomes = [
-      { recording: recordingOf('s1', 'do', 'silence'), heard: 'do', latencyMs: 10 },
-      { recording: inLetters, heard: null, latencyMs: null },
+      {
+        recording: recordingOf('s1', 'do', 'silence'),
+        heard: 'do',
+        latencyMs: 10,
+        firstHeardMs: 5,
+      },
+      { recording: inLetters, heard: null, latencyMs: null, firstHeardMs: null },
     ];
 
     const report = speechBenchReport(twoNotations, { outcomes, sessions: [] });

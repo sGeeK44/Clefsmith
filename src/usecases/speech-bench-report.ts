@@ -29,6 +29,23 @@ export interface SpeechBenchReport {
      * a percentile alone would say so.
      */
     readonly unanswered: number;
+    /**
+     * The same measurement taken to the **first non-empty partial** instead of
+     * to the final result: the earliest the decoder commits to anything.
+     *
+     * Published beside the figure above rather than instead of it. The one
+     * above is what a learner waits through; this one is the closest the track
+     * comes to saying when they spoke, which is what evaluating timing needs.
+     */
+    readonly firstHeardP95Ms: number;
+    /** How many utterances the figure above was computed over. */
+    readonly firstHeard: number;
+    /**
+     * How many produced no partial at all, final result or not. An utterance
+     * can settle without the decoder ever having said anything on the way, so
+     * this is its own count and not `unanswered` under another name.
+     */
+    readonly unheard: number;
   };
   /** One matrix per notation, in the order the corpus declares them. */
   readonly confusion: readonly ConfusionMatrix[];
@@ -47,6 +64,10 @@ export function speechBenchReport(corpus: Corpus, result: ReplayResult): SpeechB
 
   const latencies = outcomes
     .map((outcome) => outcome.latencyMs)
+    .filter((latency): latency is number => latency !== null);
+
+  const firstHeard = outcomes
+    .map((outcome) => outcome.firstHeardMs)
     .filter((latency): latency is number => latency !== null);
 
   const confusion = Object.entries(corpus.notations).map(([notation, notes]) =>
@@ -69,6 +90,9 @@ export function speechBenchReport(corpus: Corpus, result: ReplayResult): SpeechB
       p95Ms: p95(latencies),
       measured: latencies.length,
       unanswered: outcomes.length - latencies.length,
+      firstHeardP95Ms: p95(firstHeard),
+      firstHeard: firstHeard.length,
+      unheard: outcomes.length - firstHeard.length,
     },
     confusion,
     sessions: sessions.map(({ notation, startupMs }) => ({ notation, startupMs })),
