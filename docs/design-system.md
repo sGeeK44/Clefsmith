@@ -33,7 +33,7 @@ is for. Without that plugin a themed component renders with no style at all.
 
 ## Components
 
-Nine, in `src/components/ui/`:
+Eleven, in `src/components/ui/`:
 
 | Component | Holds                                                     |
 | --------- | --------------------------------------------------------- |
@@ -45,6 +45,7 @@ Nine, in `src/components/ui/`:
 | `Flash`   | A message that says something and then takes itself away. |
 | `Toggle`  | One thing that is either on or off, and its label.        |
 | `Beat`    | Which of the four beats of a measure is passing.          |
+| `Chip`    | One fact about what is about to be played, on a fill.     |
 
 `Choice` is not a `Button`: a button asks to be acted on, a choice shows a state. The
 selected option carries the accent, and nothing in it is primary.
@@ -69,6 +70,10 @@ is the screen's business, and a bar that knew would be a bar per screen. It has 
 weights: the regular one measures the screen, the thin one measures the line of a list it
 sits under — at the regular weight a bar under a list line reads as a second element
 rather than as a measure of the line above it.
+
+`Chip` arrived with the parcours, where three of them sit side by side under a study. On
+the page's own ground they read as one sentence broken by spaces; the fill is what makes
+them count as three.
 
 **Not checked by anything**: that a screen uses a token rather than a literal colour. It is
 a convention, held up at review.
