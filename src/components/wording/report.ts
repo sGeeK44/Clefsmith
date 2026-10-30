@@ -35,3 +35,10 @@ export function missLine(times: number): string {
 export function nextLine(opened: Level | undefined): string {
   return opened === undefined ? 'Séance suivante' : `Étude ${opened} · ${tempoOf(opened)}`;
 }
+
+export const RIGHT_NOTES = 'Notes justes';
+export const TO_REVIEW = 'À revoir';
+export const NO_MISTAKE = 'Aucune erreur';
+export const OPENED = 'Nouvelle étude';
+export const REPLAY = 'Rejouer';
+export const BACK = 'Parcours';

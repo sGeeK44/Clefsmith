@@ -102,8 +102,14 @@ Saying what a session was worth and writing it down are the **same read**: the r
 worked out from the record the session was played against, so it has to be read before the
 new one is written.
 
+The screen that shows it **writes nothing**. The exercise has already recorded; a second
+writer on the same record would count the session twice. It is replaced rather than
+stacked on the exercise, and it replaces itself on the way out: a session that is over,
+and a report that has been acted on, are not places to come back to.
+
 **Checked** by `bun test`: `src/domain/training/report.ts`, the sentences put on it in
-`src/components/wording/report.ts`, and the slot it waits in.
+`src/components/wording/report.ts`, and the slot it waits in. **Not checked by anything**:
+that the screen shows the three notes the report names. That needs a renderer.
 
 ## Reading one on screen
 
