@@ -130,9 +130,23 @@ application's document directory, named after the instant it was produced and ne
 overwritten — two runs of the same build are what tells a figure apart from a
 fluctuation.
 
+**Keep the screen on for the whole run.** The replay hands over the audio at the rate it
+was spoken, which it does on a timer, and Android stops those timers when the application
+goes to the background. The run does not fail when the screen turns off — it freezes
+where it was and resumes when the screen comes back, which is worse, because a report
+still comes out at the end. On a cabled device:
+
+```sh
+adb shell svc power stayon true
+```
+
+Collecting the report:
+
 - **iOS** — the Files app, under _On My iPhone → Clefsmith_. `UIFileSharingEnabled` is
   what puts it there.
-- **Android** — `adb exec-out run-as com.clefsmith.app cat files/<name>.json`.
+- **Android** — `adb pull /sdcard/Android/data/com.clefsmith.app/files/<name>.json`. The
+  screen writes a copy there for exactly this, because `adb run-as` reaches the document
+  directory only on a debuggable build and the run above has to be a release one.
 
 The report is the same shape as the host one, written by the same function, so the two
 and the other track's are comparable line for line.
