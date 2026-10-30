@@ -138,6 +138,12 @@ against. **Checked** by `bench/vocabulary.test.ts`: renaming a degree in the dom
 it red, because the recordings are named after those words and re-recording is a session
 with five speakers.
 
+The table is read **both ways**: naming a degree, and finding the degree a heard word
+stands for. One table rather than two, because two diverge the day either moves — and this
+one is what the corpus was recorded against, so the drift would stay silent until a learner
+said a note the application no longer recognised. A word that is not one of the seven
+returns **nothing**: it is not a wrong answer, it is no answer.
+
 The learner picks one, and `syllabic` is what they get until they do. The choice is not a
 display preference: it is the vocabulary the speech recogniser will be asked to listen
 for, which is why it is settled once and read by everything that names a note.
