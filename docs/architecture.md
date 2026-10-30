@@ -67,6 +67,15 @@ whose modules agree with each other.
 
 **Not checked by anything**: same reason — a running build on a device is what sees it.
 
+Signing is put back by a plugin of this repository, `plugins/with-signing.ts`: what comes
+out of a prebuild carries no team and no signing style, which Xcode reads as manual
+signing and refuses to build for a device over. The team is read from `APPLE_TEAM_ID` in
+the environment and never from a committed file — it is account data, and one developer's
+team written into the repository signs everyone else's builds in their name. Unset, the
+plugin writes nothing and says so on the prebuild.
+
+**Not checked by anything**: run a prebuild and read `ios/Clefsmith.xcodeproj` to see it.
+
 ## The speech bench
 
 `bench/` is not part of the application and is never imported by it. It replays a corpus
