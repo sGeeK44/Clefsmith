@@ -57,12 +57,42 @@ export function answered(drill: Drill, said: Degree): Drill {
 
   const right = said === expected.degree;
 
+  return { ...scored(drill, said), at: right ? drill.at + 1 : measureOf(drill.at) };
+}
+
+/**
+ * The same attempt, recorded where the reading stands.
+ *
+ * What a metronome session does with a named degree: it is worth what it is
+ * worth, and accuracy counts it, but it moves nothing. Under a metronome the
+ * beat owns the position — rewinding to the start of the measure while the beat
+ * keeps counting would put the two out of step for the rest of the session.
+ */
+export function scored(drill: Drill, said: Degree): Drill {
+  const expected = expectedOf(drill);
+
+  if (expected === undefined) {
+    return drill;
+  }
+
+  const right = said === expected.degree;
+
   return {
     ...drill,
-    at: right ? drill.at + 1 : measureOf(drill.at),
     answers: [...drill.answers, { degree: expected.degree, correct: right }],
     last: { said, expected: expected.degree, right },
   };
+}
+
+/**
+ * A beat passing, which moves the reading on whatever was said.
+ *
+ * It records nothing: a note nobody named is not a wrong answer, it is a note
+ * the session went past. Counting it as a mistake would make a learner who said
+ * nothing at all look like one who said everything wrong.
+ */
+export function beaten(drill: Drill): Drill {
+  return isOver(drill) ? drill : { ...drill, at: drill.at + 1 };
 }
 
 function measureOf(at: number): number {

@@ -268,11 +268,41 @@ played — and the way to make "not kept between two launches" true is to have n
 keep them, rather than a rule someone has to remember not to break.
 
 Sixty to the minute is the one tempo a learner counts without being taught how. The
-metronome starts off: the first mode has no rhythm to keep.
+metronome starts off: reading notes has no rhythm to keep.
 
 **Checked** by `bun test`: `src/domain/training/session-settings.ts` holds the bounds and
 the arithmetic, so they hold wherever a session is started from rather than on the screen
 that happens to show them.
+
+## Reading at a tempo
+
+With the metronome on, the session is read **at the tempo rather than at the learner's
+pace**: a beat passes, and the reading is on the next note whatever was said. One beat to
+a note, four beats to a measure, and the grid is the tempo and nothing else — one beat
+lasts `60000 / tempo` milliseconds, and no session ever stores its beats. A stored grid is
+a second copy of a number the learner can change, and the two disagree the first time they
+do.
+
+Every beat is waited for **from the start of the session**, never one interval after the
+last one. A loop that sleeps an interval at a time adds what each beat cost to the next,
+and a sixteen-measure session paced that way finishes visibly late.
+
+Under the metronome a named degree is still recorded — accuracy counts it the same way —
+but it **moves nothing**, and a wrong one does not send the learner back to the start of
+the measure the way reading notes does. The beat owns the position; rewinding under a
+metronome that keeps counting would put the two out of step for the rest of the session.
+A note nobody named is not a wrong answer either: the beat records nothing, it only moves.
+
+Which of the four beats is passing is shown, not counted out in figures — a number
+changing four times a measure at the edge of the staff is read instead of seen.
+
+**Checked** by `bun test`: the grid is in `src/domain/training/beat.ts`, what a beat does
+to a reading in `src/domain/training/drill.ts`, and the pacing in
+`src/usecases/keep-time.ts`, against a clock the test moves itself.
+
+**Not checked by anything**: that the exercise screen starts the metronome for a rhythmic
+session and not for a reading one, and that the beat is drawn. There is no renderer in
+this repository — see _What is not here_.
 
 ## Keeping a record
 

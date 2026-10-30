@@ -33,7 +33,7 @@ is for. Without that plugin a themed component renders with no style at all.
 
 ## Components
 
-Eight, in `src/components/ui/`:
+Nine, in `src/components/ui/`:
 
 | Component | Holds                                                     |
 | --------- | --------------------------------------------------------- |
@@ -44,6 +44,7 @@ Eight, in `src/components/ui/`:
 | `Choice`  | Which of several options is the current one.              |
 | `Flash`   | A message that says something and then takes itself away. |
 | `Toggle`  | One thing that is either on or off, and its label.        |
+| `Beat`    | Which of the four beats of a measure is passing.          |
 
 `Choice` is not a `Button`: a button asks to be acted on, a choice shows a state. The
 selected option carries the accent, and nothing in it is primary.
@@ -59,6 +60,9 @@ The next component arrives with the screen that needs it, not before. A design s
 grown ahead of its screens is a catalogue of guesses — `Choice` arrived with Réglages,
 `Flash` with the desk, `Toggle` with the parcours and `ProgressBar` with the exercise,
 which is the rule working rather than an exception to it.
+
+`Beat` arrived with the rhythmic reading and holds no count of its own either: which beat
+is passing is the session's business.
 
 `ProgressBar` holds no number of its own. What the share means — notes read, files sent —
 is the screen's business, and a bar that knew would be a bar per screen.

@@ -6,6 +6,7 @@ import type { AppVersionReader, GetAppVersion } from '@/usecases/get-app-version
 import type { GetProgress, ProgressStore } from '@/usecases/get-progress';
 import type { GetSettings, SettingsStore } from '@/usecases/get-settings';
 import type { KeepReport, RecallReport, ReportStore } from '@/usecases/keep-report';
+import type { KeepTime } from '@/usecases/keep-time';
 import type { AnswerSource, ListenForAnswers } from '@/usecases/listen-for-answers';
 import type {
   AskForMicrophone,
@@ -40,6 +41,7 @@ export const SYMBOLS = {
     GetProgress: Symbol.for('GetProgress') as ServiceIdentifier<GetProgress>,
     GetSettings: Symbol.for('GetSettings') as ServiceIdentifier<GetSettings>,
     KeepReport: Symbol.for('KeepReport') as ServiceIdentifier<KeepReport>,
+    KeepTime: Symbol.for('KeepTime') as ServiceIdentifier<KeepTime>,
     ListenForAnswers: Symbol.for('ListenForAnswers') as ServiceIdentifier<ListenForAnswers>,
     RecallReport: Symbol.for('RecallReport') as ServiceIdentifier<RecallReport>,
     RecordFinishedSession: Symbol.for(

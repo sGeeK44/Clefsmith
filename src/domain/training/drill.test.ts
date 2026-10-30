@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import type { Degree, Pitch } from '@/domain/notation/pitch';
-import { answered, drillOf, expectedOf, isOver } from '@/domain/training/drill';
+import { answered, beaten, drillOf, expectedOf, isOver, scored } from '@/domain/training/drill';
 import { accuracyOf } from '@/domain/training/progress';
 
 /** Five notes: one whole measure of four, and the first note of the next. */
@@ -66,5 +66,36 @@ describe('a session being read', () => {
 
     expect(drill.answers).toHaveLength(8);
     expect(accuracyOf(drill.answers)).toBe(88);
+  });
+
+  describe('under a metronome', () => {
+    it('moves on when the beat passes, whatever was said', () => {
+      expect(expectedOf(beaten(drillOf(NOTES)))).toEqual({ degree: 'd', octave: 4 });
+    });
+
+    it('records nothing for a beat: a note nobody named is not a wrong answer', () => {
+      expect(beaten(drillOf(NOTES)).answers).toStrictEqual([]);
+    });
+
+    it('is over once the last note has been beaten, and no further', () => {
+      const beatenThrough = NOTES.reduce(beaten, drillOf(NOTES));
+
+      expect(isOver(beatenThrough)).toBe(true);
+      expect(beaten(beatenThrough).at).toBe(NOTES.length);
+    });
+
+    it('counts what was named without moving the reading on', () => {
+      const drill = scored(drillOf(NOTES), 'c');
+
+      expect(expectedOf(drill)).toEqual({ degree: 'c', octave: 4 });
+      expect(drill.last).toEqual({ said: 'c', expected: 'c', right: true });
+    });
+
+    it('leaves a mistake where it stands rather than sending it back', () => {
+      const drill = scored(beaten(beaten(drillOf(NOTES))), 'a');
+
+      expect(expectedOf(drill)).toEqual({ degree: 'e', octave: 4 });
+      expect(accuracyOf(drill.answers)).toBe(0);
+    });
   });
 });
