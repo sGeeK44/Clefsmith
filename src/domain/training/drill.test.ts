@@ -30,7 +30,12 @@ describe('a session being read', () => {
   });
 
   it('records what was named against what was shown', () => {
-    expect(reading(['c', 'a']).last).toEqual({ said: 'a', expected: 'd', right: false });
+    expect(reading(['c', 'a']).last).toEqual({
+      said: 'a',
+      expected: 'd',
+      right: false,
+      timing: undefined,
+    });
   });
 
   it('sends a mistake back to the start of the measure, notes already read included', () => {
@@ -85,17 +90,21 @@ describe('a session being read', () => {
     });
 
     it('counts what was named without moving the reading on', () => {
-      const drill = scored(drillOf(NOTES), 'c');
+      const drill = scored(drillOf(NOTES), 'c', 'in-time');
 
       expect(expectedOf(drill)).toEqual({ degree: 'c', octave: 4 });
-      expect(drill.last).toEqual({ said: 'c', expected: 'c', right: true });
+      expect(drill.last).toEqual({ said: 'c', expected: 'c', right: true, timing: 'in-time' });
     });
 
     it('leaves a mistake where it stands rather than sending it back', () => {
-      const drill = scored(beaten(beaten(drillOf(NOTES))), 'a');
+      const drill = scored(beaten(beaten(drillOf(NOTES))), 'a', 'in-time');
 
       expect(expectedOf(drill)).toEqual({ degree: 'e', octave: 4 });
       expect(accuracyOf(drill.answers)).toBe(0);
+    });
+
+    it('says nothing about the timing of a wrong note: the mistake is the note', () => {
+      expect(scored(drillOf(NOTES), 'a', 'off-beat').last?.timing).toBeUndefined();
     });
   });
 });

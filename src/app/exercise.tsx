@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
@@ -16,16 +16,16 @@ import {
   HINT,
   LISTENING,
   REWIND,
-  RIGHT,
   shareOf,
+  toneOf,
+  verdictLine,
   verdictOf,
-  WRONG,
 } from '@/components/wording/exercise';
 import { tempoLine } from '@/components/wording/session';
 import type { Clef } from '@/domain/notation/clef';
 import { type Notation, nameOf } from '@/domain/notation/naming';
 import type { Degree } from '@/domain/notation/pitch';
-import { beatOf } from '@/domain/training/beat';
+import { beatOf, timingOf } from '@/domain/training/beat';
 import { answered, beaten, type Drill, drillOf, isOver, scored } from '@/domain/training/drill';
 import type { Level } from '@/domain/training/level';
 import type { Measures } from '@/domain/training/session-settings';
@@ -65,17 +65,30 @@ export default function ExerciseScreen() {
    * One answer at a time, and the drill decides what it is worth. The port hands
    * over a degree rather than a word: what was heard is CLE-18's problem.
    */
+  /**
+   * When the beat the note on screen was put there by fell.
+   *
+   * A ref rather than state: an answer arriving is not a reason to redraw the
+   * staff, and the beat it is judged against must be the one that was passing
+   * when the learner spoke rather than the one the next render has moved to.
+   */
+  const shownAt = useRef(0);
+
   const heard = useCallback(
-    (degree: Degree) => {
+    (degree: Degree, startedAt: number) => {
       setDrill((reading) => {
         if (reading === undefined) {
           return reading;
         }
 
-        return rhythmic ? scored(reading, degree) : answered(reading, degree);
+        if (!rhythmic) {
+          return answered(reading, degree);
+        }
+
+        return scored(reading, degree, timingOf(startedAt, shownAt.current, Number(tempo)));
       });
     },
-    [rhythmic],
+    [rhythmic, tempo],
   );
 
   /**
@@ -90,7 +103,9 @@ export default function ExerciseScreen() {
       return;
     }
 
-    return keepTime(Number(tempo), (passed) => {
+    return keepTime(Number(tempo), (passed, at) => {
+      shownAt.current = at;
+
       if (passed > 0) {
         setDrill((reading) => (reading === undefined ? reading : beaten(reading)));
       }
@@ -226,14 +241,15 @@ function Feedback({
   }
 
   const { said, expected } = drill.last;
+  const tone = toneOf(verdict);
 
   return (
     <View style={styles.feedback}>
-      <Text testID="exercise-feedback" variant="display" tone={verdict === 'right' ? 'ok' : 'bad'}>
+      <Text testID="exercise-feedback" variant="display" tone={tone}>
         {nameOf(said, notation)}
       </Text>
-      <Text variant="caption" tone={verdict === 'right' ? 'ok' : 'bad'}>
-        {verdict === 'right' ? RIGHT : WRONG}
+      <Text variant="caption" tone={tone}>
+        {verdictLine(verdict)}
       </Text>
 
       {verdict === 'wrong' && (

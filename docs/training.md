@@ -296,12 +296,36 @@ A note nobody named is not a wrong answer either: the beat records nothing, it o
 Which of the four beats is passing is shown, not counted out in figures — a number
 changing four times a measure at the edge of the staff is read instead of seen.
 
-**Checked** by `bun test`: the grid is in `src/domain/training/beat.ts`, what a beat does
-to a reading in `src/domain/training/drill.ts`, and the pacing in
-`src/usecases/keep-time.ts`, against a clock the test moves itself.
+A note is then worth two things, the note and the moment, and the feedback has **three**
+things to say rather than two: right, off the beat, wrong. Off the beat means the right
+note at the wrong moment, and it has a colour of its own — a learner shown red for a note
+they read correctly learns to distrust red.
+
+**The note comes first.** A wrong note is wrong whenever it was said; the moment is only
+judged on a note that was right. And accuracy counts a late right note as right: being
+behind the metronome is something to be told, not something to be marked down for, and
+the progression is untouched by any of this.
+
+The moment that counts is when the learner **started speaking**, not when the decoder
+settled on what they said. The decoder's own latency is subtracted where it is observable
+— the first non-empty partial of an utterance, on the other side of the answer port — and
+never carried into the verdict: CLE-20 measured 838 ms from the end of an utterance to the
+final result, which at sixty to the minute would declare every right note late.
+
+The window is a **share of the beat**, half a beat either side, written in one place. In
+milliseconds it would be half a beat at forty to the minute and more than a whole one at a
+hundred and sixty — the same number meaning "strict" at one tempo and "anything goes" at
+the other.
+
+**Checked** by `bun test`: the grid and the tolerance window are in
+`src/domain/training/beat.ts`, what a beat and an answer do to a reading in
+`src/domain/training/drill.ts`, the pacing in `src/usecases/keep-time.ts` against a clock
+the test moves itself, and the subtraction of the decoder's latency in
+`src/infrastructure/vosk-answer-source.ts`.
 
 **Not checked by anything**: that the exercise screen starts the metronome for a rhythmic
-session and not for a reading one, and that the beat is drawn. There is no renderer in
+session and not for a reading one, that the beat is drawn, and that an answer is judged
+against the beat the note on screen was put there by. There is no renderer in
 this repository — see _What is not here_.
 
 ## Keeping a record
