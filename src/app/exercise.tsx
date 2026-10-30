@@ -5,6 +5,7 @@ import { StyleSheet } from 'react-native-unistyles';
 
 import { useService } from '@/components/container-provider';
 import { Beat } from '@/components/ui/beat';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Screen } from '@/components/ui/screen';
@@ -14,8 +15,14 @@ import {
   countLine,
   expectedLine,
   HINT,
+  HUSHED,
+  LEAVE,
   LISTENING,
   legendOf,
+  PAUSE,
+  PAUSED,
+  RESTART,
+  RESUME,
   REWIND,
   shadeOf,
   shareOf,
@@ -28,7 +35,16 @@ import type { Clef } from '@/domain/notation/clef';
 import { type Notation, nameOf } from '@/domain/notation/naming';
 import type { Degree } from '@/domain/notation/pitch';
 import { beatOf, timingOf } from '@/domain/training/beat';
-import { answered, beaten, type Drill, drillOf, isOver, scored } from '@/domain/training/drill';
+import {
+  answered,
+  beaten,
+  type Drill,
+  drillOf,
+  isOver,
+  restarted,
+  rewound,
+  scored,
+} from '@/domain/training/drill';
 import type { Level } from '@/domain/training/level';
 import { type Measures, NOTES_PER_MEASURE } from '@/domain/training/session-settings';
 import { SYMBOLS } from '@/infrastructure/symbols';
@@ -59,6 +75,11 @@ export default function ExerciseScreen() {
   const keepTime = useService(SYMBOLS.usecases.KeepTime);
   const [drill, setDrill] = useState<Drill>();
   const [notation, setNotation] = useState<Notation>();
+  /**
+   * A paused session keeps its notes and lets go of everything that listens or
+   * counts: the microphone and the beat are both effects of this flag.
+   */
+  const [paused, setPaused] = useState(false);
   /** Whether the notes have been dealt — what the beat waits for, rather than the notes themselves. */
   const dealt = drill !== undefined;
 
@@ -104,7 +125,7 @@ export default function ExerciseScreen() {
    * has seen yet.
    */
   useEffect(() => {
-    if (!rhythmic || !dealt) {
+    if (!rhythmic || !dealt || paused) {
       return;
     }
 
@@ -115,7 +136,7 @@ export default function ExerciseScreen() {
         setDrill((reading) => (reading === undefined ? reading : beaten(reading)));
       }
     });
-  }, [rhythmic, dealt, keepTime, tempo]);
+  }, [rhythmic, dealt, keepTime, tempo, paused]);
 
   /**
    * Listening outlives the screen if it is only stopped on the way out: the
@@ -123,11 +144,16 @@ export default function ExerciseScreen() {
    * screen that is gone. Left is recorded, and whichever comes second wins.
    */
   useEffect(() => {
-    let left = false;
+    let left = paused;
     let stop: (() => Promise<void>) | undefined;
 
     getSettings().then((settings) => {
       setNotation(settings.notation);
+
+      if (left) {
+        return;
+      }
+
       listenForAnswers(settings.notation, heard).then((silence) => {
         stop = silence;
 
@@ -141,7 +167,7 @@ export default function ExerciseScreen() {
       left = true;
       void stop?.();
     };
-  }, [getSettings, listenForAnswers, heard]);
+  }, [getSettings, listenForAnswers, heard, paused]);
 
   /**
    * The session is written down once, as it ends, and the learner is handed back
@@ -159,6 +185,18 @@ export default function ExerciseScreen() {
       },
     );
   }, [drill, record, brief, keepReport, params]);
+
+  if (paused && drill !== undefined) {
+    return (
+      <Paused
+        onLeave={() => router.back()}
+        onResume={() => {
+          setDrill(rewound(drill));
+          setPaused(false);
+        }}
+      />
+    );
+  }
 
   /** Nothing is drawn before the notes are drawn: a staff guessed is someone else's. */
   if (drill === undefined || notation === undefined) {
@@ -204,6 +242,51 @@ export default function ExerciseScreen() {
       </Card>
 
       <Feedback drill={drill} notation={notation} rewinds={!rhythmic} />
+
+      <View style={styles.actions}>
+        <View style={styles.half}>
+          <Button
+            emphasis="quiet"
+            label={PAUSE}
+            onPress={() => setPaused(true)}
+            testID="exercise-pause"
+          />
+        </View>
+        <View style={styles.half}>
+          <Button
+            emphasis="quiet"
+            label={RESTART}
+            onPress={() => setDrill(restarted(drill))}
+            testID="exercise-restart"
+          />
+        </View>
+      </View>
+    </Screen>
+  );
+}
+
+/**
+ * The screen while nothing is being read.
+ *
+ * It covers the staff rather than sitting beside it: a paused session that still
+ * shows the notes invites the learner to go on reading them, which is the one
+ * thing a pause is for stopping.
+ */
+function Paused({
+  onLeave,
+  onResume,
+}: {
+  readonly onLeave: () => void;
+  readonly onResume: () => void;
+}) {
+  return (
+    <Screen>
+      <View style={styles.pause}>
+        <Text variant="display">{PAUSED}</Text>
+        <Text tone="muted">{HUSHED}</Text>
+        <Button label={RESUME} onPress={onResume} testID="exercise-resume" />
+        <Button emphasis="quiet" label={LEAVE} onPress={onLeave} testID="exercise-leave" />
+      </View>
     </Screen>
   );
 }
@@ -228,9 +311,10 @@ function Reading({ clef, drill }: { readonly clef: Clef; readonly drill: Drill }
 
   return (
     <ScrollView ref={scroller} showsVerticalScrollIndicator={false}>
-      {lines.map((notes, line) => (
+      {lines.map(({ from, notes }, line) => (
+        /* Keyed by where the line starts: two lines can hold the same eight notes. */
         <View
-          key={notes.map(({ pitch }) => `${pitch.degree}${pitch.octave}`).join('-')}
+          key={from}
           onLayout={({ nativeEvent }) => {
             tops.current[line] = nativeEvent.layout.y;
           }}
@@ -252,12 +336,17 @@ function Reading({ clef, drill }: { readonly clef: Clef; readonly drill: Drill }
 function linesOf(drill: Drill) {
   const count = Math.ceil(drill.notes.length / PER_LINE);
 
-  return Array.from({ length: count }, (_, line) =>
-    drill.notes.slice(line * PER_LINE, (line + 1) * PER_LINE).map((pitch, index) => ({
-      pitch,
-      shade: shadeOf(line * PER_LINE + index, drill.at, drill.marks[line * PER_LINE + index]),
-    })),
-  );
+  return Array.from({ length: count }, (_, line) => {
+    const from = line * PER_LINE;
+
+    return {
+      from,
+      notes: drill.notes.slice(from, from + PER_LINE).map((pitch, index) => ({
+        pitch,
+        shade: shadeOf(from + index, drill.at, drill.marks[from + index]),
+      })),
+    };
+  });
 }
 
 /**
@@ -365,6 +454,9 @@ const styles = StyleSheet.create((theme) => ({
   hint: { flexDirection: 'row', justifyContent: 'space-between' },
   feedback: { alignItems: 'center', gap: theme.spacing.xs, paddingVertical: theme.spacing.l },
   legend: { flexDirection: 'row', gap: theme.spacing.m },
+  actions: { flexDirection: 'row', gap: theme.spacing.s },
+  half: { flex: 1 },
+  pause: { flex: 1, gap: theme.spacing.m, justifyContent: 'center' },
   /** A clef reaches below its staff, so two lines set tight overlap. */
   line: { paddingBottom: theme.spacing.s },
   /** Still there, no longer asking to be read. */

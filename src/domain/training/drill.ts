@@ -81,15 +81,42 @@ export function answered(drill: Drill, said: Degree): Drill {
    * one too would make a mistake vanish in the same frame it was made, and the
    * learner would be sent back up the staff with nothing saying why.
    */
+  const missed = drill.at;
+
+  return {
+    ...rewound(scored(drill, said, undefined)),
+    marks: rewound(drill).marks.map((mark, index) => (index === missed ? 'wrong' : mark)),
+  };
+}
+
+/**
+ * Back to the first note of the measure in hand, that measure shown as unread.
+ *
+ * It is what a mistake does and what coming back from a pause does: a measure is
+ * the unit a reader re-reads, and half a measure read before an interruption is
+ * not a reading of it.
+ */
+export function rewound(drill: Drill): Drill {
   const from = measureOf(drill.at);
 
   return {
-    ...scored(drill, said, undefined),
+    ...drill,
     at: from,
     marks: drill.marks.map((mark, index) =>
-      index >= from && index < drill.at ? undefined : index === drill.at ? 'wrong' : mark,
+      index >= from && index <= drill.at ? undefined : mark,
     ),
   };
+}
+
+/**
+ * The same notes, read from the top, with nothing kept from the reading left behind.
+ *
+ * The attempts go with it. A learner who asks to start over is saying the reading
+ * did not count, and holding its mistakes against their accuracy would make the
+ * button a punishment.
+ */
+export function restarted(drill: Drill): Drill {
+  return drillOf(drill.notes);
 }
 
 /**
