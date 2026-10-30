@@ -18,6 +18,12 @@ export const HINT = 'Dites la note surlignée';
 export const RIGHT = 'Juste';
 export const WRONG = 'Faux';
 export const REWIND = 'On reprend au début de la mesure';
+export const PAUSE = '⏸ Pause';
+export const RESTART = '↺ Recommencer';
+export const PAUSED = 'En pause';
+export const HUSHED = 'Micro et métronome coupés. Vous reprendrez au début de la mesure.';
+export const RESUME = 'Reprendre';
+export const LEAVE = 'Quitter la séance';
 export const OFF_BEAT = 'Juste, mais à côté du temps';
 const LATE = 'Décalé';
 

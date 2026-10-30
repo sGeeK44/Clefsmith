@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'bun:test';
 import type { Degree, Pitch } from '@/domain/notation/pitch';
-import { answered, beaten, drillOf, expectedOf, isOver, scored } from '@/domain/training/drill';
+import {
+  answered,
+  beaten,
+  drillOf,
+  expectedOf,
+  isOver,
+  restarted,
+  rewound,
+  scored,
+} from '@/domain/training/drill';
 import { accuracyOf } from '@/domain/training/progress';
 
 /** Five notes: one whole measure of four, and the first note of the next. */
@@ -142,5 +151,49 @@ describe('what each note has been worth', () => {
 
   it('leaves an earlier measure alone when a later one is missed', () => {
     expect(reading(['c', 'd', 'e', 'f', 'a']).marks).toEqual(['ok', 'ok', 'ok', 'ok', 'wrong']);
+  });
+});
+
+describe('coming back to the measure in hand', () => {
+  it('goes back to its first note', () => {
+    expect(rewound(reading(['c', 'd'])).at).toBe(0);
+  });
+
+  it('shows that measure as unread, the note it was interrupted on included', () => {
+    expect(rewound(reading(['c', 'd'])).marks).toEqual([
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+    ]);
+  });
+
+  it('leaves the measures already behind the learner alone', () => {
+    const second = reading(['c', 'd', 'e', 'f']);
+
+    expect(rewound(second).at).toBe(4);
+    expect(rewound(second).marks).toEqual(['ok', 'ok', 'ok', 'ok', undefined]);
+  });
+
+  it('keeps what was attempted: a measure re-read is not a measure unplayed', () => {
+    expect(rewound(reading(['c', 'd'])).answers).toHaveLength(2);
+  });
+});
+
+describe('starting the same notes over', () => {
+  it('reads from the first note again, with nothing marked', () => {
+    const fresh = restarted(reading(['c', 'd', 'a']));
+
+    expect(fresh.at).toBe(0);
+    expect(fresh.marks.every((mark) => mark === undefined)).toBe(true);
+  });
+
+  it('drops the attempts of the reading left behind', () => {
+    expect(restarted(reading(['c', 'd', 'a'])).answers).toEqual([]);
+  });
+
+  it('reads the same notes', () => {
+    expect(restarted(reading(['c'])).notes).toEqual(NOTES);
   });
 });
