@@ -90,8 +90,10 @@ export default function ExerciseScreen() {
       return;
     }
 
-    return keepTime(Number(tempo), () => {
-      setDrill((reading) => (reading === undefined ? reading : beaten(reading)));
+    return keepTime(Number(tempo), (passed) => {
+      if (passed > 0) {
+        setDrill((reading) => (reading === undefined ? reading : beaten(reading)));
+      }
     });
   }, [rhythmic, dealt, keepTime, tempo]);
 

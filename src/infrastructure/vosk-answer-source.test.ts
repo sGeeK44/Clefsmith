@@ -55,17 +55,35 @@ function fakeVosk() {
   };
 }
 
+/** A clock the test moves itself, so an instant can be asserted exactly. */
+function clockAt() {
+  let current = 0;
+
+  return {
+    now: () => current,
+    sleepUntil: async () => undefined,
+    set: (instant: number) => {
+      current = instant;
+    },
+  };
+}
+
 function sourceUnderTest() {
   const native = fakeVosk();
+  const clock = clockAt();
   const heard: Degree[] = [];
+  const startedAt: number[] = [];
 
   return {
     ...native,
+    clock,
     heard,
+    startedAt,
     listen: (notation: Notation = 'syllabic') =>
-      createVoskAnswerSource(native.vosk, 'model-fr').listen(notation, (degree) =>
-        heard.push(degree),
-      ),
+      createVoskAnswerSource(native.vosk, 'model-fr', clock).listen(notation, (degree, began) => {
+        heard.push(degree);
+        startedAt.push(began);
+      }),
   };
 }
 
@@ -131,7 +149,7 @@ describe('the answers of a session, heard', () => {
     const silence = await listen();
     await silence();
 
-    expect(closed).toEqual(['onResult', 'stop', 'unload']);
+    expect(closed).toEqual(['onPartialResult', 'onResult', 'stop', 'unload']);
   });
 
   it('hears nothing more once it has been stopped', async () => {
@@ -142,5 +160,71 @@ describe('the answers of a session, heard', () => {
     settleOn('sol');
 
     expect(heard).toStrictEqual([]);
+  });
+
+  it('times an answer from when the learner started speaking, not from when it settled', async () => {
+    const { clock, hearPartial, settleOn, startedAt, listen } = sourceUnderTest();
+    await listen();
+
+    clock.set(1200);
+    hearPartial('d');
+    clock.set(1900);
+    settleOn('do');
+
+    expect(startedAt).toEqual([1200]);
+  });
+
+  it('takes the first partial of an utterance and not the ones that refine it', async () => {
+    const { clock, hearPartial, settleOn, startedAt, listen } = sourceUnderTest();
+    await listen();
+
+    clock.set(1200);
+    hearPartial('d');
+    clock.set(1500);
+    hearPartial('do');
+    clock.set(1900);
+    settleOn('do');
+
+    expect(startedAt).toEqual([1200]);
+  });
+
+  it('passes over an empty partial: the decoder has heard nothing, not started a word', async () => {
+    const { clock, hearPartial, settleOn, startedAt, listen } = sourceUnderTest();
+    await listen();
+
+    clock.set(900);
+    hearPartial('');
+    clock.set(1200);
+    hearPartial('d');
+    clock.set(1900);
+    settleOn('do');
+
+    expect(startedAt).toEqual([1200]);
+  });
+
+  it('starts each utterance over, so the second is not timed from the first', async () => {
+    const { clock, hearPartial, settleOn, startedAt, listen } = sourceUnderTest();
+    await listen();
+
+    clock.set(1200);
+    hearPartial('d');
+    clock.set(1900);
+    settleOn('do');
+    clock.set(3100);
+    hearPartial('m');
+    clock.set(3600);
+    settleOn('mi');
+
+    expect(startedAt).toEqual([1200, 3100]);
+  });
+
+  it('falls back on the settling instant when no partial was heard at all', async () => {
+    const { clock, settleOn, startedAt, listen } = sourceUnderTest();
+    await listen();
+
+    clock.set(1900);
+    settleOn('do');
+
+    expect(startedAt).toEqual([1900]);
   });
 });
