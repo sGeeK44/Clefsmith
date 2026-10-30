@@ -6,23 +6,27 @@ import { StyleSheet } from 'react-native-unistyles';
 import { useService } from '@/components/container-provider';
 import { Card } from '@/components/ui/card';
 import { Flash } from '@/components/ui/flash';
+import { ProgressBar } from '@/components/ui/progress-bar';
 import { Screen } from '@/components/ui/screen';
 import { Staff } from '@/components/ui/staff';
 import { Text } from '@/components/ui/text';
-import { STUDIES, studyLine, tempoOf } from '@/components/wording/study';
+import { badgeLine, progressOf } from '@/components/wording/desk';
+import { studyLine, tempoOf } from '@/components/wording/study';
 import type { Notation } from '@/domain/notation/naming';
-import type { Pitch } from '@/domain/notation/pitch';
 import { type Level, newcomersOf } from '@/domain/training/level';
 import { SYMBOLS } from '@/infrastructure/symbols';
 
 const PARCOURS = '/studies';
 
-/** In the mockup's order. The last two have nothing behind them yet. */
+/**
+ * In the mockup's order, each with the glyph the mockup gives it. The last two
+ * have nothing behind them yet.
+ */
 const MODES = [
-  { id: 'reading', label: 'Lecture de notes', open: true },
-  { id: 'rhythmic-reading', label: 'Lecture rythmée', open: true },
-  { id: 'rhythm', label: 'Rythme seul', open: false },
-  { id: 'dictation', label: 'Dictée musicale', open: false },
+  { id: 'reading', label: 'Lecture de notes', glyph: '♩', open: true },
+  { id: 'rhythmic-reading', label: 'Lecture rythmée', glyph: '♫', open: true },
+  { id: 'rhythm', label: 'Rythme seul', glyph: '♪', open: false },
+  { id: 'dictation', label: 'Dictée musicale', glyph: '♬', open: false },
 ] as const;
 
 /**
@@ -63,6 +67,9 @@ export default function DeskScreen() {
         <Current level={level} notation={notation} />
       )}
 
+      <Text variant="overline" tone="muted">
+        Exercices
+      </Text>
       <View style={styles.modes}>
         {MODES.map((mode) => (
           <Mode key={mode.id} level={level} mode={mode} onClosed={setComing} />
@@ -79,7 +86,8 @@ export default function DeskScreen() {
  *
  * The whole card is the affordance rather than a button inside it: that is what
  * the mockup draws, and a button nested in a tappable card is two targets where
- * the learner sees one.
+ * the learner sees one. The disc is drawn for the eye, not for the finger —
+ * it is what makes the card read as a way in rather than as a summary.
  */
 function Current({ level, notation }: { readonly level: Level; readonly notation: Notation }) {
   const brought = newcomersOf('treble', level);
@@ -88,7 +96,7 @@ function Current({ level, notation }: { readonly level: Level; readonly notation
     <Pressable onPress={() => router.push(PARCOURS)} testID="current-study">
       <Card>
         <View style={styles.row}>
-          <Text variant="caption" tone="muted">
+          <Text variant="overline" tone="accent">
             En cours
           </Text>
           <Text variant="caption" tone="muted">
@@ -100,15 +108,29 @@ function Current({ level, notation }: { readonly level: Level; readonly notation
           <Staff clef="treble" notes={brought.map((pitch) => ({ pitch, current: false }))} />
         )}
 
-        <Text variant="title">{tempoOf(level)}</Text>
-        <Text testID="current-study-line" variant="caption" tone="muted">
-          {studyLine(level, notation)}
-        </Text>
+        <View style={styles.row}>
+          <View>
+            <Text variant="title">{tempoOf(level)}</Text>
+            <Text testID="current-study-line" variant="caption" tone="muted">
+              {studyLine(level, notation)}
+            </Text>
+          </View>
+          <View style={styles.disc}>
+            <Text style={styles.play}>▶</Text>
+          </View>
+        </View>
       </Card>
     </Pressable>
   );
 }
 
+/**
+ * One exercise, as a line rather than as a card.
+ *
+ * Four cards of equal weight say the four are equally available, which two of
+ * them are not. A line carries its own progress, and the bar is what tells the
+ * open ones apart from the ones with nothing behind them.
+ */
 function Mode({
   level,
   mode,
@@ -118,7 +140,7 @@ function Mode({
   readonly mode: (typeof MODES)[number];
   readonly onClosed: (message: string) => void;
 }) {
-  const { id, label, open } = mode;
+  const { id, label, glyph, open } = mode;
 
   return (
     <Pressable
@@ -126,35 +148,59 @@ function Mode({
       style={styles.mode}
       testID={`mode-${id}`}
     >
-      <Text>{label}</Text>
-      <Text variant="caption" tone={open ? 'accent' : 'muted'}>
-        {badge(open, level)}
-      </Text>
+      <View style={styles.tile}>
+        <Text variant="title" tone={open ? 'ink' : 'muted'}>
+          {glyph}
+        </Text>
+      </View>
+
+      <View style={styles.lane}>
+        <View style={styles.row}>
+          <Text>{label}</Text>
+          <Text variant="caption" tone={open ? 'accent' : 'muted'}>
+            {badgeLine(open, level)}
+          </Text>
+        </View>
+        {/* In a row, so the bar takes the width it is offered rather than the height. */}
+        <View style={styles.bar}>
+          <ProgressBar share={progressOf(open, level)} weight="thin" />
+        </View>
+      </View>
     </Pressable>
   );
 }
 
-/** An open mode says how far up the six the learner is, once that is known. */
-function badge(open: boolean, level: Level | undefined): string {
-  if (!open) {
-    return 'Bientôt';
-  }
-
-  return level === undefined ? '' : `${level} / ${STUDIES}`;
-}
+const DISC = 48;
+const TILE = 44;
 
 const styles = StyleSheet.create((theme) => ({
   modes: { gap: theme.spacing.xs },
-  row: { flexDirection: 'row', justifyContent: 'space-between' },
+  row: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
+  disc: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.accent,
+    borderRadius: DISC / 2,
+    height: DISC,
+    justifyContent: 'center',
+    width: DISC,
+  },
+  play: { color: theme.colors.surf, marginLeft: 2 },
   mode: {
     alignItems: 'center',
-    backgroundColor: theme.colors.surf,
-    borderColor: theme.colors.line,
-    borderRadius: theme.radii.m,
-    borderWidth: 1,
+    borderBottomColor: theme.colors.line,
+    borderBottomWidth: 1,
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: theme.spacing.m,
+    gap: theme.spacing.m,
     paddingVertical: theme.spacing.s,
   },
+  tile: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.soft,
+    borderRadius: theme.radii.m,
+    height: TILE,
+    justifyContent: 'center',
+    width: TILE,
+  },
+  lane: { flex: 1, gap: theme.spacing.xs },
+  bar: { flexDirection: 'row' },
 }));

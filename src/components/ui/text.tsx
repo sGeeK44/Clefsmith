@@ -9,7 +9,7 @@ import { StyleSheet } from 'react-native-unistyles';
  * rather than a collection of one-off decisions.
  */
 
-type Variant = 'caption' | 'body' | 'title' | 'display';
+type Variant = 'overline' | 'caption' | 'body' | 'title' | 'display';
 /** Exported so that a rule deciding a tone can be written, and tested, outside a screen. */
 export type Tone = 'ink' | 'muted' | 'accent' | 'ok' | 'late' | 'bad';
 
@@ -28,6 +28,18 @@ const styles = StyleSheet.create((theme) => ({
   text: {
     variants: {
       variant: {
+        /**
+         * The line that names the block under it — « EN COURS », « EXERCICES ».
+         *
+         * Caption-sized but never a caption: a caption comments on what is
+         * above it, an overline announces what is below.
+         */
+        overline: {
+          fontFamily: theme.typography.family.semibold,
+          fontSize: theme.typography.size.caption,
+          letterSpacing: 1.3,
+          textTransform: 'uppercase',
+        },
         caption: {
           fontSize: theme.typography.size.caption,
           fontFamily: theme.typography.family.regular,
