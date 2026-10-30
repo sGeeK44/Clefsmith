@@ -7,6 +7,7 @@ import type { FinishWelcome } from '@/usecases/finish-welcome';
 import type { AppVersionReader, GetAppVersion } from '@/usecases/get-app-version';
 import type { GetProgress, ProgressStore } from '@/usecases/get-progress';
 import type { GetSettings, SettingsStore } from '@/usecases/get-settings';
+import type { KeepReport, RecallReport, ReportStore } from '@/usecases/keep-report';
 import type { AnswerSource, ListenForAnswers } from '@/usecases/listen-for-answers';
 import type { RecordFinishedSession } from '@/usecases/record-finished-session';
 import type { ResetProgress } from '@/usecases/reset-progress';
@@ -15,6 +16,7 @@ export const SYMBOLS = {
   infrastructure: {
     AnswerSource: Symbol.for('AnswerSource') as ServiceIdentifier<AnswerSource>,
     AppVersionReader: Symbol.for('AppVersionReader') as ServiceIdentifier<AppVersionReader>,
+    ReportStore: Symbol.for('ReportStore') as ServiceIdentifier<ReportStore>,
     MicrophonePermission: Symbol.for(
       'MicrophonePermission',
     ) as ServiceIdentifier<MicrophonePermission>,
@@ -29,7 +31,9 @@ export const SYMBOLS = {
     GetAppVersion: Symbol.for('GetAppVersion') as ServiceIdentifier<GetAppVersion>,
     GetProgress: Symbol.for('GetProgress') as ServiceIdentifier<GetProgress>,
     GetSettings: Symbol.for('GetSettings') as ServiceIdentifier<GetSettings>,
+    KeepReport: Symbol.for('KeepReport') as ServiceIdentifier<KeepReport>,
     ListenForAnswers: Symbol.for('ListenForAnswers') as ServiceIdentifier<ListenForAnswers>,
+    RecallReport: Symbol.for('RecallReport') as ServiceIdentifier<RecallReport>,
     RecordFinishedSession: Symbol.for(
       'RecordFinishedSession',
     ) as ServiceIdentifier<RecordFinishedSession>,

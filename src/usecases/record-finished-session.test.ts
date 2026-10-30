@@ -29,6 +29,14 @@ describe('record finished session', () => {
     expect((await store.load()).level.treble).toBe(1);
   });
 
+  it('says what the session was worth, read against the record it was played on', async () => {
+    const store = storeHolding();
+
+    const report = await createRecordFinishedSession(store)(read);
+
+    expect(report.opened).toBe(2);
+  });
+
   it('writes the mastery the session earned', async () => {
     const store = storeHolding();
 
