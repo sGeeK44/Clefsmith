@@ -21,7 +21,7 @@ import { createKeepTime } from '@/usecases/keep-time';
 import { type AnswerSource, createListenForAnswers } from '@/usecases/listen-for-answers';
 import {
   createAskForMicrophone,
-  createMayListen,
+  createReadMicrophoneAccess,
   createShowMicrophoneSettings,
 } from '@/usecases/microphone-access';
 import { createRecordFinishedSession } from '@/usecases/record-finished-session';
@@ -72,8 +72,8 @@ export function createContainer(answerSource: AnswerSource): Container {
     .bind(SYMBOLS.usecases.AskForMicrophone)
     .toResolvedValue(createAskForMicrophone, [SYMBOLS.infrastructure.MicrophonePermission]);
   container
-    .bind(SYMBOLS.usecases.MayListen)
-    .toResolvedValue(createMayListen, [SYMBOLS.infrastructure.MicrophonePermission]);
+    .bind(SYMBOLS.usecases.ReadMicrophoneAccess)
+    .toResolvedValue(createReadMicrophoneAccess, [SYMBOLS.infrastructure.MicrophonePermission]);
   container
     .bind(SYMBOLS.usecases.ShowMicrophoneSettings)
     .toResolvedValue(createShowMicrophoneSettings, [SYMBOLS.infrastructure.MicrophonePermission]);

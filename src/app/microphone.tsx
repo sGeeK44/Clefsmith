@@ -27,14 +27,14 @@ const PARCOURS = '/studies';
  */
 export default function MicrophoneScreen() {
   const session = useLocalSearchParams<Record<string, string>>();
-  const mayListen = useService(SYMBOLS.usecases.MayListen);
+  const readAccess = useService(SYMBOLS.usecases.ReadMicrophoneAccess);
   const showSettings = useService(SYMBOLS.usecases.ShowMicrophoneSettings);
 
   const open = useCallback(async () => {
-    if (await mayListen()) {
+    if ((await readAccess()) === 'granted') {
       router.replace({ pathname: EXERCISE, params: session });
     }
-  }, [mayListen, session]);
+  }, [readAccess, session]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (state) => {

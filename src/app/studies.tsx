@@ -160,13 +160,15 @@ function Open({
   readonly session: SessionSettings;
 }) {
   const { tempo, measures, metronome } = session;
-  const mayListen = useService(SYMBOLS.usecases.MayListen);
+  const readMicrophoneAccess = useService(SYMBOLS.usecases.ReadMicrophoneAccess);
 
   const start = useCallback(async () => {
     const setup = { clef, level: `${level}`, tempo: `${tempo}`, measures: `${measures}` };
 
-    router.push(exerciseRoute(await mayListen(), { ...setup, metronome: String(metronome) }));
-  }, [clef, level, mayListen, measures, metronome, tempo]);
+    router.push(
+      exerciseRoute(await readMicrophoneAccess(), { ...setup, metronome: String(metronome) }),
+    );
+  }, [clef, level, readMicrophoneAccess, measures, metronome, tempo]);
 
   return (
     <Card>

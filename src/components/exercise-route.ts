@@ -1,3 +1,5 @@
+import type { MicrophoneAccess } from '@/usecases/microphone-access';
+
 /** The session setup, as a route carries it: strings, because a route has nothing else. */
 type Session = Record<string, string>;
 
@@ -15,6 +17,6 @@ const MICROPHONE = '/microphone';
  * two copies of this rule diverge the day either one moves, and the one that
  * moved last is the one the learner meets.
  */
-export function exerciseRoute(granted: boolean, session: Session) {
-  return { pathname: granted ? EXERCISE : MICROPHONE, params: session };
+export function exerciseRoute(access: MicrophoneAccess, session: Session) {
+  return { pathname: access === 'granted' ? EXERCISE : MICROPHONE, params: session };
 }
