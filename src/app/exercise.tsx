@@ -15,7 +15,9 @@ import {
   expectedLine,
   HINT,
   LISTENING,
+  legendOf,
   REWIND,
+  shadeOf,
   shareOf,
   toneOf,
   verdictLine,
@@ -195,6 +197,7 @@ export default function ExerciseScreen() {
 
       <Card>
         <Staff clef={brief.clef} notes={readingOf(drill)} />
+        <Legend rhythmic={rhythmic} />
       </Card>
 
       <Feedback drill={drill} notation={notation} rewinds={!rhythmic} />
@@ -202,13 +205,37 @@ export default function ExerciseScreen() {
   );
 }
 
-/** The measure being read, the note in it marked — a line at a time, as the mockup draws it. */
+/** The measure being read, each note shaded by what it has been worth — a line at a time. */
 function readingOf(drill: Drill) {
   const from = Math.floor(drill.at / SHOWN) * SHOWN;
 
-  return drill.notes
-    .slice(from, from + SHOWN)
-    .map((pitch, index) => ({ pitch, current: from + index === drill.at }));
+  return drill.notes.slice(from, from + SHOWN).map((pitch, index) => ({
+    pitch,
+    shade: shadeOf(from + index, drill.at, drill.marks[from + index]),
+  }));
+}
+
+/**
+ * What the colours on the staff mean, under the staff.
+ *
+ * It sits inside the card rather than beside it: a legend away from what it
+ * explains is read once and never again.
+ */
+function Legend({ rhythmic }: { readonly rhythmic: boolean }) {
+  return (
+    <View style={styles.legend}>
+      {legendOf(rhythmic).map(({ tone, label }) => (
+        <View key={label} style={styles.entry}>
+          <Text tone={tone} variant="caption">
+            ●
+          </Text>
+          <Text tone="muted" variant="caption">
+            {label}
+          </Text>
+        </View>
+      ))}
+    </View>
+  );
 }
 
 /**
@@ -292,4 +319,6 @@ const styles = StyleSheet.create((theme) => ({
   header: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
   hint: { flexDirection: 'row', justifyContent: 'space-between' },
   feedback: { alignItems: 'center', gap: theme.spacing.xs, paddingVertical: theme.spacing.l },
+  legend: { flexDirection: 'row', gap: theme.spacing.m },
+  entry: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.xs },
 }));

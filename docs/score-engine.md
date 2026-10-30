@@ -29,6 +29,17 @@ The layout also publishes how far the drawing reaches above and below the bottom
 ink included — a canvas sized by the staff alone clips the clef, which is taller than it.
 The painter owns the one thing the layout does not know: a canvas grows downwards.
 
+## Shades
+
+A note is handed to the layout with a **shade** — `ahead`, `current`, `ok`, `late`,
+`wrong` — and the layout carries it onto the notehead, its stem and its leger lines.
+Which shade a note gets is the screen's call, not the layout's: the layout knows that a
+note is drawn one of five ways and nothing about what an answer was worth. The painter
+owns the colours, and the ground behind the note shaded `current`.
+
+**Checked by** `src/domain/score/layout.test.ts` for the carrying, and by
+`src/components/wording/exercise.test.ts` for the screen's choice of shade.
+
 `src/domain/notation/clef.ts` counts in **half**-spaces instead, because that is the gap
 between two neighbouring degrees. The layout halves it once, where the notehead is placed.
 

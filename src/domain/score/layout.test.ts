@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'bun:test';
 import { GLYPHS } from '@/domain/score/bravura';
 import type { Engraving } from '@/domain/score/engraving';
-import { layoutStaff, type Note, type StaffLayout } from '@/domain/score/layout';
+import { layoutStaff, type Note, type Shade, type StaffLayout } from '@/domain/score/layout';
 
 const engraving: Engraving = {
   staffLineThickness: 0.13,
@@ -13,8 +13,8 @@ const engraving: Engraving = {
   clefWidth: 4,
 };
 
-function note(degree: Note['pitch']['degree'], octave: number, current = false): Note {
-  return { pitch: { degree, octave }, current };
+function note(degree: Note['pitch']['degree'], octave: number, shade: Shade = 'ahead'): Note {
+  return { pitch: { degree, octave }, shade };
 }
 
 function staff(clef: Parameters<typeof layoutStaff>[0], notes: readonly Note[]): StaffLayout {
@@ -46,8 +46,8 @@ describe('a staff', () => {
   });
 
   it('opens with the glyph of its clef, on the line that clef names', () => {
-    expect(staff('treble', []).glyphs).toEqual([{ glyph: 'gClef', x: 0, y: 1, current: false }]);
-    expect(staff('bass', []).glyphs).toEqual([{ glyph: 'fClef', x: 0, y: 3, current: false }]);
+    expect(staff('treble', []).glyphs).toEqual([{ glyph: 'gClef', x: 0, y: 1, shade: 'ahead' }]);
+    expect(staff('bass', []).glyphs).toEqual([{ glyph: 'fClef', x: 0, y: 3, shade: 'ahead' }]);
   });
 
   it('puts a notehead half a space up for every degree it climbs', () => {
@@ -62,10 +62,10 @@ describe('a staff', () => {
     expect(noteheads(layout).map((glyph) => glyph.x)).toEqual([4, 7, 10]);
   });
 
-  it('marks the current note and no other', () => {
-    const layout = staff('treble', [note('e', 4), note('f', 4, true), note('g', 4)]);
+  it('shades each note as it was asked to and no other', () => {
+    const layout = staff('treble', [note('e', 4, 'ok'), note('f', 4, 'current'), note('g', 4)]);
 
-    expect(layout.glyphs.map((glyph) => glyph.current)).toEqual([false, false, true, false]);
+    expect(layout.glyphs.map((glyph) => glyph.shade)).toEqual(['ahead', 'ok', 'current', 'ahead']);
   });
 
   it('carries a note four spaces above the staff on four leger lines, all above', () => {
@@ -96,7 +96,7 @@ describe('a staff', () => {
 
 describe('the extent of a staff', () => {
   it('holds every line and every glyph it draws', () => {
-    const layout = staff('treble', [note('c', 3), note('b', 4, true), note('g', 6)]);
+    const layout = staff('treble', [note('c', 3), note('b', 4, 'current'), note('g', 6)]);
     const reach = [
       ...layout.lines.flatMap((line) => [line.from.y, line.to.y]),
       ...layout.glyphs.map((glyph) => glyph.y + GLYPHS[glyph.glyph].top),
@@ -129,19 +129,19 @@ describe('the extent of a staff', () => {
   });
 });
 
-describe('the current note', () => {
+describe('a shaded note', () => {
   it('carries its stem and its leger lines with it, and nothing else', () => {
-    const layout = staff('treble', [note('c', 4), note('c', 4, true)]);
-    const marked = layout.lines.filter((line) => line.current);
+    const layout = staff('treble', [note('c', 4), note('c', 4, 'current')]);
+    const marked = layout.lines.filter((line) => line.shade === 'current');
 
     expect(marked).toHaveLength(2);
     expect(marked.every((line) => line.from.x > (noteheads(layout)[0]?.x as number))).toBe(true);
   });
 
-  it('leaves every staff line unmarked', () => {
-    const layout = staff('treble', [note('c', 4, true)]);
+  it('leaves every staff line at the shade of a note nobody has reached', () => {
+    const layout = staff('treble', [note('c', 4, 'current')]);
 
-    expect(staffLines(layout).some((line) => line.current)).toBe(false);
+    expect(staffLines(layout).every((line) => line.shade === 'ahead')).toBe(true);
   });
 });
 

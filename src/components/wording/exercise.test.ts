@@ -3,8 +3,10 @@ import { describe, expect, it } from 'bun:test';
 import {
   countLine,
   expectedLine,
+  legendOf,
   OFF_BEAT,
   RIGHT,
+  shadeOf,
   shareOf,
   toneOf,
   verdictLine,
@@ -62,5 +64,29 @@ describe('what the exercise screen says', () => {
 
   it('keeps the wrong answer’s colour for a wrong answer only', () => {
     expect([toneOf('right'), toneOf('off-beat'), toneOf('wrong')]).toEqual(['ok', 'late', 'bad']);
+  });
+});
+
+describe('how a note of the session is drawn', () => {
+  it('draws the note being read as the one being read, whatever it was worth', () => {
+    expect(shadeOf(2, 2, 'wrong')).toBe('current');
+  });
+
+  it('keeps what a note behind the learner was worth', () => {
+    expect(shadeOf(1, 2, 'late')).toBe('late');
+  });
+
+  it('leaves a note nobody has answered at the ink', () => {
+    expect(shadeOf(5, 2, undefined)).toBe('ahead');
+  });
+});
+
+describe('the legend under the staff', () => {
+  it('names the off-beat colour where there is a beat to be beside', () => {
+    expect(legendOf(true).map(({ label }) => label)).toEqual(['Juste', 'Décalé', 'Faux']);
+  });
+
+  it('leaves it out where there is none', () => {
+    expect(legendOf(false).map(({ label }) => label)).toEqual(['Juste', 'Faux']);
   });
 });

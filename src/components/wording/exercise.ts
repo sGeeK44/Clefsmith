@@ -1,7 +1,8 @@
 import type { Tone } from '@/components/ui/text';
 import { type Notation, nameOf } from '@/domain/notation/naming';
 import type { Degree } from '@/domain/notation/pitch';
-import type { Drill } from '@/domain/training/drill';
+import type { Shade } from '@/domain/score/layout';
+import type { Drill, Mark } from '@/domain/training/drill';
 
 /**
  * What the exercise screen says, in the learner's words.
@@ -18,6 +19,7 @@ export const RIGHT = 'Juste';
 export const WRONG = 'Faux';
 export const REWIND = 'On reprend au début de la mesure';
 export const OFF_BEAT = 'Juste, mais à côté du temps';
+const LATE = 'Décalé';
 
 export type Verdict = 'waiting' | 'right' | 'off-beat' | 'wrong';
 
@@ -80,4 +82,30 @@ export function verdictLine(verdict: Verdict): string {
   }
 
   return verdict === 'off-beat' ? OFF_BEAT : WRONG;
+}
+
+/**
+ * How one note of the session is to be drawn.
+ *
+ * The note being read is drawn as such whatever it has been worth before: what
+ * it was worth is behind the learner, and what they are being asked for is not.
+ */
+export function shadeOf(index: number, at: number, mark: Mark | undefined): Shade {
+  if (index === at) {
+    return 'current';
+  }
+
+  return mark ?? 'ahead';
+}
+
+/**
+ * What the colours under the staff mean.
+ *
+ * `Décalé` is left out where there is no beat to be beside: a legend naming a
+ * colour the session cannot produce teaches a distinction that is not there.
+ */
+export function legendOf(rhythmic: boolean): readonly { tone: Tone; label: string }[] {
+  const late = { tone: 'late' as const, label: LATE };
+
+  return [{ tone: 'ok', label: RIGHT }, ...(rhythmic ? [late] : []), { tone: 'bad', label: WRONG }];
 }

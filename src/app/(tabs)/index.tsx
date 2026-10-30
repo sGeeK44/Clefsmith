@@ -95,7 +95,10 @@ function Current({ level, notation }: { readonly level: Level; readonly notation
         </View>
 
         {brought.length > 0 && (
-          <Staff clef="treble" notes={brought.map((pitch) => ({ pitch, current: false }))} />
+          <Staff
+            clef="treble"
+            notes={brought.map((pitch) => ({ pitch, shade: 'ahead' }) as const)}
+          />
         )}
 
         <View style={styles.row}>
