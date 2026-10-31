@@ -355,21 +355,44 @@ that matters is not how late JavaScript woke up — it is how far the sound that
 speaker is from the instant the tempo asked for, after a whole session of them.
 
 Measured on **a Zebra TC52 under Android 13** and on **an iPhone 16 under iOS 26.6.2**, by
-recording the device's speaker and dating each click's attack:
+recording the device's speaker and dating each click against a grid:
 
-| Device     | Asked             | Beats | Runs | Beat measured          | Deviation at the last beat |
-| ---------- | ----------------- | ----- | ---- | ---------------------- | -------------------------- |
-| Zebra TC52 | 60 to the minute  | 62    | 8    | 1000.010 – 1000.027 ms | **≤ 3 ms**                 |
-| Zebra TC52 | 120 to the minute | 64    | 6    | 500.000 – 500.017 ms   | **≤ 2 ms**                 |
-| iPhone 16  | 60 to the minute  | 62    | 8    | 999.979 – 999.999 ms   | **≤ 1 ms**                 |
-| iPhone 16  | 120 to the minute | 61    | 6    | 499.988 – 499.998 ms   | **≤ 2 ms**                 |
+| Device     | Asked             | Beats | Runs kept | Beat measured          | Deviation at the last beat |
+| ---------- | ----------------- | ----- | --------- | ---------------------- | -------------------------- |
+| Zebra TC52 | 60 to the minute  | 45–63 | 3 of 6    | 1000.009 – 1000.012 ms | **≤ 1 ms**                 |
+| Zebra TC52 | 120 to the minute | 58    | 3 of 3    | 500.004 – 500.007 ms   | **≤ 1 ms**                 |
+| iPhone 16  | 60 to the minute  | 62–63 | 3 of 4    | 999.974 – 999.985 ms   | **≤ 4 ms**                 |
+| iPhone 16  | 120 to the minute | 60–61 | 4 of 4    | 499.987 – 499.998 ms   | **≤ 3 ms**                 |
 
-Every run was accepted; none was discarded. The beat is off by some twenty parts per
-million — long on the Android, short on the iPhone — which is a constant offset and not an
-accumulation: it is the distance between two crystals, the device's and the recorder's,
-and it is inside what either is specified to hold. That the sign flips with the device and
-not with the tempo is what says so. The dating resolves to a millisecond, so a deviation
-reported as 2 ms is a deviation of no more than that.
+The beat is off by some ten to twenty-five parts per million — long on the Android, short
+on the iPhone — which is a constant offset and not an accumulation: it is the distance
+between two crystals, the device's and the recorder's, and it is inside what either is
+specified to hold. That the sign flips with the device and not with the tempo is what says
+so, and it has now come out the same way twice, on two different instruments.
+
+**Runs are kept or dropped by the measurement, not by hand.** A run whose clicks scatter
+about their own fitted grid by more than 2 ms sd is reporting the room rather than the
+metronome, and is dropped; the count above says how many of each set survived. The four
+that did not were all recordings the room got into — a cooling fan sits squarely in the
+click's own band — and none of them disagreed about the beat, only about individual
+clicks.
+
+### How it is dated
+
+The first version of this measurement found each click by looking for a pure kilohertz
+tone. That stopped working the day the click got loud enough to be useful: a phone
+speaker driven at a level a learner can hear over their own voice distorts, and the
+harmonics it adds are 19 dB below the fundamental on the iPhone and 24 dB below it on the
+Zebra, against 88 dB below in the file being played. The tone is no longer pure, and a
+detector built on its purity lost a quarter of the clicks and dated the ones it kept tens
+of milliseconds out.
+
+What a room cannot imitate is being periodic. So every loud onset is a candidate now, and
+the beat is the period and phase that the largest number of them agree on — a vote, not a
+filter. Only the candidates that fall on the winning grid are fitted, so a burst of fan
+noise contributes nothing to the figure even when it is louder than the click. Checked by
+running it against a recording the old detector had accepted: it returns the same beat to
+within 2 ppm, with an eighth of the scatter.
 
 **The threshold: under 5 ms across a sixteen-measure session**, which is a twentieth of
 the tolerance window at the fastest tempo the setup offers. A beat scheduled by a
