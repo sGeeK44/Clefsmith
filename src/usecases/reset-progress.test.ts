@@ -7,6 +7,7 @@ describe('resetting the progression', () => {
   it('puts the learner back to their first day', async () => {
     const store = storeHolding({
       sessions: 12,
+      beats: { timed: 80, onTime: 60 },
       level: { treble: 5, bass: 3 },
       mastery: { treble: { c: 40 }, bass: { g: 80 } },
     });

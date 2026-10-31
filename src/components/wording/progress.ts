@@ -33,6 +33,11 @@ export function toneOf(score: number | undefined): Tone {
   return score < UNSTEADY ? 'late' : 'ink';
 }
 
+/** `72 %`, or the em dash when no session has ever been read to a metronome. */
+export function shareLine(share: number | undefined): string {
+  return share === undefined ? NO_FIGURE : `${share} %`;
+}
+
 /** `Réviser do et fa` — weakest first, which is the order they were asked for. */
 export function reviewLine(weakest: readonly Degree[], notation: Notation): string {
   return `Réviser ${weakest.map((degree) => nameOf(degree, notation)).join(' et ')}`;
