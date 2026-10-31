@@ -1,3 +1,8 @@
+import { oneOf } from '@/core/one-of';
+import { CLEFS, type Clef } from '@/domain/notation/clef';
+import { DEGREES, type Degree } from '@/domain/notation/pitch';
+import { LEVELS, type Level } from '@/domain/training/level';
+import { MEASURES, type Measures } from '@/domain/training/session-settings';
 import type { MicrophoneAccess } from '@/usecases/microphone-access';
 
 /** The session setup, as a route carries it: strings, because a route has nothing else. */
@@ -25,4 +30,41 @@ const MICROPHONE = '/microphone' as const;
  */
 export function exerciseRoute(access: MicrophoneAccess, session: Session) {
   return { pathname: access === 'granted' ? EXERCISE : MICROPHONE, params: session };
+}
+
+/**
+ * What the route says the session is, or nothing when it does not say.
+ *
+ * The route is typed, not checked: everything on it is a string, and the types
+ * the screen needs are unions. Casting those strings instead — which is what
+ * this used to do, inside the exercise screen — lets whatever arrived travel
+ * into the domain, where `Number('')` is a level zero that no staff has a range
+ * for, and the screen dies on a lookup far from the link that caused it.
+ *
+ * Returning `undefined` makes the unreadable route a case the screen handles,
+ * the way a report that was never played is one.
+ */
+export function briefOf({ clef, level, measures, degrees = '' }: Partial<Session>) {
+  const read = {
+    clef: oneOf(CLEFS, clef),
+    level: oneOf(LEVELS, level),
+    measures: oneOf(MEASURES, measures),
+    degrees: degrees.split(',').filter(Boolean).map(oneOfDegrees),
+  };
+
+  return read.clef !== undefined &&
+    read.level !== undefined &&
+    read.measures !== undefined &&
+    read.degrees.every((degree) => degree !== undefined)
+    ? (read as Brief)
+    : undefined;
+}
+
+const oneOfDegrees = (degree: string) => oneOf(DEGREES, degree);
+
+interface Brief {
+  readonly clef: Clef;
+  readonly level: Level;
+  readonly measures: Measures;
+  readonly degrees: readonly Degree[];
 }

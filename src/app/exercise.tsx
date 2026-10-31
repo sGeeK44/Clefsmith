@@ -4,6 +4,7 @@ import { Pressable, ScrollView, type ScrollViewInstance, View } from 'react-nati
 import { StyleSheet } from 'react-native-unistyles';
 
 import { useService } from '@/components/container-provider';
+import { briefOf } from '@/components/exercise-route';
 import { Beat } from '@/components/ui/beat';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -66,6 +67,8 @@ const ZONE = 168;
 
 const REPORT = '/report';
 
+const PARCOURS = '/studies';
+
 export default function ExerciseScreen() {
   const params = useLocalSearchParams<Params>();
   const { clef, level, measures, degrees, tempo, metronome } = params;
@@ -73,7 +76,7 @@ export default function ExerciseScreen() {
   const rhythmic = metronome === 'true';
   /** The route is what the parcours decided; it does not change under the screen. */
   const brief = useMemo(
-    () => briefOf(clef, level, measures, degrees),
+    () => briefOf({ clef, level, measures, degrees }),
     [clef, level, measures, degrees],
   );
   const drawSession = useService(SYMBOLS.usecases.DrawSession);
@@ -92,8 +95,23 @@ export default function ExerciseScreen() {
   /** Whether the notes have been dealt — what the beat waits for, rather than the notes themselves. */
   const dealt = drill !== undefined;
 
+  /**
+   * A route that names no session sends the learner back to the parcours.
+   *
+   * It is reachable: a link typed by hand, a link kept from a version that
+   * spelled a parameter differently. Drawing a staff out of it is what used to
+   * happen, and the screen died inside the domain rather than here.
+   */
   useEffect(() => {
-    setDrill(drillOf(drawSession(brief)));
+    if (brief === undefined) {
+      router.replace(PARCOURS);
+    }
+  }, [brief]);
+
+  useEffect(() => {
+    if (brief !== undefined) {
+      setDrill(drillOf(drawSession(brief)));
+    }
   }, [drawSession, brief]);
 
   /**
@@ -183,7 +201,7 @@ export default function ExerciseScreen() {
    * to the parcours. The report of what they just read is CLE-41.
    */
   useEffect(() => {
-    if (drill === undefined || !isOver(drill)) {
+    if (brief === undefined || drill === undefined || !isOver(drill)) {
       return;
     }
 
@@ -208,7 +226,7 @@ export default function ExerciseScreen() {
   }
 
   /** Nothing is drawn before the notes are drawn: a staff guessed is someone else's. */
-  if (drill === undefined || notation === undefined) {
+  if (brief === undefined || drill === undefined || notation === undefined) {
     return (
       <Screen>
         <Text variant="caption" tone="muted">
@@ -478,19 +496,6 @@ interface Params extends Record<string, string | undefined> {
   readonly tempo?: string;
   readonly metronome?: string;
   readonly degrees?: string;
-}
-
-/**
- * The route hands over strings. They are read back into what the session needs,
- * and nothing checks them: a route string is checked by nothing in this repository.
- */
-function briefOf(clef = '', level = '', measures = '', degrees = '') {
-  return {
-    clef: clef as Clef,
-    level: Number(level) as Level,
-    measures: Number(measures) as Measures,
-    degrees: degrees.split(',').filter(Boolean) as Degree[],
-  };
 }
 
 const styles = StyleSheet.create((theme) => ({
