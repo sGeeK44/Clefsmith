@@ -72,7 +72,7 @@ export function answered(drill: Drill, said: Degree): Drill {
   const right = said === expected.degree;
 
   if (right) {
-    return { ...scored(drill, said, undefined), at: drill.at + 1 };
+    return { ...marked(drill, said, undefined, drill.at), at: drill.at + 1 };
   }
 
   /**
@@ -84,7 +84,7 @@ export function answered(drill: Drill, said: Degree): Drill {
   const missed = drill.at;
 
   return {
-    ...rewound(scored(drill, said, undefined)),
+    ...rewound(marked(drill, said, undefined, drill.at)),
     marks: rewound(drill).marks.map((mark, index) => (index === missed ? 'wrong' : mark)),
   };
 }
@@ -128,7 +128,20 @@ export function restarted(drill: Drill): Drill {
  * keeps counting would put the two out of step for the rest of the session.
  */
 export function scored(drill: Drill, said: Degree, beating: Beating | undefined): Drill {
-  const expected = expectedOf(drill);
+  return marked(drill, said, beating, drill.at);
+}
+
+/**
+ * One attempt written against one note, and nothing else.
+ *
+ * It takes the note it writes against rather than reading the position, because
+ * the two readings do not agree on what that note is: at the learner's own pace
+ * the note answered is the one being asked for, and under a metronome it is the
+ * one that was being asked for when the learner spoke. Sharing the writing and
+ * not the choice is what keeps one from inheriting the other's rules.
+ */
+function marked(drill: Drill, said: Degree, beating: Beating | undefined, at: number): Drill {
+  const expected = drill.notes[at];
 
   if (expected === undefined) {
     return drill;
@@ -142,9 +155,7 @@ export function scored(drill: Drill, said: Degree, beating: Beating | undefined)
       ...drill.answers,
       { degree: expected.degree, correct: right, timing: beating?.timing },
     ],
-    marks: drill.marks.map((mark, index) =>
-      index === drill.at ? markOf(right, beating?.timing) : mark,
-    ),
+    marks: drill.marks.map((mark, index) => (index === at ? markOf(right, beating?.timing) : mark)),
     /**
      * The note comes first: a wrong one is wrong whenever it was said, and
      * telling a learner their mistake was off the beat buries the mistake.
