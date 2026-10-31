@@ -42,19 +42,20 @@ is for. Without that plugin a themed component renders with no style at all.
 
 ## Components
 
-Eleven, in `src/components/ui/`:
+Twelve, in `src/components/ui/`:
 
-| Component | Holds                                                     |
-| --------- | --------------------------------------------------------- |
-| `Text`    | The only place a font family or a type size is named.     |
-| `Button`  | Two weights of emphasis, `primary` and `quiet`.           |
-| `Card`    | The only component that knows what "raised" looks like.   |
-| `Screen`  | The page: ground, safe-area insets, gutter.               |
-| `Choice`  | Which of several options is the current one.              |
-| `Flash`   | A message that says something and then takes itself away. |
-| `Toggle`  | One thing that is either on or off, and its label.        |
-| `Beat`    | Which of the four beats of a measure is passing.          |
-| `Chip`    | One fact about what is about to be played, on a fill.     |
+| Component     | Holds                                                     |
+| ------------- | --------------------------------------------------------- |
+| `Text`        | The only place a font family or a type size is named.     |
+| `Button`      | Two weights of emphasis, `primary` and `quiet`.           |
+| `Card`        | The only component that knows what "raised" looks like.   |
+| `Screen`      | The page: ground, safe-area insets, gutter.               |
+| `Choice`      | Which of several options is the current one.              |
+| `Flash`       | A message that says something and then takes itself away. |
+| `Toggle`      | One thing that is either on or off, and its label.        |
+| `Beat`        | Which of the four beats of a measure is passing.          |
+| `Chip`        | One fact about what is about to be played, on a fill.     |
+| `TimingMeter` | Where one answer fell against its beat.                   |
 
 A primary `Button` is **ink**, not accent. Accent is the colour that points at
 something — an overline, a study that has just opened, the note being read — and a screen

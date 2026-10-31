@@ -12,14 +12,18 @@ import { ProgressBar } from '@/components/ui/progress-bar';
 import { Screen } from '@/components/ui/screen';
 import { Staff } from '@/components/ui/staff';
 import { Text } from '@/components/ui/text';
+import { TimingMeter } from '@/components/ui/timing-meter';
 import {
+  BEHIND,
   countLine,
+  EARLY,
   expectedLine,
   HINT,
   HUSHED,
   LEAVE,
   LISTENING,
   legendOf,
+  offsetLine,
   PAUSE,
   PAUSED,
   paceLine,
@@ -36,7 +40,7 @@ import { tempoLine } from '@/components/wording/session';
 import type { Clef } from '@/domain/notation/clef';
 import { type Notation, nameOf } from '@/domain/notation/naming';
 import type { Degree } from '@/domain/notation/pitch';
-import { beatOf, timingOf } from '@/domain/training/beat';
+import { beatingOf, beatOf, meterOf } from '@/domain/training/beat';
 import {
   answered,
   beaten,
@@ -116,7 +120,7 @@ export default function ExerciseScreen() {
           return answered(reading, degree);
         }
 
-        return scored(reading, degree, timingOf(startedAt, shownAt.current, Number(tempo)));
+        return scored(reading, degree, beatingOf(startedAt, shownAt.current, Number(tempo)));
       });
     },
     [rhythmic, tempo],
@@ -253,7 +257,7 @@ export default function ExerciseScreen() {
         <Legend rhythmic={rhythmic} />
       </Card>
 
-      <Feedback drill={drill} notation={notation} rewinds={!rhythmic} />
+      <Feedback drill={drill} notation={notation} rewinds={!rhythmic} tempo={Number(tempo)} />
 
       <View style={styles.actions}>
         <View style={styles.half}>
@@ -395,11 +399,13 @@ function Feedback({
   drill,
   notation,
   rewinds,
+  tempo,
 }: {
   readonly drill: Drill;
   readonly notation: Notation;
   /** Under a metronome a mistake sends nobody back: the beat keeps the place. */
   readonly rewinds: boolean;
+  readonly tempo: number;
 }) {
   const verdict = verdictOf(drill.last);
 
@@ -416,7 +422,7 @@ function Feedback({
     );
   }
 
-  const { said, expected } = drill.last;
+  const { beating, said, expected } = drill.last;
   const tone = toneOf(verdict);
   const wrong = verdict === 'wrong';
 
@@ -431,6 +437,25 @@ function Feedback({
         {nameOf(said, notation)}
       </Text>
       <Chip label={verdictLine(verdict)} tone={tone} />
+
+      {/* Only where a beat was kept, and only on a note worth measuring: a
+          cursor under a wrong note answers a question nobody asked. */}
+      {beating !== undefined && (
+        <View style={styles.meter}>
+          <TimingMeter at={meterOf(beating.offset, tempo)} />
+          <View style={styles.ends}>
+            <Text tone="muted" variant="caption">
+              {EARLY}
+            </Text>
+            <Text testID="exercise-offset" tone={tone} variant="caption">
+              {offsetLine(beating)}
+            </Text>
+            <Text tone="muted" variant="caption">
+              {BEHIND}
+            </Text>
+          </View>
+        </View>
+      )}
 
       {wrong && (
         <>
@@ -483,6 +508,9 @@ const styles = StyleSheet.create((theme) => ({
     justifyContent: 'center',
   },
   struck: { textDecorationLine: 'line-through' },
+  /** The meter takes the screen's width; the zone around it centres everything else. */
+  meter: { alignSelf: 'stretch', gap: theme.spacing.xs },
+  ends: { flexDirection: 'row', justifyContent: 'space-between' },
   legend: { flexDirection: 'row', gap: theme.spacing.m },
   actions: { flexDirection: 'row', gap: theme.spacing.s },
   half: { flex: 1 },

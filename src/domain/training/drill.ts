@@ -1,5 +1,5 @@
 import type { Degree, Pitch } from '@/domain/notation/pitch';
-import type { Timing } from '@/domain/training/beat';
+import type { Beating, Timing } from '@/domain/training/beat';
 import type { Answer } from '@/domain/training/progress';
 import { NOTES_PER_MEASURE } from '@/domain/training/session-settings';
 
@@ -9,7 +9,7 @@ interface Attempt {
   readonly expected: Degree;
   readonly right: boolean;
   /** Nothing under no metronome: without a beat there is no moment to be late for. */
-  readonly timing: Timing | undefined;
+  readonly beating: Beating | undefined;
 }
 
 /**
@@ -127,7 +127,7 @@ export function restarted(drill: Drill): Drill {
  * beat owns the position — rewinding to the start of the measure while the beat
  * keeps counting would put the two out of step for the rest of the session.
  */
-export function scored(drill: Drill, said: Degree, timing: Timing | undefined): Drill {
+export function scored(drill: Drill, said: Degree, beating: Beating | undefined): Drill {
   const expected = expectedOf(drill);
 
   if (expected === undefined) {
@@ -138,15 +138,20 @@ export function scored(drill: Drill, said: Degree, timing: Timing | undefined): 
 
   return {
     ...drill,
-    answers: [...drill.answers, { degree: expected.degree, correct: right, timing }],
-    marks: drill.marks.map((mark, index) => (index === drill.at ? markOf(right, timing) : mark)),
+    answers: [
+      ...drill.answers,
+      { degree: expected.degree, correct: right, timing: beating?.timing },
+    ],
+    marks: drill.marks.map((mark, index) =>
+      index === drill.at ? markOf(right, beating?.timing) : mark,
+    ),
     /**
      * The note comes first: a wrong one is wrong whenever it was said, and
      * telling a learner their mistake was off the beat buries the mistake.
      * Accuracy counts a late right note as right — being behind the metronome
      * is something to be told, not something to be marked down for.
      */
-    last: { said, expected: expected.degree, right, timing: right ? timing : undefined },
+    last: { said, expected: expected.degree, right, beating: right ? beating : undefined },
   };
 }
 

@@ -46,7 +46,46 @@ const TOLERANCE = 0.5;
 
 export type Timing = 'in-time' | 'off-beat';
 
-/** Whether an utterance started close enough to the beat it answers. */
-export function timingOf(startedAt: number, beat: number, tempo: number): Timing {
-  return Math.abs(startedAt - beat) <= TOLERANCE * beatIntervalMs(tempo) ? 'in-time' : 'off-beat';
+/** What one utterance was worth against its beat: the verdict, and how far off. */
+export interface Beating {
+  readonly timing: Timing;
+  /** Signed milliseconds — negative said early, positive said late. */
+  readonly offset: number;
+}
+
+/** How close to its beat an utterance started, judged and measured. */
+export function beatingOf(startedAt: number, beat: number, tempo: number): Beating {
+  const offset = startedAt - beat;
+
+  return {
+    offset,
+    timing: Math.abs(offset) <= TOLERANCE * beatIntervalMs(tempo) ? 'in-time' : 'off-beat',
+  };
+}
+
+/**
+ * How far either side of its own beat the meter reaches, in beats.
+ *
+ * Three times the tolerance, so the band in the middle is a third of the track:
+ * wide enough to aim at, narrow enough that hitting it means something. A track
+ * scaled to anything else would draw a band whose width says nothing about the
+ * rule it stands for.
+ */
+const TRACK = 3 * TOLERANCE;
+
+/** Where the in-time band starts and ends on the track, as shares of its width. */
+export const BAND = {
+  from: (TRACK - TOLERANCE) / (2 * TRACK),
+  to: (TRACK + TOLERANCE) / (2 * TRACK),
+} as const;
+
+/**
+ * Where an utterance sits on that track, from nought at its early end to one at
+ * its late end. Anything further off is held at the end it ran past: a cursor
+ * drawn outside the track is a cursor nobody can read.
+ */
+export function meterOf(offset: number, tempo: number): number {
+  const span = 2 * TRACK * beatIntervalMs(tempo);
+
+  return Math.min(Math.max(offset / span + 0.5, 0), 1);
 }

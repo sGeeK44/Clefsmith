@@ -5,6 +5,7 @@ import {
   expectedLine,
   legendOf,
   OFF_BEAT,
+  offsetLine,
   paceLine,
   RIGHT,
   shadeOf,
@@ -36,18 +37,43 @@ describe('what the exercise screen says', () => {
   });
 
   it('tells a right answer from a wrong one', () => {
-    expect(verdictOf({ said: 'c', expected: 'c', right: true, timing: undefined })).toBe('right');
-    expect(verdictOf({ said: 'c', expected: 'd', right: false, timing: undefined })).toBe('wrong');
+    expect(verdictOf({ said: 'c', expected: 'c', right: true, beating: undefined })).toBe('right');
+    expect(verdictOf({ said: 'c', expected: 'd', right: false, beating: undefined })).toBe('wrong');
   });
 
   it('says a right note said off the beat is neither simply right nor wrong', () => {
-    expect(verdictOf({ said: 'c', expected: 'c', right: true, timing: 'off-beat' })).toBe(
-      'off-beat',
-    );
+    expect(
+      verdictOf({
+        said: 'c',
+        expected: 'c',
+        right: true,
+        beating: { timing: 'off-beat', offset: 700 },
+      }),
+    ).toBe('off-beat');
   });
 
   it('says nothing about the beat when the note was in time', () => {
-    expect(verdictOf({ said: 'c', expected: 'c', right: true, timing: 'in-time' })).toBe('right');
+    expect(
+      verdictOf({
+        said: 'c',
+        expected: 'c',
+        right: true,
+        beating: { timing: 'in-time', offset: 0 },
+      }),
+    ).toBe('right');
+  });
+
+  it('says which side of the beat a note fell on, and how far off', () => {
+    expect(offsetLine({ timing: 'off-beat', offset: 700 })).toBe('En retard · ±700 ms');
+    expect(offsetLine({ timing: 'off-beat', offset: -700 })).toBe('En avance · ±700 ms');
+  });
+
+  it('says a note inside the window is in time rather than which side it leans', () => {
+    expect(offsetLine({ timing: 'in-time', offset: -120 })).toBe('À temps · ±120 ms');
+  });
+
+  it("rounds the figure: a tenth of a millisecond is nobody's precision", () => {
+    expect(offsetLine({ timing: 'in-time', offset: 119.6 })).toBe('À temps · ±120 ms');
   });
 
   it('names the note that was missed, in the notation the learner chose', () => {
