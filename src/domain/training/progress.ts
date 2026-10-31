@@ -23,8 +23,22 @@ const HIGHEST = 100;
  */
 export type Mastery = Partial<Record<Degree, number>>;
 
+/**
+ * How much of what was read under a metronome fell on the beat, counted rather
+ * than averaged.
+ *
+ * Two running totals, not a running percentage: a percentage of percentages
+ * weighs a four-measure session as heavily as a sixteen-measure one, and the
+ * learner who practises longer would see their figure matter less.
+ */
+export interface Beats {
+  readonly timed: number;
+  readonly onTime: number;
+}
+
 export interface Progress {
   readonly sessions: number;
+  readonly beats: Beats;
   readonly level: Readonly<Record<Clef, Level>>;
   readonly mastery: Readonly<Record<Clef, Mastery>>;
 }
@@ -50,7 +64,24 @@ export interface SessionResult {
 }
 
 export function noProgress(): Progress {
-  return { sessions: 0, level: { treble: 1, bass: 1 }, mastery: { treble: {}, bass: {} } };
+  return {
+    sessions: 0,
+    beats: { timed: 0, onTime: 0 },
+    level: { treble: 1, bass: 1 },
+    mastery: { treble: {}, bass: {} },
+  };
+}
+
+/**
+ * How well the learner keeps time, over everything they have ever read to one.
+ *
+ * Nothing at all until something has been read to a metronome — the same rule
+ * as a degree never met: a figure nobody has earned is not a zero.
+ */
+export function rhythmOf(progress: Progress): number | undefined {
+  const { timed, onTime } = progress.beats;
+
+  return timed === 0 ? undefined : Math.round((onTime / timed) * 100);
 }
 
 /** The share of the session answered correctly, rounded, out of a hundred. */
@@ -105,8 +136,14 @@ export function sessionFinished(progress: Progress, result: SessionResult): Prog
     level === progress.level[clef] &&
     level < (LEVELS.at(-1) as Level);
 
+  const timed = answers.filter((answer) => answer.timing !== undefined);
+
   return {
     sessions: progress.sessions + 1,
+    beats: {
+      timed: progress.beats.timed + timed.length,
+      onTime: progress.beats.onTime + timed.filter((one) => one.timing === 'in-time').length,
+    },
     level: { ...progress.level, [clef]: opens ? ((level + 1) as Level) : progress.level[clef] },
     mastery: { ...progress.mastery, [clef]: rescored(progress.mastery[clef], answers) },
   };

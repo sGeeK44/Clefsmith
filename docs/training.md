@@ -72,6 +72,16 @@ same number.
 Every attempt is recorded, right or wrong. **Accuracy is counted over attempts, not over
 notes**: a measure re-read three times cost what it cost.
 
+An attempt read under a metronome also carries **how it was timed**, and the progression
+keeps two running totals of it: how many notes were read to a beat, and how many fell on
+one. Two totals rather than a running percentage — a percentage of percentages weighs a
+four-measure session as heavily as a sixteen-measure one. A learner who has never played
+to a metronome has **no** rhythmic figure rather than nought, the same rule as a degree
+never met.
+
+**Checked** by `bun test`: `rhythmOf` is nothing until something is timed, counts notes
+rather than sessions, and leaves untimed answers out of both sides of the division.
+
 Chance is a port, `src/core/random.ts`, beside the clock and for the same reason: a
 generator that reaches for `Math.random` can be tested for its shape and nothing else.
 Its adapter, `src/core/math-random.ts`, arrived with the first real caller — drawing the

@@ -34,6 +34,28 @@ describe('a record that can be read', () => {
   });
 });
 
+describe('the beats a record carries', () => {
+  it('comes back with what was counted under a metronome', () => {
+    expect(decode(written({ beats: { timed: 40, onTime: 31 } })).beats).toEqual({
+      timed: 40,
+      onTime: 31,
+    });
+  });
+
+  it('reads a record written before beats were counted as having none, not as spoilt', () => {
+    expect(decode(written({ beats: undefined })).sessions).toBe(1);
+    expect(decode(written({ beats: undefined })).beats).toEqual({ timed: 0, onTime: 0 });
+  });
+
+  it('forgets counts it cannot believe rather than the whole history', () => {
+    expect(decode(written({ beats: { timed: 2, onTime: 9 } })).beats).toEqual({
+      timed: 0,
+      onTime: 0,
+    });
+    expect(decode(written({ beats: { timed: -1, onTime: 0 } })).sessions).toBe(1);
+  });
+});
+
 describe('a record that cannot be read', () => {
   it('starts the learner over when nothing was ever written', () => {
     expect(decode(null)).toEqual(noProgress());

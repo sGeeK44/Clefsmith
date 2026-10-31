@@ -9,12 +9,12 @@ import { Card } from '@/components/ui/card';
 import { Choice, type Option } from '@/components/ui/choice';
 import { Screen } from '@/components/ui/screen';
 import { Text } from '@/components/ui/text';
-import { NO_FIGURE, reviewLine, scoreLine, toneOf } from '@/components/wording/progress';
+import { reviewLine, scoreLine, shareLine, toneOf } from '@/components/wording/progress';
 import { clefName } from '@/components/wording/study';
 import { CLEFS, type Clef } from '@/domain/notation/clef';
 import { type Notation, nameOf } from '@/domain/notation/naming';
 import { DEGREES, type Degree } from '@/domain/notation/pitch';
-import { masteryOf, type Progress, weakestOf } from '@/domain/training/progress';
+import { masteryOf, type Progress, rhythmOf, weakestOf } from '@/domain/training/progress';
 import { defaultSessionSettings } from '@/domain/training/session-settings';
 import { SYMBOLS } from '@/infrastructure/symbols';
 
@@ -85,7 +85,11 @@ export default function ProgressScreen() {
 
           <View style={styles.counts}>
             <Count figure={`${progress.sessions}`} label="Séances terminées" testID="sessions" />
-            <Count figure={NO_FIGURE} label="Précision rythmique" testID="rhythm" />
+            <Count
+              figure={shareLine(rhythmOf(progress))}
+              label="Précision rythmique"
+              testID="rhythm"
+            />
           </View>
         </>
       )}

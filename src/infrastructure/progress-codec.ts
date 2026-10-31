@@ -1,7 +1,7 @@
 import { CLEFS } from '@/domain/notation/clef';
 import { DEGREES, type Degree } from '@/domain/notation/pitch';
 import { LEVELS, type Level } from '@/domain/training/level';
-import { type Mastery, noProgress, type Progress } from '@/domain/training/progress';
+import { type Beats, type Mastery, noProgress, type Progress } from '@/domain/training/progress';
 
 /**
  * The shape of what is written down.
@@ -50,7 +50,7 @@ function readProgress(value: unknown): Progress | undefined {
 
   return level === undefined || mastery === undefined
     ? undefined
-    : { sessions: value.sessions, level, mastery };
+    : { sessions: value.sessions, beats: readBeats(value.beats), level, mastery };
 }
 
 function readPerClef<T>(
@@ -66,6 +66,24 @@ function readPerClef<T>(
   return read.some(([, one]) => one === undefined)
     ? undefined
     : (Object.fromEntries(read) as Readonly<Record<'treble' | 'bass', T>>);
+}
+
+/**
+ * The beats kept, or none.
+ *
+ * Absent is the normal case rather than an error: records written before the
+ * application counted beats are schema 2 and nothing about them is wrong — they
+ * simply have no rhythm behind them yet. Unreadable counts are read the same
+ * way, which costs a learner a figure and not their whole history.
+ */
+function readBeats(value: unknown): Beats {
+  if (!isRecord(value) || !isCount(value.timed) || !isCount(value.onTime)) {
+    return { timed: 0, onTime: 0 };
+  }
+
+  return value.onTime > value.timed
+    ? { timed: 0, onTime: 0 }
+    : { timed: value.timed, onTime: value.onTime };
 }
 
 function readLevel(value: unknown): Level | undefined {

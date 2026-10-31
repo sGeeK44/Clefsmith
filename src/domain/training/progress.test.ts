@@ -10,6 +10,7 @@ import {
   onTimeOf,
   type Progress,
   reachOf,
+  rhythmOf,
   type SessionResult,
   sessionFinished,
   weakestOf,
@@ -36,6 +37,7 @@ describe('a learner who has never played', () => {
   it('is on the first level of both clefs, with nothing behind them', () => {
     expect(noProgress()).toEqual({
       sessions: 0,
+      beats: { timed: 0, onTime: 0 },
       level: { treble: 1, bass: 1 },
       mastery: { treble: {}, bass: {} },
     });
@@ -127,6 +129,43 @@ describe('finishing a session', () => {
 
   it('opens one level at a time, however long the session', () => {
     expect(after(session({ answers: answers('cdecdecde') })).level.treble).toBe(2);
+  });
+});
+
+describe('how well the learner keeps time', () => {
+  /** A session of four, of which `onTime` fell on the beat and the rest beside it. */
+  function metronome(onTime: number, late: number): SessionResult {
+    return session({
+      answers: [
+        ...Array.from({ length: onTime }, () => ({
+          degree: 'c' as Degree,
+          correct: true,
+          timing: 'in-time' as const,
+        })),
+        ...Array.from({ length: late }, () => ({
+          degree: 'c' as Degree,
+          correct: true,
+          timing: 'off-beat' as const,
+        })),
+      ],
+    });
+  }
+
+  it('is nothing at all until something has been read to a metronome', () => {
+    expect(rhythmOf(noProgress())).toBeUndefined();
+    expect(rhythmOf(after(session()))).toBeUndefined();
+  });
+
+  it('is the share of everything ever read to one that fell on the beat', () => {
+    expect(rhythmOf(after(metronome(3, 1)))).toBe(75);
+  });
+
+  it('counts the notes rather than averaging the sessions, so a long one weighs more', () => {
+    expect(rhythmOf(after(metronome(1, 0), metronome(0, 3)))).toBe(25);
+  });
+
+  it('leaves what was read without a beat out of both sides', () => {
+    expect(rhythmOf(after(metronome(1, 1), session()))).toBe(50);
   });
 });
 
