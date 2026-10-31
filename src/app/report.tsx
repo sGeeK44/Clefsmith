@@ -91,6 +91,11 @@ export default function ReportScreen() {
 
       {opened !== undefined && <Opened clef={clef} level={opened} />}
 
+      {/* What the report says is read from the top; what to do about it is
+          reached with a thumb. The mockup sets the three at the foot of the
+          screen, and a short report would otherwise leave them mid-page. */}
+      <View style={styles.spacer} />
+
       <Button
         label={nextLine(clef, opened)}
         onPress={() => void start(readMicrophoneAccess, setup, opened ?? report.level)}
@@ -196,6 +201,7 @@ const styles = StyleSheet.create((theme) => ({
   figures: { flexDirection: 'row', gap: theme.spacing.s },
   half: { flex: 1 },
   miss: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
+  spacer: { flex: 1 },
   opened: {
     borderColor: theme.colors.accent,
     borderRadius: theme.radii.xl,
