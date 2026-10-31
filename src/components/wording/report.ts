@@ -27,6 +27,19 @@ export function playedLine(clef: Clef, level: Level, review: boolean, notation: 
   return review ? 'Révision ciblée' : studyLine(clef, level, notation);
 }
 
+/**
+ * How long a missed note's bar is drawn, as a share of its track.
+ *
+ * Three mistakes fill it. The bar answers "how badly", not "how badly compared
+ * to the others" — scaled against the worst of the session, one mistake on a
+ * clean reading would draw a full bar and read as a disaster.
+ */
+const FILLS_AT = 3;
+
+export function missShare(times: number): number {
+  return Math.min(times / FILLS_AT, 1);
+}
+
 /** `3 erreurs`, and `1 erreur` — a learner who missed a note once reads the singular. */
 export function missLine(times: number): string {
   return times === 1 ? '1 erreur' : `${times} erreurs`;

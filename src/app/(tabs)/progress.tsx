@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Choice, type Option } from '@/components/ui/choice';
 import { Screen } from '@/components/ui/screen';
+import type { Tone } from '@/components/ui/text';
 import { Text } from '@/components/ui/text';
 import { reviewLine, scoreLine, shareLine, toneOf } from '@/components/wording/progress';
 import { clefName } from '@/components/wording/study';
@@ -119,7 +120,9 @@ function Bar({
       </Text>
 
       <View style={styles.track}>
-        {score !== undefined && <View style={[styles.fill, { height: score }]} />}
+        {score !== undefined && (
+          <View style={[styles.fill, styles.toned(toneOf(score)), { height: score }]} />
+        )}
       </View>
 
       <Text>{nameOf(degree, notation)}</Text>
@@ -203,8 +206,8 @@ const styles = StyleSheet.create((theme) => ({
   bars: { alignItems: 'flex-end', flexDirection: 'row', gap: theme.spacing.xs },
   bar: { alignItems: 'center', flex: 1, gap: theme.spacing.xs },
   track: { height: TALLEST, justifyContent: 'flex-end', width: '100%' },
+  toned: (tone: Tone) => ({ backgroundColor: theme.colors[tone] }),
   fill: {
-    backgroundColor: theme.colors.accent,
     borderRadius: theme.radii.s,
     minHeight: SLIVER,
     width: '100%',
