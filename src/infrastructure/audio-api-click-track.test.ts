@@ -1,65 +1,50 @@
 import { describe, expect, it } from 'bun:test';
 import { type AudioClock, createAudioApiClickTracks } from '@/infrastructure/audio-api-click-track';
 
-/** What a click left on the stand-in hardware: when it sounds, and how. */
+/** The bundled file, as a bundler hands it over: a module number. */
+const CLICK = 42;
+
+/** What one click left on the stand-in hardware. */
 interface Written {
   readonly startedAt: number;
-  readonly stoppedAt: number;
-  readonly pitch: number;
-  /** The instants the envelope was given a value at, in the order it was given them. */
-  readonly shapedAt: readonly number[];
+  /** The sound it was given, so that a click playing silence is a failure. */
+  readonly plays: unknown;
   readonly reachesTheOutput: boolean;
 }
 
 /**
  * A stand-in for the audio hardware, writing down what was scheduled on it.
  *
- * It records on `stop`, which is the last thing said about a click: by then it
- * is wired, shaped and started, so one entry is one finished click.
+ * It records on `start`, which is the last thing said about a click: by then it
+ * is loaded and wired, so one entry is one finished click.
  */
 function audioClock(currentTime: number) {
   const written: Written[] = [];
+  const decoded: number[] = [];
   let closed = false;
   const destination = { connect() {} };
+  const sample = { duration: 0.04 };
 
-  const envelope = () => {
-    const shapedAt: number[] = [];
+  const playback = () => {
     let output: unknown;
+    let started = false;
     const node = {
-      shapedAt,
-      get reaches() {
-        return output === destination;
-      },
+      buffer: null as typeof sample | null,
       connect(to: unknown) {
         output = to;
       },
-      gain: {
-        setValueAtTime: (_value: number, at: number) => void shapedAt.push(at),
-        exponentialRampToValueAtTime: (_value: number, at: number) => void shapedAt.push(at),
-      },
-    };
-
-    return node;
-  };
-
-  const oscillator = () => {
-    let ridden: ReturnType<typeof envelope> | undefined;
-    let startedAt = 0;
-    const node = {
-      frequency: { value: 0 },
-      connect(to: ReturnType<typeof envelope>) {
-        ridden = to;
-      },
+      /* Refuses a second start, as the library's own node does — without that,
+         an adapter reusing one node for every click would pass unnoticed. */
       start(at: number) {
-        startedAt = at;
-      },
-      stop(at: number) {
+        if (started) {
+          throw new Error('InvalidStateError');
+        }
+
+        started = true;
         written.push({
-          startedAt,
-          stoppedAt: at,
-          pitch: node.frequency.value,
-          shapedAt: ridden?.shapedAt ?? [],
-          reachesTheOutput: ridden?.reaches ?? false,
+          startedAt: at,
+          plays: node.buffer,
+          reachesTheOutput: output === destination,
         });
       },
     };
@@ -70,8 +55,12 @@ function audioClock(currentTime: number) {
   const clock: AudioClock = {
     currentTime,
     destination,
-    createGain: envelope,
-    createOscillator: oscillator,
+    decodeAudioData(asset) {
+      decoded.push(asset);
+
+      return Promise.resolve(sample);
+    },
+    createBufferSource: playback,
     close() {
       closed = true;
 
@@ -82,6 +71,8 @@ function audioClock(currentTime: number) {
   return {
     open: () => clock,
     written,
+    decoded,
+    sample,
     get closed() {
       return closed;
     },
@@ -90,7 +81,7 @@ function audioClock(currentTime: number) {
 
 describe('audio api click track', () => {
   it('tells the time on the audio hardware, in milliseconds', async () => {
-    const track = await createAudioApiClickTracks(audioClock(2.5).open)();
+    const track = await createAudioApiClickTracks(audioClock(2.5).open, CLICK)();
 
     expect(track.now()).toBe(2500);
   });
@@ -98,34 +89,43 @@ describe('audio api click track', () => {
   it('sounds a click at the instant it was written for, not at the current one', async () => {
     const hardware = audioClock(2.5);
 
-    (await createAudioApiClickTracks(hardware.open)()).clickAt(4000);
+    (await createAudioApiClickTracks(hardware.open, CLICK)()).clickAt(4000);
 
     expect(hardware.written[0]?.startedAt).toBe(4);
   });
 
-  it('cuts each click short, so a beat is a click and not a tone', async () => {
+  it('plays the bundled sound, through to the output', async () => {
     const hardware = audioClock(0);
 
-    (await createAudioApiClickTracks(hardware.open)()).clickAt(1000);
+    (await createAudioApiClickTracks(hardware.open, CLICK)()).clickAt(1000);
 
-    expect([hardware.written[0]?.startedAt, hardware.written[0]?.stoppedAt]).toEqual([1, 1.03]);
+    expect([hardware.decoded, hardware.written[0]?.plays, hardware.written[0]?.reachesTheOutput]) //
+      .toEqual([[CLICK], hardware.sample, true]);
   });
 
-  it('rides the click on an envelope that reaches the output', async () => {
+  it('decodes the sound once a track, however many clicks it takes', async () => {
     const hardware = audioClock(0);
+    const track = await createAudioApiClickTracks(hardware.open, CLICK)();
 
-    (await createAudioApiClickTracks(hardware.open)()).clickAt(1000);
+    track.clickAt(1000);
+    track.clickAt(2000);
 
-    expect([hardware.written[0]?.reachesTheOutput, hardware.written[0]?.shapedAt]).toEqual([
-      true,
-      [1, 1.002, 1.03],
-    ]);
+    expect([hardware.decoded.length, hardware.written.length]).toEqual([1, 2]);
+  });
+
+  it('gives each click a playback of its own, which the library forbids restarting', async () => {
+    const hardware = audioClock(0);
+    const track = await createAudioApiClickTracks(hardware.open, CLICK)();
+
+    track.clickAt(1000);
+
+    expect(() => track.clickAt(2000)).not.toThrow();
   });
 
   it('releases the hardware when the track is stopped', async () => {
     const hardware = audioClock(0);
 
-    (await createAudioApiClickTracks(hardware.open)()).stop();
+    (await createAudioApiClickTracks(hardware.open, CLICK)()).stop();
 
     expect(hardware.closed).toBe(true);
   });
@@ -136,7 +136,7 @@ describe('audio api click track', () => {
       opened += 1;
 
       return audioClock(0).open();
-    });
+    }, CLICK);
 
     await tracks();
     await tracks();
