@@ -5,6 +5,7 @@ import {
   expectedLine,
   legendOf,
   OFF_BEAT,
+  paceLine,
   RIGHT,
   shadeOf,
   shareOf,
@@ -88,5 +89,15 @@ describe('the legend under the staff', () => {
 
   it('leaves it out where there is none', () => {
     expect(legendOf(false).map(({ label }) => label)).toEqual(['Juste', 'Faux']);
+  });
+});
+
+describe('how the session is to be read', () => {
+  it('asks for the beat where there is one', () => {
+    expect(paceLine(true)).toBe('Dites chaque note en rythme');
+  });
+
+  it('leaves the pace to the learner where there is none', () => {
+    expect(paceLine(false)).toBe('Lisez à votre rythme');
   });
 });

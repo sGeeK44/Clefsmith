@@ -15,6 +15,16 @@ import type { Drill, Mark } from '@/domain/training/drill';
 /** Before anything has been said, and after each note is answered. */
 export const LISTENING = "J'écoute…";
 export const HINT = 'Dites la note surlignée';
+
+/**
+ * How the session is to be read, said once at the top of the screen.
+ *
+ * It is the one line that tells the two readings apart while they are being
+ * played: everything else on the exercise looks the same under a beat or not.
+ */
+export function paceLine(rhythmic: boolean): string {
+  return rhythmic ? 'Dites chaque note en rythme' : 'Lisez à votre rythme';
+}
 export const RIGHT = 'Juste';
 export const WRONG = 'Faux';
 export const REWIND = 'On reprend au début de la mesure';

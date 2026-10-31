@@ -7,6 +7,7 @@ import { useService } from '@/components/container-provider';
 import { Beat } from '@/components/ui/beat';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { Chip } from '@/components/ui/chip';
 import { ProgressBar } from '@/components/ui/progress-bar';
 import { Screen } from '@/components/ui/screen';
 import { Staff } from '@/components/ui/staff';
@@ -21,6 +22,7 @@ import {
   legendOf,
   PAUSE,
   PAUSED,
+  paceLine,
   RESTART,
   RESUME,
   REWIND,
@@ -54,6 +56,9 @@ const PER_LINE = NOTES_PER_MEASURE * 2;
 
 /** Smaller than the default: eight notes and a clef have to fit a phone's width. */
 const SPACE = 10;
+
+/** What the feedback zone takes, in every one of its three states. */
+const ZONE = 168;
 
 const REPORT = '/report';
 
@@ -227,7 +232,7 @@ export default function ExerciseScreen() {
 
       <View style={styles.hint}>
         <Text variant="caption" tone="muted">
-          {HINT}
+          {paceLine(rhythmic)}
         </Text>
         <Text variant="caption" tone="muted">
           {tempoLine(Number(tempo))}
@@ -397,23 +402,30 @@ function Feedback({
         <Text testID="exercise-feedback" variant="title">
           {LISTENING}
         </Text>
+        <Text tone="muted" variant="caption">
+          {HINT}
+        </Text>
       </View>
     );
   }
 
   const { said, expected } = drill.last;
   const tone = toneOf(verdict);
+  const wrong = verdict === 'wrong';
 
   return (
     <View style={styles.feedback}>
-      <Text testID="exercise-feedback" variant="display" tone={tone}>
+      <Text
+        style={wrong ? styles.struck : undefined}
+        testID="exercise-feedback"
+        tone={tone}
+        variant="display"
+      >
         {nameOf(said, notation)}
       </Text>
-      <Text variant="caption" tone={tone}>
-        {verdictLine(verdict)}
-      </Text>
+      <Chip label={verdictLine(verdict)} tone={tone} />
 
-      {verdict === 'wrong' && (
+      {wrong && (
         <>
           <Text>{expectedLine(expected, notation)}</Text>
           {rewinds && (
@@ -452,7 +464,17 @@ function briefOf(clef = '', level = '', measures = '', degrees = '') {
 const styles = StyleSheet.create((theme) => ({
   header: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
   hint: { flexDirection: 'row', justifyContent: 'space-between' },
-  feedback: { alignItems: 'center', gap: theme.spacing.xs, paddingVertical: theme.spacing.l },
+  /**
+   * One height, whatever it holds: a zone that grows with its contents moves the
+   * staff above it, and the learner reads a line that has just jumped.
+   */
+  feedback: {
+    alignItems: 'center',
+    gap: theme.spacing.xs,
+    height: ZONE,
+    justifyContent: 'center',
+  },
+  struck: { textDecorationLine: 'line-through' },
   legend: { flexDirection: 'row', gap: theme.spacing.m },
   actions: { flexDirection: 'row', gap: theme.spacing.s },
   half: { flex: 1 },
