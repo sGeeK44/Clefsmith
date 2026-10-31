@@ -85,6 +85,10 @@ which is the rule working rather than an exception to it.
 `Beat` arrived with the rhythmic reading and holds no count of its own either: which beat
 is passing is the session's business.
 
+`ProgressBar` takes a `tone` from the same vocabulary `Text` does, so a bar and the figure
+beside it are given one colour and cannot drift apart — a red number on a blue bar says
+two different things about the same note.
+
 `ProgressBar` holds no number of its own. What the share means — notes read, files sent —
 is the screen's business, and a bar that knew would be a bar per screen. It has two
 weights: the regular one measures the screen, the thin one measures the line of a list it

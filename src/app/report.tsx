@@ -13,6 +13,7 @@ import { Text } from '@/components/ui/text';
 import {
   BACK,
   missLine,
+  missShare,
   NO_MISTAKE,
   nextLine,
   ON_TIME,
@@ -83,7 +84,7 @@ export default function ReportScreen() {
           {missed.length === 0 ? NO_MISTAKE : TO_REVIEW}
         </Text>
         {missed.map((miss) => (
-          <Miss key={miss.degree} miss={miss} notation={notation} worst={missed[0]?.times ?? 1} />
+          <Miss key={miss.degree} miss={miss} notation={notation} />
         ))}
       </Card>
 
@@ -138,20 +139,18 @@ function Figure({
   );
 }
 
-/** One note to go back over, and how far it stands from the worst of them. */
+/** One note to go back over, and how often it went wrong — three mistakes fill the bar. */
 function Miss({
   miss,
   notation,
-  worst,
 }: {
   readonly miss: Report['missed'][number];
   readonly notation: Notation;
-  readonly worst: number;
 }) {
   return (
     <View style={styles.miss}>
       <Text testID={`miss-${miss.degree}`}>{nameOf(miss.degree, notation)}</Text>
-      <ProgressBar share={miss.times / worst} />
+      <ProgressBar share={missShare(miss.times)} tone="bad" />
       <Text variant="caption" tone="muted">
         {missLine(miss.times)}
       </Text>

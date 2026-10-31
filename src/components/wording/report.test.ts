@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'bun:test';
 
-import { missLine, nextLine, playedLine, verdictLine } from '@/components/wording/report';
+import {
+  missLine,
+  missShare,
+  nextLine,
+  playedLine,
+  verdictLine,
+} from '@/components/wording/report';
 
 describe('what the report screen says', () => {
   it('praises a clean reading, approves a passed one, and replays the rest', () => {
@@ -22,6 +28,12 @@ describe('what the report screen says', () => {
   it('writes one mistake in the singular', () => {
     expect(missLine(1)).toBe('1 erreur');
     expect(missLine(3)).toBe('3 erreurs');
+  });
+
+  it('fills a missed note\u2019s bar at three mistakes, and never past it', () => {
+    expect(missShare(1)).toBeCloseTo(1 / 3);
+    expect(missShare(3)).toBe(1);
+    expect(missShare(9)).toBe(1);
   });
 
   it('names the study a session opened, and offers another session when it opened none', () => {
