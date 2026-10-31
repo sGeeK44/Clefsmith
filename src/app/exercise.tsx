@@ -234,12 +234,19 @@ export default function ExerciseScreen() {
         <Text variant="caption" tone="muted">
           {paceLine(rhythmic)}
         </Text>
-        <Text variant="caption" tone="muted">
-          {tempoLine(Number(tempo))}
-        </Text>
-      </View>
 
-      {rhythmic && <Beat current={beatOf(drill.at)} />}
+        {/* The beat and the tempo are one statement, and a reading with no beat
+            makes neither: a tempo printed over a free reading is a figure the
+            learner is being asked to ignore. */}
+        {rhythmic && (
+          <View style={styles.beat}>
+            <Beat current={beatOf(drill.at)} />
+            <Text variant="caption" tone="muted">
+              {tempoLine(Number(tempo))}
+            </Text>
+          </View>
+        )}
+      </View>
 
       <Card fills>
         <Reading clef={brief.clef} drill={drill} />
@@ -463,7 +470,8 @@ function briefOf(clef = '', level = '', measures = '', degrees = '') {
 
 const styles = StyleSheet.create((theme) => ({
   header: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
-  hint: { flexDirection: 'row', justifyContent: 'space-between' },
+  beat: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
+  hint: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
   /**
    * One height, whatever it holds: a zone that grows with its contents moves the
    * staff above it, and the learner reads a line that has just jumped.

@@ -28,7 +28,14 @@ export function paceLine(rhythmic: boolean): string {
 export const RIGHT = 'Juste';
 export const WRONG = 'Faux';
 export const REWIND = 'On reprend au début de la mesure';
-export const PAUSE = '⏸ Pause';
+/**
+ * U+FE0E after the glyph asks for its text presentation.
+ *
+ * Without it iOS draws ⏸ as a colour emoji, which puts the one saturated blue
+ * square of the screen inside a quiet button — the loudest thing on an exercise
+ * would be the way out of it.
+ */
+export const PAUSE = '⏸︎ Pause';
 export const RESTART = '↺ Recommencer';
 export const PAUSED = 'En pause';
 export const HUSHED = 'Micro et métronome coupés. Vous reprendrez au début de la mesure.';
