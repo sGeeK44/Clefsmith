@@ -1,9 +1,11 @@
 import { Canvas, Text as Glyph, Line, RoundedRect, useFont, vec } from '@shopify/react-native-skia';
+import { useState } from 'react';
+import { View } from 'react-native';
 import { useUnistyles } from 'react-native-unistyles';
 import type { Colors } from '@/components/theme/tokens';
 import type { Clef } from '@/domain/notation/clef';
 import { GLYPHS } from '@/domain/score/bravura';
-import { ENGRAVING } from '@/domain/score/engraving';
+import { ENGRAVING, spreadOver } from '@/domain/score/engraving';
 import { type Barring, layoutStaff, type Note, type Shade } from '@/domain/score/layout';
 
 const BRAVURA = require('../../../assets/fonts/Bravura.otf');
@@ -54,53 +56,68 @@ export function Staff({
 }) {
   const { theme } = useUnistyles();
   const font = useFont(BRAVURA, space * EM_IN_SPACES);
-  const layout = layoutStaff(clef, notes, ENGRAVING, GLYPHS, barring);
+  /**
+   * How wide the staff may be, in pixels, once it has been laid out — and
+   * `undefined` until then. The staff is engraved to the room it is given
+   * rather than to a width of its own, so there is nothing to draw before the
+   * first layout has said what that room is.
+   */
+  const [room, setRoom] = useState<number>();
+  const engraving =
+    room === undefined ? ENGRAVING : spreadOver(ENGRAVING, notes.length, room / space);
+  const layout = layoutStaff(clef, notes, engraving, GLYPHS, barring);
 
   /** Staff coordinates grow upwards; a canvas grows downwards. */
   const at = (x: number, y: number) => vec(x * space, (layout.top - y) * space);
 
-  if (font === null) {
-    return null;
-  }
-
   return (
-    <Canvas style={{ width: layout.width * space, height: (layout.top - layout.bottom) * space }}>
-      {layout.glyphs
-        .filter((glyph) => glyph.shade === 'current' && glyph.glyph === 'noteheadBlack')
-        .map((glyph) => (
-          <RoundedRect
-            color={theme.colors.soft}
-            height={(layout.top - layout.bottom) * space}
-            key={`highlight-${glyph.x}`}
-            r={space}
-            width={HIGHLIGHT * space}
-            x={(glyph.x + ENGRAVING.noteheadWidth / 2 - HIGHLIGHT / 2) * space}
-            y={0}
-          />
-        ))}
-      {layout.lines.map((line) => (
-        <Line
-          key={`${line.from.x},${line.from.y}-${line.to.x},${line.to.y}`}
-          color={colourOf(line.shade, theme.colors)}
-          p1={at(line.from.x, line.from.y)}
-          p2={at(line.to.x, line.to.y)}
-          strokeWidth={line.thickness * space}
-        />
-      ))}
-      {layout.glyphs.map((glyph) => {
-        const origin = at(glyph.x, glyph.y);
+    /* The wrapper is what the room is read from, and it stays measured: a staff
+       that read its room once would keep a width the screen no longer has. */
+    <View onLayout={({ nativeEvent }) => setRoom(nativeEvent.layout.width)}>
+      {font !== null && room !== undefined && (
+        <Canvas
+          style={{ width: layout.width * space, height: (layout.top - layout.bottom) * space }}
+        >
+          {layout.glyphs
+            .filter((glyph) => glyph.shade === 'current' && glyph.glyph === 'noteheadBlack')
+            .map((glyph) => (
+              <RoundedRect
+                color={theme.colors.soft}
+                height={(layout.top - layout.bottom) * space}
+                key={`highlight-${glyph.x}`}
+                r={space}
+                width={HIGHLIGHT * space}
+                x={(glyph.x + ENGRAVING.noteheadWidth / 2 - HIGHLIGHT / 2) * space}
+                y={0}
+              />
+            ))}
+          {layout.lines.map((line) => (
+            <Line
+              key={`${line.from.x},${line.from.y}-${line.to.x},${line.to.y}`}
+              color={colourOf(line.shade, theme.colors)}
+              p1={at(line.from.x, line.from.y)}
+              p2={at(line.to.x, line.to.y)}
+              strokeWidth={line.thickness * space}
+            />
+          ))}
+          {layout.glyphs.map((glyph) => {
+            const origin = at(glyph.x, glyph.y);
 
-        return (
-          <Glyph
-            key={`${glyph.glyph}-${glyph.x}-${glyph.y}`}
-            color={colourOf(glyph.shade, theme.colors)}
-            font={font}
-            text={String.fromCodePoint(Number.parseInt(GLYPHS[glyph.glyph].codepoint.slice(2), 16))}
-            x={origin.x}
-            y={origin.y}
-          />
-        );
-      })}
-    </Canvas>
+            return (
+              <Glyph
+                key={`${glyph.glyph}-${glyph.x}-${glyph.y}`}
+                color={colourOf(glyph.shade, theme.colors)}
+                font={font}
+                text={String.fromCodePoint(
+                  Number.parseInt(GLYPHS[glyph.glyph].codepoint.slice(2), 16),
+                )}
+                x={origin.x}
+                y={origin.y}
+              />
+            );
+          })}
+        </Canvas>
+      )}
+    </View>
   );
 }
