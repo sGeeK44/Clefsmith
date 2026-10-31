@@ -1,23 +1,30 @@
 import type { ClickTrack, OpenClickTrack } from '@/usecases/play-clicks';
 
-/** One scheduled value of a node's parameter, on the audio clock, in seconds. */
-interface AudioParameter {
-  setValueAtTime(value: number, at: number): void;
-  exponentialRampToValueAtTime(value: number, at: number): void;
-}
-
 interface Connectable {
   connect(destination: Connectable): void;
 }
 
-interface Gain extends Connectable {
-  readonly gain: AudioParameter;
+/**
+ * A sound the hardware has finished decoding, kept to be played again.
+ *
+ * Opaque on purpose: nothing here reads it, it is only handed back to the node
+ * that plays it. `duration` is there so that only a decoded sound satisfies the
+ * type — an empty object would otherwise pass for one.
+ */
+interface Sample {
+  readonly duration: number;
 }
 
-interface Oscillator extends Connectable {
-  readonly frequency: { value: number };
+/**
+ * One playback of a sample, on the audio timeline.
+ *
+ * Single use: the library refuses to start a node twice, so a click is a node
+ * and the sample behind it is shared. There is no `stop` — the node ends by
+ * itself at the end of the sample, which is what makes it a click.
+ */
+interface Playback extends Connectable {
+  buffer: Sample | null;
   start(at: number): void;
-  stop(at: number): void;
 }
 
 /**
@@ -31,59 +38,51 @@ interface Oscillator extends Connectable {
 export interface AudioClock {
   readonly currentTime: number;
   readonly destination: Connectable;
-  createOscillator(): Oscillator;
-  createGain(): Gain;
+  decodeAudioData(asset: number): Promise<Sample>;
+  createBufferSource(): Playback;
   close(): Promise<void>;
 }
 
 export type OpenAudioClock = () => AudioClock;
 
 const SECOND = 1000;
-/** A click, not a note: short enough to have no pitch of its own to follow. */
-const PITCH = 1000;
-const ATTACK = 0.002;
-const DECAY = 0.03;
-/**
- * Silence, written as the smallest audible figure rather than zero: an
- * exponential ramp is undefined at zero and would leave the gain where it was.
- */
-const SILENT = 0.0001;
 
 /**
- * Clicks, written on the audio hardware's own clock.
+ * Plays one recorded click per beat, rather than synthesising one.
  *
- * Every instant the use case hands over is a date in the future on that clock,
- * which is the whole point: the beat is decided by the audio thread and not by
- * when JavaScript happened to wake up.
+ * Both platforms used to draw the same oscillator and render it differently —
+ * on the iPhone 16 the click came out drier and quieter than on Android. A
+ * decoded sample is the same numbers everywhere, so there is one sound and no
+ * pair of per-platform constants to keep in agreement.
+ *
+ * `asset` is what `require()` returns for the bundled file: a module number the
+ * library resolves itself. It is handed in rather than required here, because
+ * `require` of an asset is a bundler's trick and no test runner has it.
  */
-export function createAudioApiClickTracks(openClock: OpenAudioClock): OpenClickTrack {
-  return (): Promise<ClickTrack> => {
+export function createAudioApiClickTracks(
+  openClock: OpenAudioClock,
+  asset: number,
+): OpenClickTrack {
+  return async (): Promise<ClickTrack> => {
     const clock = openClock();
+    /* Once per track, and before the track is handed over: decoding is the
+       only thing here that takes time, and a beat may not wait for it. */
+    const click = await clock.decodeAudioData(asset);
 
-    /* Nothing to wait for while the click is synthesised: the hardware is
-       usable the instant it is handed over. The promise is the port's, not
-       this adapter's. */
-    return Promise.resolve({
+    return {
       now: () => clock.currentTime * SECOND,
 
       clickAt(instant) {
-        const at = instant / SECOND;
-        const click = clock.createOscillator();
-        const envelope = clock.createGain();
+        const playback = clock.createBufferSource();
 
-        click.frequency.value = PITCH;
-        click.connect(envelope);
-        envelope.connect(clock.destination);
-        envelope.gain.setValueAtTime(SILENT, at);
-        envelope.gain.exponentialRampToValueAtTime(1, at + ATTACK);
-        envelope.gain.exponentialRampToValueAtTime(SILENT, at + DECAY);
-        click.start(at);
-        click.stop(at + DECAY);
+        playback.buffer = click;
+        playback.connect(clock.destination);
+        playback.start(instant / SECOND);
       },
 
       stop() {
         void clock.close();
       },
-    });
+    };
   };
 }

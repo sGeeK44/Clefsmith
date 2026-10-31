@@ -41,9 +41,19 @@ AudioManager.setAudioSessionOptions({
   iosOptions: ['defaultToSpeaker'],
 });
 
+/**
+ * The metronome's click: a kilohertz sine over forty milliseconds, decaying by
+ * `exp(-90t)`, mono at 48 kHz, peaking at 0.72 of full scale.
+ *
+ * Recorded rather than synthesised so that both platforms sound the same, and
+ * uncompressed so that the attack lands on the sample it was written for — the
+ * library decodes WAV through miniaudio on iOS and Android alike.
+ */
+const CLICK = require('../../assets/sounds/click.wav');
+
 const container = createContainer(
   createVoskAnswerSource(vosk, MODEL_PATH, systemClock),
-  createAudioApiClickTracks(() => new AudioContext()),
+  createAudioApiClickTracks(() => new AudioContext(), CLICK),
 );
 
 const WELCOME = '/welcome';
