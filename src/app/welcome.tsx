@@ -211,7 +211,8 @@ function Pick({
 const styles = StyleSheet.create((theme) => ({
   heard: {
     alignItems: 'center',
-    alignSelf: 'flex-start',
+    /** Under a staff that fills the card, and centred on it the way the mockup sets it. */
+    alignSelf: 'center',
     backgroundColor: theme.colors.soft,
     borderRadius: theme.radii.pill,
     flexDirection: 'row',
