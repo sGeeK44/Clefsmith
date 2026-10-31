@@ -12,9 +12,12 @@ import {
 } from '@/domain/training/drill';
 import { accuracyOf } from '@/domain/training/progress';
 
-/** What a beaten session hands the drill: a verdict, and how far off it was. */
-const ON_BEAT = { timing: 'in-time', offset: 0 } as const;
-const OFF_BEAT = { timing: 'off-beat', offset: 700 } as const;
+/** What a beaten session hands the drill: a verdict, how far off, and which beat. */
+const ON_BEAT = { timing: 'in-time', offset: 0, behind: 0 } as const;
+const OFF_BEAT = { timing: 'off-beat', offset: 700, behind: 0 } as const;
+
+/** The same verdict, on a beat the grid has since moved past. */
+const beatsBack = (behind: number) => ({ ...ON_BEAT, behind }) as const;
 
 /** Five notes: one whole measure of four, and the first note of the next. */
 const NOTES: readonly Pitch[] = [
@@ -130,6 +133,53 @@ describe('a session being read', () => {
 
     it('says nothing about the timing of a wrong note: the mistake is the note', () => {
       expect(scored(drillOf(NOTES), 'a', OFF_BEAT).last?.beating).toBeUndefined();
+    });
+
+    it('writes against the note that was being read, not the one the beat has reached', () => {
+      const drill = scored(beaten(beaten(drillOf(NOTES))), 'd', beatsBack(1));
+
+      expect(drill.marks).toEqual([undefined, 'ok', undefined, undefined, undefined]);
+    });
+
+    it('leaves the reading where the beat put it, however far back the answer reached', () => {
+      const drill = scored(beaten(beaten(drillOf(NOTES))), 'c', beatsBack(2));
+
+      expect(drill.at).toBe(2);
+      expect(drill.marks[0]).toBe('ok');
+    });
+
+    it('drops a second answer landing on a beat already answered', () => {
+      const once = scored(drillOf(NOTES), 'c', ON_BEAT);
+
+      expect(scored(once, 'a', ON_BEAT)).toBe(once);
+    });
+
+    it('drops an answer more than a measure behind the beat', () => {
+      const fifth = NOTES.reduce(beaten, drillOf(NOTES));
+
+      expect(scored(fifth, 'c', beatsBack(5))).toBe(fifth);
+    });
+
+    it('keeps an answer a whole measure behind the beat', () => {
+      const fifth = NOTES.reduce(beaten, drillOf(NOTES));
+
+      expect(scored(fifth, 'd', beatsBack(4)).marks[1]).toBe('ok');
+    });
+
+    it('keeps an answer late by one beat across a bar line', () => {
+      /* The last note of a measure, answered once the beat has moved on to the
+         first of the next: a bar line between the two is a beat of lateness
+         like any other, and it is the commonest one there is. */
+      const nextMeasure = NOTES.slice(0, 4).reduce(beaten, drillOf(NOTES));
+
+      expect(scored(nextMeasure, 'f', beatsBack(1)).marks[3]).toBe('ok');
+    });
+
+    it('keeps the answer to the last note, settled after the session ended', () => {
+      const measure = NOTES.slice(0, 4);
+      const over = measure.reduce(beaten, drillOf(measure));
+
+      expect(scored(over, 'f', beatsBack(1)).marks[3]).toBe('ok');
     });
   });
 });

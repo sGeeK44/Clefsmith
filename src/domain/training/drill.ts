@@ -72,7 +72,7 @@ export function answered(drill: Drill, said: Degree): Drill {
   const right = said === expected.degree;
 
   if (right) {
-    return { ...scored(drill, said, undefined), at: drill.at + 1 };
+    return { ...marked(drill, said, undefined, drill.at), at: drill.at + 1 };
   }
 
   /**
@@ -84,7 +84,7 @@ export function answered(drill: Drill, said: Degree): Drill {
   const missed = drill.at;
 
   return {
-    ...rewound(scored(drill, said, undefined)),
+    ...rewound(marked(drill, said, undefined, drill.at)),
     marks: rewound(drill).marks.map((mark, index) => (index === missed ? 'wrong' : mark)),
   };
 }
@@ -120,15 +120,52 @@ export function restarted(drill: Drill): Drill {
 }
 
 /**
- * The same attempt, recorded where the reading stands.
+ * The same attempt, recorded against the note it was an answer to.
  *
  * What a metronome session does with a named degree: it is worth what it is
  * worth, and accuracy counts it, but it moves nothing. Under a metronome the
  * beat owns the position — rewinding to the start of the measure while the beat
  * keeps counting would put the two out of step for the rest of the session.
+ *
+ * The note is not where the reading stands. Understanding a word takes longer
+ * than a beat, so where the reading stands is the note after the one the
+ * learner was looking at; the beating says how many beats back to reach.
  */
 export function scored(drill: Drill, said: Degree, beating: Beating | undefined): Drill {
-  const expected = expectedOf(drill);
+  const behind = beating?.behind ?? 0;
+  const at = drill.at - behind;
+
+  /**
+   * Nothing is written more than a measure late, and nothing is written twice.
+   *
+   * A measure's worth of beats, counted back from where the reading stands —
+   * not "the measure in hand". The two sound alike and are not: a bar line
+   * crossed one beat after a note would throw that note's answer away, and a
+   * decoder that takes a beat to settle would lose a quarter of the session at
+   * sixty to the minute and half of it at a hundred and twenty. What is being
+   * bounded is how late an answer may be, so it is a span and not a boundary.
+   *
+   * Two readings landing on one beat is the same note answered twice, and the
+   * first is the learner's.
+   */
+  if (behind > NOTES_PER_MEASURE || at < 0 || drill.marks[at] !== undefined) {
+    return drill;
+  }
+
+  return marked(drill, said, beating, at);
+}
+
+/**
+ * One attempt written against one note, and nothing else.
+ *
+ * It takes the note it writes against rather than reading the position, because
+ * the two readings do not agree on what that note is: at the learner's own pace
+ * the note answered is the one being asked for, and under a metronome it is the
+ * one that was being asked for when the learner spoke. Sharing the writing and
+ * not the choice is what keeps one from inheriting the other's rules.
+ */
+function marked(drill: Drill, said: Degree, beating: Beating | undefined, at: number): Drill {
+  const expected = drill.notes[at];
 
   if (expected === undefined) {
     return drill;
@@ -142,9 +179,7 @@ export function scored(drill: Drill, said: Degree, beating: Beating | undefined)
       ...drill.answers,
       { degree: expected.degree, correct: right, timing: beating?.timing },
     ],
-    marks: drill.marks.map((mark, index) =>
-      index === drill.at ? markOf(right, beating?.timing) : mark,
-    ),
+    marks: drill.marks.map((mark, index) => (index === at ? markOf(right, beating?.timing) : mark)),
     /**
      * The note comes first: a wrong one is wrong whenever it was said, and
      * telling a learner their mistake was off the beat buries the mistake.

@@ -46,20 +46,44 @@ const TOLERANCE = 0.5;
 
 export type Timing = 'in-time' | 'off-beat';
 
-/** What one utterance was worth against its beat: the verdict, and how far off. */
+/** What one utterance was worth against its beat: which beat, the verdict, and how far off. */
 export interface Beating {
   readonly timing: Timing;
   /** Signed milliseconds — negative said early, positive said late. */
   readonly offset: number;
+  /**
+   * How many beats before the one passing the utterance started on.
+   *
+   * Nought for an answer settled within the beat it was said on, and that is
+   * not the ordinary case: naming a note takes time and a decoder takes more,
+   * so by the time a word is settled the grid has usually moved on. Without
+   * this the answer would be judged against whatever note the move left under
+   * the cursor — the note after the one the learner was reading.
+   */
+  readonly behind: number;
 }
 
-/** How close to its beat an utterance started, judged and measured. */
+/**
+ * Which beat an utterance belongs to, and how close to it the learner started.
+ *
+ * The beat it belongs to is the one that was **passing when they started
+ * speaking**, whatever has passed since: a word is counted from the start of
+ * the utterance backwards, not from the instant it was understood.
+ *
+ * Backwards by whole beats and never by a half. The beat a note was said on is
+ * the one it was shown on, and rounding to the nearest would move an answer
+ * said late onto the next note and call it on time — the off-beat verdict
+ * deleting itself.
+ */
 export function beatingOf(startedAt: number, beat: number, tempo: number): Beating {
-  const offset = startedAt - beat;
+  const interval = beatIntervalMs(tempo);
+  const behind = Math.max(0, Math.ceil((beat - startedAt) / interval));
+  const offset = startedAt - (beat - behind * interval);
 
   return {
+    behind,
     offset,
-    timing: Math.abs(offset) <= TOLERANCE * beatIntervalMs(tempo) ? 'in-time' : 'off-beat',
+    timing: Math.abs(offset) <= TOLERANCE * interval ? 'in-time' : 'off-beat',
   };
 }
 

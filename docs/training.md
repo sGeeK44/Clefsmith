@@ -331,10 +331,35 @@ settled on what they said. The decoder's own latency is subtracted where it is o
 never carried into the verdict: CLE-20 measured 838 ms from the end of an utterance to the
 final result, which at sixty to the minute would declare every right note late.
 
-The window is a **share of the beat**, half a beat either side, written in one place. In
-milliseconds it would be half a beat at forty to the minute and more than a whole one at a
-hundred and sixty — the same number meaning "strict" at one tempo and "anything goes" at
-the other.
+That instant also decides **which note was answered**, and not only how late it was. An
+utterance is counted back by whole beats from the one passing to the beat it started on,
+because the grid has usually moved on by the time a word is understood — 838 ms of
+settling plus the word itself is more than a beat at sixty to the minute, and a reading
+judged against the note under the cursor is a reading judged against the next note.
+
+Back by whole beats and never to the nearest: rounding would move a note said late onto
+the beat after it and call it on time, which is the off-beat verdict deleting itself. The
+beat a note was said on is the one it was **shown** on, so an answer never lands on a note
+the learner had not yet been shown, and a reading is never early for a beat that has not
+come. The window is therefore one-sided in practice, and a session where an answer reads
+as early is a session where something upstream handed over the wrong instant.
+
+The window is a **share of the beat**, half a beat, written in one place. In milliseconds
+it would be half a beat at forty to the minute and more than a whole one at a hundred and
+sixty — the same number meaning "strict" at one tempo and "anything goes" at the other.
+
+Reaching back has two limits. **One answer to a beat**: a second reading landing on a note
+already marked is dropped, because it is the same note answered twice and the first is the
+learner's. **Nothing more than a measure late**: a reading that reaches back further than
+a measure's worth of beats is dropped, because at that distance it is an answer to a staff
+the learner has stopped reading.
+
+A **span**, counted back from where the reading stands — not the measure in hand. The two
+sound alike and are not. A bar line crossed one beat after a note would throw that note's
+answer away, and a decoder that takes a beat to settle would then lose a quarter of a
+session at sixty to the minute and half of it at a hundred and twenty: a silent loss in
+place of a visible mistake, which is worse than the bug it replaced. What is being bounded
+is how late an answer may be, so it is a distance and not a boundary.
 
 **Checked** by `bun test`: the grid and the tolerance window are in
 `src/domain/training/beat.ts`, what a beat and an answer do to a reading in
