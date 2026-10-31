@@ -15,7 +15,12 @@ const BRAVURA = require('../../../assets/fonts/Bravura.otf');
  */
 const EM_IN_SPACES = 4;
 
-/** How wide the ground behind the note being read is, in staff spaces. */
+/**
+ * How wide the ground behind the note being read is, in staff spaces.
+ *
+ * It is centred on the notehead, which is drawn from its left edge — the same
+ * half-head the leger lines are placed by.
+ */
 const HIGHLIGHT = 2.4;
 
 /**
@@ -69,7 +74,7 @@ export function Staff({
             key={`highlight-${glyph.x}`}
             r={space}
             width={HIGHLIGHT * space}
-            x={(glyph.x - HIGHLIGHT / 2) * space}
+            x={(glyph.x + ENGRAVING.noteheadWidth / 2 - HIGHLIGHT / 2) * space}
             y={0}
           />
         ))}

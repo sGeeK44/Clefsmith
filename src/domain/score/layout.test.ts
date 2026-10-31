@@ -97,13 +97,20 @@ describe('a staff', () => {
     expect(horizontals(staff('treble', [note('g', 5), note('d', 4)]))).toEqual([]);
   });
 
+  /**
+   * A glyph is placed at the origin it is drawn from, which for a notehead is its
+   * left edge — the stem anchors say so, leaving the head at `x + advance` going
+   * up. A leger line centred on that number instead sits half a notehead to the
+   * left of the note it carries, which is what middle C showed under the staff.
+   */
   it('draws a leger line wider than the notehead it carries, centred on it', () => {
     const layout = staff('treble', [note('c', 4)]);
     const [leger] = horizontals(layout);
     const [head] = noteheads(layout);
+    const centre = (head?.x as number) + 1.18 / 2;
 
-    expect(leger?.from.x).toBeCloseTo((head?.x as number) - 1.18 / 2 - 0.4, 10);
-    expect(leger?.to.x).toBeCloseTo((head?.x as number) + 1.18 / 2 + 0.4, 10);
+    expect(((leger?.from.x as number) + (leger?.to.x as number)) / 2).toBeCloseTo(centre, 10);
+    expect((leger?.to.x as number) - (leger?.from.x as number)).toBeCloseTo(1.18 + 2 * 0.4, 10);
   });
 });
 

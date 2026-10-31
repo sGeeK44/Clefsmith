@@ -210,7 +210,8 @@ function legerLines(
   engraving: Engraving,
 ): LineSegment[] {
   const outside = position > TOP_POSITION ? position - TOP_POSITION : Math.min(position, 0);
-  const x = noteX(index, engraving);
+  /** The notehead is drawn from its left edge, so its centre is half a head further on. */
+  const x = noteX(index, engraving) + engraving.noteheadWidth / 2;
   const half = engraving.noteheadWidth / 2 + engraving.legerLineExtension;
 
   return Array.from({ length: Math.floor(Math.abs(outside) / 2) }, (_, step) => {
