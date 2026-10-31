@@ -16,7 +16,8 @@ export interface Step {
 
 export const STEPS: readonly Step[] = [
   {
-    title: 'Lisez la note. Dites-la.',
+    /** Two lines, as the mockup sets it: the reading and the saying are two acts. */
+    title: 'Lisez la note.\nDites-la.',
     body: 'Clefsmith vous écoute et vous corrige en direct. Dix minutes entre deux cours, et la lecture devient naturelle.',
     cta: 'Continuer',
   },
