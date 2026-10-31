@@ -29,6 +29,9 @@ const TICK_SIZE = 20;
 const HALO = 140;
 const MEDALLION = 84;
 const CAPSULE = 14;
+/** The ring that says which start is taken, and the dot inside the one that is. */
+const RING = 24;
+const DOT = 10;
 
 /**
  * The introduction, shown once and never again.
@@ -192,10 +195,15 @@ function Pick({
       style={styles.pick}
       testID={`start-${start.level}`}
     >
-      <Text style={styles.pickTitle}>{start.title}</Text>
-      <Text variant="caption" tone="muted">
-        {start.detail}
-      </Text>
+      <View style={styles.said}>
+        <Text style={styles.pickTitle}>{start.title}</Text>
+        <Text variant="caption" tone="muted">
+          {start.detail}
+        </Text>
+      </View>
+      {/* The mark the mockup draws, and the only thing on the card that says
+          which start is taken without asking the eye to compare two grounds. */}
+      <View style={styles.ring}>{picked && <View style={styles.mark} />}</View>
     </Pressable>
   );
 }
@@ -254,16 +262,34 @@ const styles = StyleSheet.create((theme) => ({
   dot: { backgroundColor: theme.colors.line, borderRadius: 3, height: 6, width: 6 },
   here: { backgroundColor: theme.colors.ink, borderRadius: 3, height: 6, width: 18 },
   pick: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.surf,
     borderRadius: theme.radii.xl,
     borderWidth: 1,
-    gap: theme.spacing.xs,
+    flexDirection: 'row',
+    gap: theme.spacing.m,
     padding: theme.spacing.m,
     variants: {
       picked: {
-        true: { backgroundColor: theme.colors.soft, borderColor: theme.colors.ink },
-        false: { backgroundColor: theme.colors.bg, borderColor: theme.colors.line },
+        true: { borderColor: theme.colors.ink },
+        false: { borderColor: theme.colors.line },
       },
     },
   },
+  said: { flex: 1, gap: theme.spacing.xs },
+  ring: {
+    alignItems: 'center',
+    borderRadius: RING / 2,
+    height: RING,
+    justifyContent: 'center',
+    width: RING,
+    variants: {
+      picked: {
+        true: { backgroundColor: theme.colors.ink, borderColor: theme.colors.ink, borderWidth: 1 },
+        false: { backgroundColor: 'transparent', borderColor: theme.colors.line, borderWidth: 1 },
+      },
+    },
+  },
+  mark: { backgroundColor: theme.colors.surf, borderRadius: DOT / 2, height: DOT, width: DOT },
   pickTitle: { fontFamily: theme.typography.family.medium },
 }));
