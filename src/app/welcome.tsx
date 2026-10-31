@@ -19,6 +19,17 @@ const SHOWN = { degree: 'g', octave: 4 } as const;
 
 const DESK = '/';
 
+/** The listening bars of the first step, in points, and the mark that answers them. */
+const LEVELS = [8, 14, 20, 11] as const;
+const BARS = 20;
+const TICK = '✓';
+const TICK_SIZE = 20;
+
+/** The microphone of the last step: a disc on a halo, to the mockup's two sizes. */
+const HALO = 140;
+const MEDALLION = 84;
+const CAPSULE = 14;
+
 /**
  * The introduction, shown once and never again.
  *
@@ -77,11 +88,16 @@ export default function WelcomeScreen() {
         </Pressable>
       </View>
 
+      {/* The picture comes before the words it illustrates, and the question
+          after the words that ask it: a list of answers read before the question
+          is a list of answers to nothing. */}
       {step === 0 && notation !== undefined && <Read notation={notation} />}
-      {step === 1 && <Where chosen={start} onChoose={setStart} />}
+      {step === 2 && <Microphone />}
 
       <Text variant="display">{title}</Text>
       <Text tone="muted">{body}</Text>
+
+      {step === 1 && <Where chosen={start} onChoose={setStart} />}
 
       <View style={styles.spacer} />
 
@@ -96,15 +112,47 @@ export default function WelcomeScreen() {
   );
 }
 
-/** What an exercise looks like: a note, and the word that answers it. */
+/** What an exercise looks like: a note, and the word that answers it, heard. */
 function Read({ notation }: { readonly notation: Notation }) {
   return (
     <Card>
       <Staff clef="treble" notes={[{ pitch: SHOWN, shade: 'current' }]} />
-      <Text testID="welcome-note" variant="title" tone="accent">
-        {`« ${nameOf(SHOWN.degree, notation)} »`}
-      </Text>
+      <View style={styles.heard}>
+        <View style={styles.levels}>
+          {LEVELS.map((level) => (
+            <View key={level} style={[styles.level, { height: level }]} />
+          ))}
+        </View>
+        <Text testID="welcome-note" variant="title">
+          {`« ${nameOf(SHOWN.degree, notation)} »`}
+        </Text>
+        <View style={styles.tick}>
+          <Text style={styles.ticked} variant="caption">
+            {TICK}
+          </Text>
+        </View>
+      </View>
     </Card>
+  );
+}
+
+/**
+ * What the microphone is for, drawn rather than named.
+ *
+ * Two circles and three rectangles: the shape of a microphone is recognised at
+ * this size, and an icon font pulled in for one glyph is a font shipped for one
+ * glyph. The accent is spent here because this is the screen that asks for
+ * something, and it is the only thing on it being asked about.
+ */
+function Microphone() {
+  return (
+    <View style={styles.halo} testID="welcome-microphone">
+      <View style={styles.medallion}>
+        <View style={styles.capsule} />
+        <View style={styles.stem} />
+        <View style={styles.foot} />
+      </View>
+    </View>
   );
 }
 
@@ -153,6 +201,52 @@ function Pick({
 }
 
 const styles = StyleSheet.create((theme) => ({
+  heard: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: theme.colors.soft,
+    borderRadius: theme.radii.pill,
+    flexDirection: 'row',
+    gap: theme.spacing.s,
+    paddingHorizontal: theme.spacing.m,
+    paddingVertical: theme.spacing.s,
+  },
+  levels: { alignItems: 'center', flexDirection: 'row', gap: 3, height: BARS },
+  level: { backgroundColor: theme.colors.accent, borderRadius: 2, width: 3 },
+  tick: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.ok,
+    borderRadius: theme.radii.pill,
+    height: TICK_SIZE,
+    justifyContent: 'center',
+    width: TICK_SIZE,
+  },
+  ticked: { color: theme.colors.bg },
+  halo: {
+    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: theme.colors.soft,
+    borderRadius: theme.radii.pill,
+    height: HALO,
+    justifyContent: 'center',
+    width: HALO,
+  },
+  medallion: {
+    alignItems: 'center',
+    backgroundColor: theme.colors.accent,
+    borderRadius: theme.radii.pill,
+    height: MEDALLION,
+    justifyContent: 'center',
+    width: MEDALLION,
+  },
+  capsule: {
+    backgroundColor: theme.colors.bg,
+    borderRadius: CAPSULE / 2,
+    height: CAPSULE * 1.7,
+    width: CAPSULE,
+  },
+  stem: { backgroundColor: theme.colors.bg, height: 7, marginTop: 4, width: 3 },
+  foot: { backgroundColor: theme.colors.bg, borderRadius: 2, height: 3, marginTop: 2, width: 20 },
   head: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
   spacer: { flex: 1 },
   starts: { gap: theme.spacing.s },
