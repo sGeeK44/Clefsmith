@@ -140,7 +140,7 @@ index 4556403d00596ffe8d187845b45470020774ee26..897bb3ca537bf40372e62e9a9da81ec7
    }
    return self;
  }
-@@ -124,17 +131,50 @@ RCT_EXPORT_MODULE()
+@@ -124,17 +131,56 @@ RCT_EXPORT_MODULE()
      timeoutMs = *(options->timeout());
    }
  
@@ -179,13 +179,20 @@ index 4556403d00596ffe8d187845b45470020774ee26..897bb3ca537bf40372e62e9a9da81ec7
 +  // started under it never renders, and its clock never advances. The speaker
 +  // is asked for explicitly because `playAndRecord` otherwise comes out of the
 +  // receiver, which is not where a metronome is of any use.
++  //
++  // `Default` rather than `Measurement`: Apple documents that measurement mode
++  // "disables some dynamics processing on input and output signals, resulting
++  // in a lower-output playback level", and that attenuation is what made the
++  // metronome barely audible on iOS while the same sound was loud on Android.
++  // A processed microphone signal is what is given up for it.
    NSError *catErr = nil;
    @try {
      if (@available(iOS 10.0, *)) {
 -      [audioSession setCategory:AVAudioSessionCategoryRecord
-+      [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord
-                            mode:AVAudioSessionModeMeasurement
+-                           mode:AVAudioSessionModeMeasurement
 -                        options:0
++      [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord
++                           mode:AVAudioSessionModeDefault
 +                        options:AVAudioSessionCategoryOptionDefaultToSpeaker
                            error:&catErr];
      } else {
@@ -194,7 +201,7 @@ index 4556403d00596ffe8d187845b45470020774ee26..897bb3ca537bf40372e62e9a9da81ec7
      }
      if (catErr) {
        NSString *msg = [NSString stringWithFormat:@"Audio session category error: %@", catErr.localizedDescription];
-@@ -291,6 +331,87 @@ RCT_EXPORT_MODULE()
+@@ -291,6 +337,87 @@ RCT_EXPORT_MODULE()
    }
  }
  
@@ -282,7 +289,7 @@ index 4556403d00596ffe8d187845b45470020774ee26..897bb3ca537bf40372e62e9a9da81ec7
  - (void)stop {
    if (!_isRunning)
      return; // idempotent
-@@ -360,6 +481,14 @@ RCT_EXPORT_MODULE()
+@@ -360,6 +487,14 @@ RCT_EXPORT_MODULE()
      _timeoutSource = nil;
    }
  
