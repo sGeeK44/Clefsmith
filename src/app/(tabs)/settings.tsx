@@ -70,17 +70,19 @@ export default function SettingsScreen() {
         <Choice label="Nom des notes" options={NOTATIONS} chosen={notation} onChoose={choose} />
       </Card>
 
-      {/* Replaying it writes the mark again and never takes a study back. */}
+      {/* One card, two rows: both are something done to the record rather than a
+          setting held in it, and two cards would make them two subjects.
+          Replaying the introduction writes the mark again and takes no study back. */}
       <Card>
         <Pressable onPress={() => router.push(WELCOME)} style={styles.row} testID="replay-welcome">
           <Text>Revoir l'introduction</Text>
           <View style={styles.spacer} />
           <Text tone="muted">›</Text>
         </Pressable>
-      </Card>
 
-      <Card>
-        <Pressable onPress={confirmReset} testID="reset-progress">
+        <View style={styles.rule} />
+
+        <Pressable onPress={confirmReset} style={styles.row} testID="reset-progress">
           <Text tone="bad">Réinitialiser la progression</Text>
         </Pressable>
       </Card>
@@ -94,5 +96,11 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create((theme) => ({
   row: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
+  /** The hairline between two rows of one card, drawn edge to edge of its padding. */
+  rule: {
+    backgroundColor: theme.colors.line,
+    height: StyleSheet.hairlineWidth,
+    marginHorizontal: -theme.spacing.m,
+  },
   spacer: { flex: 1 },
 }));
