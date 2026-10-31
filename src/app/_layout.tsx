@@ -7,6 +7,7 @@ import * as vosk from 'react-native-vosk';
 import '@/components/theme/unistyles';
 
 import { ContainerProvider, useService } from '@/components/container-provider';
+import { Splash } from '@/components/splash';
 import { createContainer } from '@/infrastructure/container';
 import { SYMBOLS } from '@/infrastructure/symbols';
 import { systemClock } from '@/infrastructure/system-clock';
@@ -21,6 +22,15 @@ const MODEL_PATH = 'vosk-model-small-fr-0.22';
 const container = createContainer(createVoskAnswerSource(vosk, MODEL_PATH, systemClock));
 
 const WELCOME = '/welcome';
+
+/**
+ * How long the opening screen is held up once there is nothing left to wait for.
+ *
+ * A mark worth drawing is worth reading, and a splash that leaves before the eye
+ * has landed on it reads as a glitch. It is a hold, not a loading time: a tap
+ * ends it, and the decision below it has already been made.
+ */
+const HELD_MS = 1600;
 
 SplashScreen.preventAutoHideAsync();
 
@@ -46,6 +56,7 @@ export default function RootLayout() {
 function Launch() {
   const getSettings = useService(SYMBOLS.usecases.GetSettings);
   const [decided, setDecided] = useState(false);
+  const [held, setHeld] = useState(true);
 
   useEffect(() => {
     getSettings().then((settings) => {
@@ -58,10 +69,26 @@ function Launch() {
   }, [getSettings]);
 
   useEffect(() => {
-    if (decided) {
-      SplashScreen.hideAsync();
-    }
-  }, [decided]);
+    const timer = setTimeout(() => setHeld(false), HELD_MS);
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+    return () => clearTimeout(timer);
+  }, []);
+
+  /**
+   * The native splash comes down on the first frame, under our own.
+   *
+   * It is a single image on a colour and cannot carry the words; ours is drawn
+   * above the stack and hides it until the decision has been applied. Waiting
+   * for the decision here would stack two splashes end to end.
+   */
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
+
+  return (
+    <>
+      <Stack screenOptions={{ headerShown: false }} />
+      {(held || !decided) && <Splash onSkip={() => setHeld(false)} />}
+    </>
+  );
 }
