@@ -1,10 +1,11 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, ScrollView, type ScrollViewInstance, View } from 'react-native';
+import { AppState, Pressable, ScrollView, type ScrollViewInstance, View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
 import { useService } from '@/components/container-provider';
 import { briefOf } from '@/components/exercise-route';
+import { sessionLife } from '@/components/session-life';
 import { Beat } from '@/components/ui/beat';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -67,6 +68,25 @@ const ZONE = 168;
 
 const REPORT = '/report';
 
+/**
+ * Where the application is, as the session needs to know it.
+ *
+ * `AppState.currentState` is the starting value rather than `active` assumed: a
+ * screen mounted while the application is already on its way out would
+ * otherwise start a metronome nobody is in front of.
+ */
+function useAppState() {
+  const [state, setState] = useState(AppState.currentState);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener('change', setState);
+
+    return () => subscription.remove();
+  }, []);
+
+  return state;
+}
+
 const PARCOURS = '/studies';
 
 export default function ExerciseScreen() {
@@ -85,6 +105,7 @@ export default function ExerciseScreen() {
   const record = useService(SYMBOLS.usecases.RecordFinishedSession);
   const keepReport = useService(SYMBOLS.usecases.KeepReport);
   const keepTime = useService(SYMBOLS.usecases.KeepTime);
+  const playClicks = useService(SYMBOLS.usecases.PlayClicks);
   const [drill, setDrill] = useState<Drill>();
   const [notation, setNotation] = useState<Notation>();
   /**
@@ -94,6 +115,7 @@ export default function ExerciseScreen() {
   const [paused, setPaused] = useState(false);
   /** Whether the notes have been dealt — what the beat waits for, rather than the notes themselves. */
   const dealt = drill !== undefined;
+  const { beats, listens } = sessionLife({ rhythmic, dealt, paused, appState: useAppState() });
 
   /**
    * A route that names no session sends the learner back to the parcours.
@@ -152,7 +174,7 @@ export default function ExerciseScreen() {
    * has seen yet.
    */
   useEffect(() => {
-    if (!rhythmic || !dealt || paused) {
+    if (!beats) {
       return;
     }
 
@@ -163,7 +185,22 @@ export default function ExerciseScreen() {
         setDrill((reading) => (reading === undefined ? reading : beaten(reading)));
       }
     });
-  }, [rhythmic, dealt, keepTime, tempo, paused]);
+  }, [beats, keepTime, tempo]);
+
+  /**
+   * The beat heard, on the same condition as the beat counted.
+   *
+   * Its own effect rather than a line in the one above: the clicks are written
+   * on the audio clock and the count on the wall clock, so joining them would
+   * tie the grid the learner hears to a render.
+   */
+  useEffect(() => {
+    if (!beats) {
+      return;
+    }
+
+    return playClicks(Number(tempo));
+  }, [beats, playClicks, tempo]);
 
   /**
    * Listening outlives the screen if it is only stopped on the way out: the
@@ -171,7 +208,7 @@ export default function ExerciseScreen() {
    * screen that is gone. Left is recorded, and whichever comes second wins.
    */
   useEffect(() => {
-    let left = paused;
+    let left = !listens;
     let stop: (() => Promise<void>) | undefined;
 
     getSettings().then((settings) => {
@@ -194,7 +231,7 @@ export default function ExerciseScreen() {
       left = true;
       void stop?.();
     };
-  }, [getSettings, listenForAnswers, heard, paused]);
+  }, [getSettings, listenForAnswers, heard, listens]);
 
   /**
    * The session is written down once, as it ends, and the learner is handed back
