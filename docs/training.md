@@ -376,6 +376,13 @@ the tolerance window at the fastest tempo the setup offers. A beat scheduled by 
 JavaScript timer instead would be late by several whole beats over the same session, which
 is what the audio clock is here to prevent.
 
+**And it stops with the application.** Sent to the background mid-session on the iPhone 16,
+the click train ends on its last scheduled beat and the next one never sounds — measured the
+same way, by recording the speaker: twelve clicks a second apart, the application left the
+foreground 0.57 s after the twelfth, and the beat due a second later is at the room's noise
+floor. The lookahead is what makes this worth measuring: a metronome merely left running
+would have been heard for another half second at least, and then on forever.
+
 **Not checked by anything.** No test in this repository hears a speaker. The measurement
 is a device run, and the figures above are what one produced; re-running it is the only
 way to find out that they have changed.
