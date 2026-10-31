@@ -37,7 +37,8 @@ describe('what the report screen says', () => {
   });
 
   it('names the study a session opened, and offers another session when it opened none', () => {
-    expect(nextLine(4)).toBe('Étude 4 · Moderato');
-    expect(nextLine(undefined)).toBe('Séance suivante');
+    expect(nextLine('treble', 4)).toBe('Étude 4 · Moderato');
+    expect(nextLine('bass', 4)).toBe('Étude 4 · Mezzo-forte');
+    expect(nextLine('treble', undefined)).toBe('Séance suivante');
   });
 });

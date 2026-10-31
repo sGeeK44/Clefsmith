@@ -46,8 +46,8 @@ export function missLine(times: number): string {
 }
 
 /** The study a session opened, named — or the next session, when it opened none. */
-export function nextLine(opened: Level | undefined): string {
-  return opened === undefined ? 'Séance suivante' : `Étude ${opened} · ${tempoOf(opened)}`;
+export function nextLine(clef: Clef, opened: Level | undefined): string {
+  return opened === undefined ? 'Séance suivante' : `Étude ${opened} · ${tempoOf(clef, opened)}`;
 }
 
 export const RIGHT_NOTES = 'Notes justes';

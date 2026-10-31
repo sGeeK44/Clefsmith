@@ -12,13 +12,24 @@ import { LEVELS } from '@/domain/training/level';
 
 describe('what a level is called on screen', () => {
   it('names the six in the order they are climbed', () => {
-    expect(LEVELS.map(tempoOf)).toEqual([
+    expect(LEVELS.map((level) => tempoOf('treble', level))).toEqual([
       'Largo',
       'Adagio',
       'Andante',
       'Moderato',
       'Allegro',
       'Presto',
+    ]);
+  });
+
+  it('climbs the bass through dynamics rather than through tempi', () => {
+    expect(LEVELS.map((level) => tempoOf('bass', level))).toEqual([
+      'Pianissimo',
+      'Piano',
+      'Mezzo-piano',
+      'Mezzo-forte',
+      'Forte',
+      'Fortissimo',
     ]);
   });
 
@@ -36,12 +47,23 @@ describe('the line under a study', () => {
     expect(studyLine('treble', 1, 'letters')).toBe('Étude 1 · C, D, E');
   });
 
-  it('names only the two a later study adds, not the whole pool', () => {
-    expect(studyLine('treble', 4, 'syllabic')).toBe('Étude 4 · Do, Ré');
+  it('names only the notes a later study adds, not the whole pool', () => {
+    expect(studyLine('treble', 2, 'syllabic')).toBe('Étude 2 · Fa, Sol');
   });
 
-  it('says nothing after the number when the study brings no note of its own', () => {
-    expect(studyLine('treble', 6, 'syllabic')).toBe('Étude 6');
+  it('says the staff is read faster when the study brings no note of its own', () => {
+    expect(studyLine('treble', 6, 'syllabic')).toBe('Étude 6 · Toute la portée, plus vite');
+    expect(studyLine('bass', 6, 'syllabic')).toBe('Étude 6 · Toute la portée, plus vite');
+  });
+
+  it('names the skill rather than the notes where a study reaches off the staff', () => {
+    expect(studyLine('treble', 5, 'syllabic')).toBe('Étude 5 · Lignes supplémentaires');
+    expect(studyLine('bass', 5, 'syllabic')).toBe('Étude 5 · Lignes supplémentaires');
+  });
+
+  it('calls out the octave where a study brings degrees already read lower down', () => {
+    expect(studyLine('treble', 4, 'syllabic')).toBe('Étude 4 · Do et Ré aigus');
+    expect(studyLine('bass', 4, 'letters')).toBe('Étude 4 · G et A aigus');
   });
 
   it('names the notes the study brings in the clef it is read in', () => {

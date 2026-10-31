@@ -10,9 +10,18 @@ platform in sight — **checked** by the `inner-layers-are-platform-free` rule o
 Six per clef, and **not the same six**. A level is a range of **positions on the staff**,
 in half-spaces from the bottom line — the unit `src/domain/notation/clef.ts` counts in.
 
-The mockup calls a level an _étude_ and names each one after a tempo marking. That is the
-word on the screen; the domain says level, and the screens translate — the six names live
-in `src/components/wording/study.ts`, and a test there keeps them in step with `LEVELS`.
+The mockup calls a level an _étude_ and names each one after an Italian marking — the
+treble through tempi (Largo … Presto), the bass through dynamics (Pianissimo …
+Fortissimo). Two ladders, so a learner who works both clefs can tell at a glance which
+parcours they are on. That is the word on the screen; the domain says level, and the
+screens translate — the twelve names live in `src/components/wording/study.ts`, and a
+test there keeps each ladder in step with `LEVELS`.
+
+What a study **brings** is said the same way a teacher would say it, and worked out from
+the position table rather than listed per level: a study that adds nothing is the same
+staff read faster, one that reaches off the staff is about leger lines, one that adds
+degrees already read an octave down names them as the high ones, and any other names its
+notes. The first study is the exception that introduces the staff, leger line and all.
 
 | Level | Treble | Bass  | Brings                      |
 | ----- | ------ | ----- | --------------------------- |
