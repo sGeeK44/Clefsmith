@@ -7,6 +7,7 @@ import {
   accuracyOf,
   masteryOf,
   noProgress,
+  onTimeOf,
   type Progress,
   reachOf,
   type SessionResult,
@@ -52,6 +53,34 @@ describe('the accuracy of a session', () => {
 
   it('is zero when nothing was answered, rather than undefined arithmetic', () => {
     expect(accuracyOf([])).toBe(0);
+  });
+});
+
+describe('the share of a session said on the beat', () => {
+  /** `'c'` is on the beat, `'C'` is off it, `'.'` was said without one. */
+  function beaten(read: string): readonly Answer[] {
+    return [...read].map((letter) => ({
+      degree: 'c' as Degree,
+      correct: true,
+      timing: letter === '.' ? undefined : letter === letter.toLowerCase() ? 'in-time' : 'off-beat',
+    }));
+  }
+
+  it('is the share of the timed answers that fell on the beat', () => {
+    expect(onTimeOf(beaten('cccC'))).toBe(75);
+  });
+
+  it('is nothing at all when no answer was timed, which is not nought', () => {
+    expect(onTimeOf(beaten('....'))).toBeUndefined();
+    expect(onTimeOf([])).toBeUndefined();
+  });
+
+  it('counts only what was timed, on both sides of the division', () => {
+    expect(onTimeOf(beaten('cC..'))).toBe(50);
+  });
+
+  it('counts a wrong note said on the beat as said on the beat', () => {
+    expect(onTimeOf([{ degree: 'c', correct: false, timing: 'in-time' }])).toBe(100);
   });
 });
 

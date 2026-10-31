@@ -15,6 +15,7 @@ import {
   missLine,
   NO_MISTAKE,
   nextLine,
+  ON_TIME,
   OPENED,
   playedLine,
   REPLAY,
@@ -60,7 +61,7 @@ export default function ReportScreen() {
     return null;
   }
 
-  const { accuracy, missed, opened } = report;
+  const { accuracy, missed, onTime, opened } = report;
 
   return (
     <Screen>
@@ -71,14 +72,11 @@ export default function ReportScreen() {
         {verdictLine(accuracy)}
       </Text>
 
-      <Card>
-        <Text testID="report-accuracy" variant="display">
-          {`${accuracy} %`}
-        </Text>
-        <Text variant="caption" tone="muted">
-          {RIGHT_NOTES}
-        </Text>
-      </Card>
+      {/* One card alone takes the width; the beaten session's two share it. */}
+      <View style={styles.figures}>
+        <Figure label={RIGHT_NOTES} share={accuracy} testID="report-accuracy" />
+        {onTime !== undefined && <Figure label={ON_TIME} share={onTime} testID="report-on-time" />}
+      </View>
 
       <Card>
         <Text variant="caption" tone="muted">
@@ -108,6 +106,35 @@ export default function ReportScreen() {
         </View>
       </View>
     </Screen>
+  );
+}
+
+/**
+ * One figure the session is worth, out of a hundred.
+ *
+ * It is a card that flexes rather than a card of its own width: one figure fills
+ * the row, two share it, and neither case needs a layout written for it.
+ */
+function Figure({
+  label,
+  share,
+  testID,
+}: {
+  readonly label: string;
+  readonly share: number;
+  readonly testID: string;
+}) {
+  return (
+    <View style={styles.figure}>
+      <Card>
+        <Text testID={testID} variant="display">
+          {`${share} %`}
+        </Text>
+        <Text variant="caption" tone="muted">
+          {label}
+        </Text>
+      </Card>
+    </View>
   );
 }
 
@@ -165,6 +192,8 @@ async function start(read: ReadMicrophoneAccess, setup: Setup, level: Level, deg
 
 const styles = StyleSheet.create((theme) => ({
   aside: { flexDirection: 'row', gap: theme.spacing.s },
+  figure: { flex: 1 },
+  figures: { flexDirection: 'row', gap: theme.spacing.s },
   half: { flex: 1 },
   miss: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
   opened: {

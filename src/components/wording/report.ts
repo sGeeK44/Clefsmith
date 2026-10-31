@@ -38,6 +38,7 @@ export function nextLine(opened: Level | undefined): string {
 }
 
 export const RIGHT_NOTES = 'Notes justes';
+export const ON_TIME = 'À temps';
 export const TO_REVIEW = 'À revoir';
 export const NO_MISTAKE = 'Aucune erreur';
 export const OPENED = 'Nouvelle étude';

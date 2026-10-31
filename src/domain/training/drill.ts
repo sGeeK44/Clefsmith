@@ -138,7 +138,7 @@ export function scored(drill: Drill, said: Degree, timing: Timing | undefined): 
 
   return {
     ...drill,
-    answers: [...drill.answers, { degree: expected.degree, correct: right }],
+    answers: [...drill.answers, { degree: expected.degree, correct: right, timing }],
     marks: drill.marks.map((mark, index) => (index === drill.at ? markOf(right, timing) : mark)),
     /**
      * The note comes first: a wrong one is wrong whenever it was said, and

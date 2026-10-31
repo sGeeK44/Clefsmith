@@ -99,6 +99,31 @@ describe('the report of a finished session', () => {
     expect(report.opened).toBeUndefined();
   });
 
+  it('reports how much of a beaten session fell on the beat', () => {
+    const report = reportOf(onStudy(3), {
+      clef: 'treble',
+      level: 3,
+      review: false,
+      answers: [
+        { degree: 'c', correct: true, timing: 'in-time' },
+        { degree: 'c', correct: true, timing: 'off-beat' },
+      ],
+    });
+
+    expect(report.onTime).toBe(50);
+  });
+
+  it('reports no timing at all for a session read at the learner\u2019s own pace', () => {
+    const report = reportOf(onStudy(3), {
+      clef: 'treble',
+      level: 3,
+      review: false,
+      answers: reading(16, []),
+    });
+
+    expect(report.onTime).toBeUndefined();
+  });
+
   it('announces nothing when the study replayed is one the learner has left behind', () => {
     const report = reportOf(onStudy(5), {
       clef: 'treble',

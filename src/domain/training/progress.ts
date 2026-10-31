@@ -1,5 +1,6 @@
 import type { Clef } from '@/domain/notation/clef';
 import { DEGREES, type Degree } from '@/domain/notation/pitch';
+import type { Timing } from '@/domain/training/beat';
 import { LEVELS, type Level } from '@/domain/training/level';
 
 /** The share of a session that has to be right for the next level to open. */
@@ -31,6 +32,12 @@ export interface Progress {
 export interface Answer {
   readonly degree: Degree;
   readonly correct: boolean;
+  /**
+   * When it was said against the beat, or nothing at all when there was no beat
+   * to say it against. A reading at the learner's own pace has no timing to
+   * report, which is not the same as having been read off the beat.
+   */
+  readonly timing?: Timing;
 }
 
 /** What one finished session reports: which level was played, under which clef, and how. */
@@ -53,6 +60,29 @@ export function accuracyOf(answers: readonly Answer[]): number {
   }
 
   return Math.round((answers.filter((answer) => answer.correct).length / answers.length) * 100);
+}
+
+/**
+ * The share of a beaten session said on the beat, rounded, out of a hundred.
+ *
+ * Only the answers that were timed are counted, on both sides of the division:
+ * a session read without a metronome reports **nothing** rather than nought,
+ * because nothing was asked of it.
+ *
+ * A wrong note said on the beat still counts as on the beat. The two figures
+ * answer two questions — did you read it, and did you read it in time — and
+ * folding one into the other would leave neither answered.
+ */
+export function onTimeOf(answers: readonly Answer[]): number | undefined {
+  const timed = answers.filter((answer) => answer.timing !== undefined);
+
+  if (timed.length === 0) {
+    return undefined;
+  }
+
+  return Math.round(
+    (timed.filter((answer) => answer.timing === 'in-time').length / timed.length) * 100,
+  );
 }
 
 /**
