@@ -65,7 +65,7 @@ export default function ReportScreen() {
   return (
     <Screen>
       <Text variant="caption" tone="muted">
-        {playedLine(report.level, report.review, notation)}
+        {playedLine(report.clef, report.level, report.review, notation)}
       </Text>
       <Text testID="report-verdict" variant="display">
         {verdictLine(accuracy)}

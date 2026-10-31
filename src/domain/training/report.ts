@@ -1,3 +1,4 @@
+import type { Clef } from '@/domain/notation/clef';
 import { DEGREES, type Degree } from '@/domain/notation/pitch';
 import type { Level } from '@/domain/training/level';
 import {
@@ -19,6 +20,7 @@ interface Miss {
 
 /** What a finished session is worth, read off it once and shown as it is. */
 export interface Report {
+  readonly clef: Clef;
   readonly level: Level;
   readonly review: boolean;
   readonly accuracy: number;
@@ -41,6 +43,7 @@ export function reportOf(before: Progress, result: SessionResult): Report {
   const after = sessionFinished(before, result);
 
   return {
+    clef,
     level,
     review,
     accuracy: accuracyOf(answers),

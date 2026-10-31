@@ -29,19 +29,23 @@ describe('what a level is called on screen', () => {
 
 describe('the line under a study', () => {
   it('names the three notes the first one brings', () => {
-    expect(studyLine(1, 'syllabic')).toBe('Étude 1 · Do, Ré, Mi');
+    expect(studyLine('treble', 1, 'syllabic')).toBe('Étude 1 · Do, Ré, Mi');
   });
 
   it('names them in the notation the learner chose', () => {
-    expect(studyLine(1, 'letters')).toBe('Étude 1 · C, D, E');
+    expect(studyLine('treble', 1, 'letters')).toBe('Étude 1 · C, D, E');
   });
 
   it('names only the two a later study adds, not the whole pool', () => {
-    expect(studyLine(4, 'syllabic')).toBe('Étude 4 · Do, Ré');
+    expect(studyLine('treble', 4, 'syllabic')).toBe('Étude 4 · Do, Ré');
   });
 
   it('says nothing after the number when the study brings no note of its own', () => {
-    expect(studyLine(6, 'syllabic')).toBe('Étude 6');
+    expect(studyLine('treble', 6, 'syllabic')).toBe('Étude 6');
+  });
+
+  it('names the notes the study brings in the clef it is read in', () => {
+    expect(studyLine('bass', 1, 'syllabic')).toBe('Étude 1 · Sol, La, Si');
   });
 });
 

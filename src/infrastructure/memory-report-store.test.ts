@@ -3,7 +3,14 @@ import { describe, expect, it } from 'bun:test';
 import type { Report } from '@/domain/training/report';
 import { createMemoryReportStore } from '@/infrastructure/memory-report-store';
 
-const read: Report = { level: 3, review: false, accuracy: 100, missed: [], opened: 4 };
+const read: Report = {
+  clef: 'treble',
+  level: 3,
+  review: false,
+  accuracy: 100,
+  missed: [],
+  opened: 4,
+};
 
 describe('the report of the last session', () => {
   it('has nothing to show before a session has been played', () => {

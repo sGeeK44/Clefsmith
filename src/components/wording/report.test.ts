@@ -14,8 +14,9 @@ describe('what the report screen says', () => {
   });
 
   it('names the study played, or says it was not one', () => {
-    expect(playedLine(3, false, 'syllabic')).toBe('Étude 3 · La, Si');
-    expect(playedLine(3, true, 'syllabic')).toBe('Révision ciblée');
+    expect(playedLine('treble', 3, false, 'syllabic')).toBe('Étude 3 · La, Si');
+    expect(playedLine('treble', 3, true, 'syllabic')).toBe('Révision ciblée');
+    expect(playedLine('bass', 3, false, 'syllabic')).toBe('Étude 3 · Mi, Fa');
   });
 
   it('writes one mistake in the singular', () => {

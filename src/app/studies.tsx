@@ -216,7 +216,7 @@ function Open({
   return (
     <Card>
       <Text variant="caption" tone="muted">
-        {studyLine(level, notation)}
+        {studyLine(clef, level, notation)}
       </Text>
 
       {/* The last studies draw fifteen notes, which is wider than any phone. */}
