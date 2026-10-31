@@ -6,7 +6,9 @@ import {
   legendOf,
   OFF_BEAT,
   offsetLine,
+  PAUSE,
   paceLine,
+  RESTART,
   RIGHT,
   shadeOf,
   shareOf,
@@ -125,5 +127,22 @@ describe('how the session is to be read', () => {
 
   it('leaves the pace to the learner where there is none', () => {
     expect(paceLine(false)).toBe('Lisez à votre rythme');
+  });
+});
+
+describe('the icon a button on the exercise carries', () => {
+  /**
+   * Emoji presentation, as the platforms decide it: the pictographs, the
+   * dingbats, and the handful of technical symbols — ⏸ among them — that
+   * Unicode gave a colour face. A variation selector is not a defence, because
+   * Android ignores the one that asks for text.
+   */
+  const COLOURED = /[\u{231A}-\u{23FA}\u{2600}-\u{27BF}\u{1F000}-\u{1FAFF}]|\u{FE0F}/u;
+
+  it.each([
+    ['the pause', PAUSE],
+    ['the restart', RESTART],
+  ])('draws %s in a glyph no platform turns into a colour emoji', (_what, label) => {
+    expect(label).not.toMatch(COLOURED);
   });
 });

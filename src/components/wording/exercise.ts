@@ -30,13 +30,16 @@ export const RIGHT = 'Juste';
 export const WRONG = 'Faux';
 export const REWIND = 'On reprend au début de la mesure';
 /**
- * U+FE0E after the glyph asks for its text presentation.
+ * Two rectangles rather than ⏸, which no variation selector makes black.
  *
- * Without it iOS draws ⏸ as a colour emoji, which puts the one saturated blue
- * square of the screen inside a quiet button — the loudest thing on an exercise
- * would be the way out of it.
+ * ⏸ carries a colour emoji on both platforms. iOS honours a U+FE0E after it
+ * and draws the glyph as text; Android ignores the request and draws the
+ * orange square anyway, which puts the loudest thing on the exercise screen
+ * inside the quiet button that leaves it. U+25AE has no emoji to fall back
+ * to, so the pause is ink on both — the same block the play triangle on the
+ * desk is already drawn from.
  */
-export const PAUSE = '⏸︎ Pause';
+export const PAUSE = '▮▮ Pause';
 export const RESTART = '↺ Recommencer';
 export const PAUSED = 'En pause';
 export const HUSHED = 'Micro et métronome coupés. Vous reprendrez au début de la mesure.';
