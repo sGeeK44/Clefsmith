@@ -12,6 +12,10 @@ import {
 } from '@/domain/training/drill';
 import { accuracyOf } from '@/domain/training/progress';
 
+/** What a beaten session hands the drill: a verdict, and how far off it was. */
+const ON_BEAT = { timing: 'in-time', offset: 0 } as const;
+const OFF_BEAT = { timing: 'off-beat', offset: 700 } as const;
+
 /** Five notes: one whole measure of four, and the first note of the next. */
 const NOTES: readonly Pitch[] = [
   { degree: 'c', octave: 4 },
@@ -43,7 +47,7 @@ describe('a session being read', () => {
       said: 'a',
       expected: 'd',
       right: false,
-      timing: undefined,
+      beating: undefined,
     });
   });
 
@@ -99,21 +103,21 @@ describe('a session being read', () => {
     });
 
     it('counts what was named without moving the reading on', () => {
-      const drill = scored(drillOf(NOTES), 'c', 'in-time');
+      const drill = scored(drillOf(NOTES), 'c', ON_BEAT);
 
       expect(expectedOf(drill)).toEqual({ degree: 'c', octave: 4 });
-      expect(drill.last).toEqual({ said: 'c', expected: 'c', right: true, timing: 'in-time' });
+      expect(drill.last).toEqual({ said: 'c', expected: 'c', right: true, beating: ON_BEAT });
     });
 
     it('leaves a mistake where it stands rather than sending it back', () => {
-      const drill = scored(beaten(beaten(drillOf(NOTES))), 'a', 'in-time');
+      const drill = scored(beaten(beaten(drillOf(NOTES))), 'a', ON_BEAT);
 
       expect(expectedOf(drill)).toEqual({ degree: 'e', octave: 4 });
       expect(accuracyOf(drill.answers)).toBe(0);
     });
 
     it('records how a note was timed on the attempt, where the session is counted from', () => {
-      expect(scored(drillOf(NOTES), 'c', 'off-beat').answers).toEqual([
+      expect(scored(drillOf(NOTES), 'c', OFF_BEAT).answers).toEqual([
         { degree: 'c', correct: true, timing: 'off-beat' },
       ]);
     });
@@ -125,7 +129,7 @@ describe('a session being read', () => {
     });
 
     it('says nothing about the timing of a wrong note: the mistake is the note', () => {
-      expect(scored(drillOf(NOTES), 'a', 'off-beat').last?.timing).toBeUndefined();
+      expect(scored(drillOf(NOTES), 'a', OFF_BEAT).last?.beating).toBeUndefined();
     });
   });
 });
@@ -140,15 +144,15 @@ describe('what each note has been worth', () => {
   });
 
   it('marks a right note said off the beat as late rather than as a mistake', () => {
-    expect(scored(drillOf(NOTES), 'c', 'off-beat').marks[0]).toBe('late');
+    expect(scored(drillOf(NOTES), 'c', OFF_BEAT).marks[0]).toBe('late');
   });
 
   it('marks a right note said on the beat', () => {
-    expect(scored(drillOf(NOTES), 'c', 'in-time').marks[0]).toBe('ok');
+    expect(scored(drillOf(NOTES), 'c', ON_BEAT).marks[0]).toBe('ok');
   });
 
   it('marks a wrong note under a metronome, where the reading does not rewind', () => {
-    expect(scored(drillOf(NOTES), 'a', 'in-time').marks[0]).toBe('wrong');
+    expect(scored(drillOf(NOTES), 'a', ON_BEAT).marks[0]).toBe('wrong');
   });
 
   it('clears the measure it sends the learner back to, keeping the note they missed', () => {

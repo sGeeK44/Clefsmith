@@ -2,6 +2,7 @@ import type { Tone } from '@/components/ui/text';
 import { type Notation, nameOf } from '@/domain/notation/naming';
 import type { Degree } from '@/domain/notation/pitch';
 import type { Shade } from '@/domain/score/layout';
+import type { Beating } from '@/domain/training/beat';
 import type { Drill, Mark } from '@/domain/training/drill';
 
 /**
@@ -44,6 +45,31 @@ export const LEAVE = 'Quitter la séance';
 export const OFF_BEAT = 'Juste, mais à côté du temps';
 const LATE = 'Décalé';
 
+/** The two ends of the timing meter, which is read from early to late. */
+export const EARLY = 'En avance';
+export const BEHIND = 'En retard';
+const IN_TIME = 'À temps';
+
+/**
+ * `En retard · ±120 ms` — what the cursor under the staff is showing.
+ *
+ * The milliseconds are a magnitude, not a signed number: which side of the beat
+ * the note fell on is already said in words, and said twice it reads as two
+ * figures. Rounded, because a tenth of a millisecond is a precision neither the
+ * microphone nor the learner has.
+ */
+export function offsetLine(beating: Beating): string {
+  return `${sideOf(beating)} · ±${Math.round(Math.abs(beating.offset))} ms`;
+}
+
+function sideOf({ offset, timing }: Beating): string {
+  if (timing === 'in-time') {
+    return IN_TIME;
+  }
+
+  return offset < 0 ? EARLY : BEHIND;
+}
+
 export type Verdict = 'waiting' | 'right' | 'off-beat' | 'wrong';
 
 export function verdictOf(last: Drill['last']): Verdict {
@@ -56,7 +82,7 @@ export function verdictOf(last: Drill['last']): Verdict {
   }
 
   /** The note was right, so the only thing left to say about it is when it was said. */
-  return last.timing === 'off-beat' ? 'off-beat' : 'right';
+  return last.beating?.timing === 'off-beat' ? 'off-beat' : 'right';
 }
 
 /**

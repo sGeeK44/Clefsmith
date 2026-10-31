@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test';
-import { beatAt, beatIntervalMs, beatOf, timingOf } from '@/domain/training/beat';
+import { BAND, beatAt, beatIntervalMs, beatingOf, beatOf, meterOf } from '@/domain/training/beat';
 
 describe('the beat grid', () => {
   it('beats once a second at sixty to the minute', () => {
@@ -29,31 +29,60 @@ describe('the beat grid', () => {
     const BEAT = 1000;
 
     it('calls a note started on its beat in time', () => {
-      expect(timingOf(BEAT, BEAT, 60)).toBe('in-time');
+      expect(beatingOf(BEAT, BEAT, 60).timing).toBe('in-time');
     });
 
     it('calls a note started a whole beat late off the beat', () => {
-      expect(timingOf(BEAT + 1000, BEAT, 60)).toBe('off-beat');
+      expect(beatingOf(BEAT + 1000, BEAT, 60).timing).toBe('off-beat');
     });
 
     it('tolerates as much ahead of the beat as behind it', () => {
-      expect(timingOf(BEAT - 400, BEAT, 60)).toBe('in-time');
-      expect(timingOf(BEAT - 600, BEAT, 60)).toBe('off-beat');
+      expect(beatingOf(BEAT - 400, BEAT, 60).timing).toBe('in-time');
+      expect(beatingOf(BEAT - 600, BEAT, 60).timing).toBe('off-beat');
     });
 
     it('tolerates the same lead at one tempo and not at another', () => {
       const lead = 300;
 
-      expect(timingOf(BEAT - lead, BEAT, 60)).toBe('in-time');
-      expect(timingOf(BEAT - lead, BEAT, 160)).toBe('off-beat');
+      expect(beatingOf(BEAT - lead, BEAT, 60).timing).toBe('in-time');
+      expect(beatingOf(BEAT - lead, BEAT, 160).timing).toBe('off-beat');
+    });
+
+    it('measures how far off the beat the note fell, and on which side of it', () => {
+      expect(beatingOf(BEAT + 120, BEAT, 60).offset).toBe(120);
+      expect(beatingOf(BEAT - 120, BEAT, 60).offset).toBe(-120);
     });
 
     it('turns a note in time into a late one when it is timed on the decoder settling', () => {
       /** What CLE-20 measured from the end of an utterance to the final result. */
       const settling = 838;
 
-      expect(timingOf(BEAT, BEAT, 60)).toBe('in-time');
-      expect(timingOf(BEAT + settling, BEAT, 60)).toBe('off-beat');
+      expect(beatingOf(BEAT, BEAT, 60).timing).toBe('in-time');
+      expect(beatingOf(BEAT + settling, BEAT, 60).timing).toBe('off-beat');
     });
+  });
+});
+
+describe('the meter the timing is read on', () => {
+  it('puts a note said on its beat in the middle of the track', () => {
+    expect(meterOf(0, 60)).toBe(0.5);
+  });
+
+  it('draws the band as the tolerance itself: a note at its edge lands on the band', () => {
+    expect(meterOf(500, 60)).toBeCloseTo(BAND.to, 10);
+    expect(meterOf(-500, 60)).toBeCloseTo(BAND.from, 10);
+  });
+
+  it('gives the band a third of the track, which is what makes it aimable', () => {
+    expect([BAND.from, BAND.to]).toEqual([1 / 3, 2 / 3]);
+  });
+
+  it('spans the same number of beats whatever the tempo, not the same milliseconds', () => {
+    expect(meterOf(250, 120)).toBe(meterOf(500, 60));
+  });
+
+  it('holds a note further off than the track reaches at the end it ran past', () => {
+    expect(meterOf(9000, 60)).toBe(1);
+    expect(meterOf(-9000, 60)).toBe(0);
   });
 });
