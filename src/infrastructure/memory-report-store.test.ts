@@ -8,6 +8,7 @@ const read: Report = {
   level: 3,
   review: false,
   accuracy: 100,
+  onTime: undefined,
   missed: [],
   opened: 4,
 };

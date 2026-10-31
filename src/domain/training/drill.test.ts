@@ -112,6 +112,18 @@ describe('a session being read', () => {
       expect(accuracyOf(drill.answers)).toBe(0);
     });
 
+    it('records how a note was timed on the attempt, where the session is counted from', () => {
+      expect(scored(drillOf(NOTES), 'c', 'off-beat').answers).toEqual([
+        { degree: 'c', correct: true, timing: 'off-beat' },
+      ]);
+    });
+
+    it('records a reading with no beat as timed by nothing, not as off the beat', () => {
+      expect(scored(drillOf(NOTES), 'c', undefined).answers).toEqual([
+        { degree: 'c', correct: true, timing: undefined },
+      ]);
+    });
+
     it('says nothing about the timing of a wrong note: the mistake is the note', () => {
       expect(scored(drillOf(NOTES), 'a', 'off-beat').last?.timing).toBeUndefined();
     });

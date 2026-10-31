@@ -4,6 +4,7 @@ import type { Level } from '@/domain/training/level';
 import {
   type Answer,
   accuracyOf,
+  onTimeOf,
   type Progress,
   type SessionResult,
   sessionFinished,
@@ -24,6 +25,8 @@ export interface Report {
   readonly level: Level;
   readonly review: boolean;
   readonly accuracy: number;
+  /** The share said on the beat, or nothing when the session was not beaten. */
+  readonly onTime: number | undefined;
   /** At most three, most missed first. Empty when the session was read clean. */
   readonly missed: readonly Miss[];
   /** The level the session opened, if it opened one. */
@@ -47,6 +50,7 @@ export function reportOf(before: Progress, result: SessionResult): Report {
     level,
     review,
     accuracy: accuracyOf(answers),
+    onTime: onTimeOf(answers),
     missed: missesOf(answers),
     opened: after.level[clef] > before.level[clef] ? after.level[clef] : undefined,
   };
