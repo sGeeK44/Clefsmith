@@ -350,12 +350,16 @@ sixty — the same number meaning "strict" at one tempo and "anything goes" at t
 
 Reaching back has two limits. **One answer to a beat**: a second reading landing on a note
 already marked is dropped, because it is the same note answered twice and the first is the
-learner's. **Nothing across a measure**: a reading settled so late that the grid has left
-the measure its note belongs to is dropped, because marking it would change a measure the
-learner has already been shown the result of. The measure is counted from the last note
-the reading reached rather than from the position itself — a session ends on its final
-beat while the word for its final note is still being decoded, and counting from the
-position would throw that answer away in every session and only there.
+learner's. **Nothing more than a measure late**: a reading that reaches back further than
+a measure's worth of beats is dropped, because at that distance it is an answer to a staff
+the learner has stopped reading.
+
+A **span**, counted back from where the reading stands — not the measure in hand. The two
+sound alike and are not. A bar line crossed one beat after a note would throw that note's
+answer away, and a decoder that takes a beat to settle would then lose a quarter of a
+session at sixty to the minute and half of it at a hundred and twenty: a silent loss in
+place of a visible mistake, which is worse than the bug it replaced. What is being bounded
+is how late an answer may be, so it is a distance and not a boundary.
 
 **Checked** by `bun test`: the grid and the tolerance window are in
 `src/domain/training/beat.ts`, what a beat and an answer do to a reading in

@@ -132,33 +132,27 @@ export function restarted(drill: Drill): Drill {
  * learner was looking at; the beating says how many beats back to reach.
  */
 export function scored(drill: Drill, said: Degree, beating: Beating | undefined): Drill {
-  const at = drill.at - (beating?.behind ?? 0);
+  const behind = beating?.behind ?? 0;
+  const at = drill.at - behind;
 
   /**
-   * Nothing is written outside the measure in hand, and nothing is written
-   * twice. A reading settled so late that the grid has left its measure is an
-   * answer to a staff the learner is no longer looking at, and marking it would
-   * change a measure they have already been shown the result of. Two readings
-   * landing on one beat is the same note answered twice: the first is theirs.
+   * Nothing is written more than a measure late, and nothing is written twice.
+   *
+   * A measure's worth of beats, counted back from where the reading stands —
+   * not "the measure in hand". The two sound alike and are not: a bar line
+   * crossed one beat after a note would throw that note's answer away, and a
+   * decoder that takes a beat to settle would lose a quarter of the session at
+   * sixty to the minute and half of it at a hundred and twenty. What is being
+   * bounded is how late an answer may be, so it is a span and not a boundary.
+   *
+   * Two readings landing on one beat is the same note answered twice, and the
+   * first is the learner's.
    */
-  if (at < measureOf(lastRead(drill)) || drill.marks[at] !== undefined) {
+  if (behind > NOTES_PER_MEASURE || at < 0 || drill.marks[at] !== undefined) {
     return drill;
   }
 
   return marked(drill, said, beating, at);
-}
-
-/**
- * The last note the reading has reached, which is the last note there is once
- * it is over.
- *
- * A session ends on its final beat, and the word for its final note is still
- * being decoded when it does. Counting from the position itself would put that
- * last answer a measure behind the cursor and throw it away — every session
- * losing its last note, and only its last note.
- */
-function lastRead(drill: Drill): number {
-  return Math.min(drill.at, drill.notes.length - 1);
 }
 
 /**
