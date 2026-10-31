@@ -198,7 +198,7 @@ const styles = StyleSheet.create((theme) => ({
   miss: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.s },
   opened: {
     borderColor: theme.colors.accent,
-    borderRadius: theme.radii.m,
+    borderRadius: theme.radii.xl,
     borderStyle: 'dashed',
     borderWidth: 1,
     gap: theme.spacing.xs,

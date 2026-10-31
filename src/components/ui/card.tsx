@@ -24,7 +24,7 @@ const styles = StyleSheet.create((theme) => ({
   card: {
     backgroundColor: theme.colors.surf,
     borderColor: theme.colors.line,
-    borderRadius: theme.radii.m,
+    borderRadius: theme.radii.xl,
     borderWidth: 1,
     gap: theme.spacing.s,
     padding: theme.spacing.m,

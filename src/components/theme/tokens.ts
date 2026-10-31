@@ -39,7 +39,7 @@ export interface Colors {
 interface Theme {
   readonly colors: Colors;
   readonly spacing: Readonly<Record<'xs' | 's' | 'm' | 'l' | 'xl', number>>;
-  readonly radii: Readonly<Record<'s' | 'm' | 'l' | 'pill', number>>;
+  readonly radii: Readonly<Record<'s' | 'm' | 'l' | 'xl' | 'pill', number>>;
   readonly typography: {
     readonly family: Readonly<Record<'light' | 'regular' | 'medium' | 'semibold' | 'bold', string>>;
     readonly size: Readonly<Record<'caption' | 'body' | 'title' | 'display', number>>;
@@ -48,7 +48,19 @@ interface Theme {
 
 /** Shared by both themes: a rhythm does not change with the light. */
 const spacing = { xs: 4, s: 8, m: 16, l: 24, xl: 40 } as const;
-const radii = { s: 6, m: 12, l: 20, pill: 999 } as const;
+/**
+ * The four corners the mockup draws, and the pill.
+ *
+ * `s` is a bar or a dot, `m` a pad or a segment, `l` a button, `xl` a card. They
+ * are the mockup's own numbers rather than a geometric progression: the step
+ * from a segment to a card is what the eye reads as "this is a surface", and a
+ * ladder that happens to be regular would move it.
+ *
+ * The segmented `Choice` wants an inner corner for the raised option, and takes
+ * it as `m` less its lip — which lands on the mockup's own 11 without anyone
+ * having to write 11 down twice.
+ */
+const radii = { s: 6, m: 14, l: 18, xl: 22, pill: 999 } as const;
 const typography = {
   family: {
     light: 'Outfit_300Light',
