@@ -7,7 +7,7 @@
 export const MODES = [
   { id: 'reading', label: 'Lecture de notes', glyph: '♩', open: true, timed: false },
   { id: 'rhythmic-reading', label: 'Lecture rythmée', glyph: '♫', open: true, timed: true },
-  { id: 'rhythm', label: 'Rythme seul', glyph: '♪', open: false, timed: false },
+  { id: 'rhythm', label: 'Rythme seul', glyph: '𝄽', open: false, timed: false },
   { id: 'dictation', label: 'Dictée musicale', glyph: '♬', open: false, timed: false },
 ] as const;
 
