@@ -75,7 +75,8 @@ rather than as a measure of the line above it.
 
 `Chip` arrived with the parcours, where three of them sit side by side under a study. On
 the page's own ground they read as one sentence broken by spaces; the fill is what makes
-them count as three.
+them count as three. Its tone is the text's, never the fill's: a verdict said on a
+coloured ground would outshout the note it is a verdict on.
 
 **Not checked by anything**: that a screen uses a token rather than a literal colour. It is
 a convention, held up at review.

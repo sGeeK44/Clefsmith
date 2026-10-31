@@ -1,7 +1,7 @@
 import { View } from 'react-native';
 import { StyleSheet } from 'react-native-unistyles';
 
-import { Text } from '@/components/ui/text';
+import { Text, type Tone } from '@/components/ui/text';
 
 /**
  * One fact about what is about to be played, on a fill of its own.
@@ -10,10 +10,10 @@ import { Text } from '@/components/ui/text';
  * read as one sentence broken by spaces. The fill is what makes them count as
  * three — it is a separator the eye does not have to parse.
  */
-export function Chip({ label }: { readonly label: string }) {
+export function Chip({ label, tone = 'muted' }: { readonly label: string; readonly tone?: Tone }) {
   return (
     <View style={styles.chip}>
-      <Text variant="caption" tone="muted">
+      <Text tone={tone} variant="caption">
         {label}
       </Text>
     </View>
