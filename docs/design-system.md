@@ -10,6 +10,13 @@ Eleven colour roles, a spacing scale, a radius scale and a type scale, declared 
 `src/components/theme/tokens.ts`. Spacing, radii and type are shared by both themes: a
 rhythm does not change with the light.
 
+The radius scale is the mockup's own four corners plus the pill: `s` is a bar or a dot,
+`m` a pad or a segment, `l` a button, `xl` a card. They are not a geometric progression —
+the step from a segment to a card is what the eye reads as "this is a surface", and a
+ladder that happened to be regular would move it. The segmented `Choice` takes its inner
+corner as `m` less its lip, which lands on the mockup's own 11 without anyone writing 11
+down twice.
+
 The mockup supplies the light palette only. The dark one is derived from it — warm hue
 kept, lightness ladder inverted role by role, status colours moved up in lightness at
 constant hue and chroma. The mockup writes its status colours in `oklch()`, which older

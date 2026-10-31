@@ -160,7 +160,7 @@ const styles = StyleSheet.create((theme) => ({
   dot: { backgroundColor: theme.colors.line, borderRadius: 3, height: 6, width: 6 },
   here: { backgroundColor: theme.colors.ink, borderRadius: 3, height: 6, width: 18 },
   pick: {
-    borderRadius: theme.radii.l,
+    borderRadius: theme.radii.xl,
     borderWidth: 1,
     gap: theme.spacing.xs,
     padding: theme.spacing.m,
