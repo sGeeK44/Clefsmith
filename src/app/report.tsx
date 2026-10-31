@@ -24,6 +24,7 @@ import {
   TO_REVIEW,
   verdictLine,
 } from '@/components/wording/report';
+import type { Clef } from '@/domain/notation/clef';
 import { type Notation, nameOf } from '@/domain/notation/naming';
 import type { Level } from '@/domain/training/level';
 import type { Report } from '@/domain/training/report';
@@ -62,7 +63,7 @@ export default function ReportScreen() {
     return null;
   }
 
-  const { accuracy, missed, onTime, opened } = report;
+  const { accuracy, clef, missed, onTime, opened } = report;
 
   return (
     <Screen>
@@ -88,10 +89,10 @@ export default function ReportScreen() {
         ))}
       </Card>
 
-      {opened !== undefined && <Opened level={opened} />}
+      {opened !== undefined && <Opened clef={clef} level={opened} />}
 
       <Button
-        label={nextLine(opened)}
+        label={nextLine(clef, opened)}
         onPress={() => void start(readMicrophoneAccess, setup, opened ?? report.level)}
       />
       <View style={styles.aside}>
@@ -162,13 +163,13 @@ function Miss({
  * A study just opened, announced rather than raised: it is outlined, not a `Card`.
  * What is new here is pointed at, and nothing on this screen sits above it.
  */
-function Opened({ level }: { readonly level: Level }) {
+function Opened({ clef, level }: { readonly clef: Clef; readonly level: Level }) {
   return (
     <View style={styles.opened} testID="report-opened">
       <Text variant="caption" tone="accent">
         {OPENED}
       </Text>
-      <Text>{nextLine(level)}</Text>
+      <Text>{nextLine(clef, level)}</Text>
     </View>
   );
 }

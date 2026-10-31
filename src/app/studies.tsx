@@ -167,7 +167,7 @@ function Study({
           <Text style={styles.number}>{nodeLabel(reach, level)}</Text>
         </View>
         <Text style={styles.name} variant="title" tone={ahead ? 'muted' : 'ink'}>
-          {tempoOf(level)}
+          {tempoOf(clef, level)}
         </Text>
         <Text variant="caption" tone={reach === 'current' ? 'accent' : 'muted'}>
           {reachLine(reach)}
