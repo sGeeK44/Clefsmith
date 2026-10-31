@@ -47,6 +47,17 @@ Eleven, in `src/components/ui/`:
 | `Beat`    | Which of the four beats of a measure is passing.          |
 | `Chip`    | One fact about what is about to be played, on a fill.     |
 
+A primary `Button` is **ink**, not accent. Accent is the colour that points at
+something — an overline, a study that has just opened, the note being read — and a screen
+whose only button already wears it has nothing left to point with. Ink is also the
+strongest fill the palette has, which is what a single primary action wants. The two
+heights the mockup draws, 56 and 50, live in `src/components/ui/button.tsx` rather than in the spacing
+scale: a `BUTTON` token would be a size one component uses and every other one could
+reach for.
+
+**Checked** by `bun test`: `bg` on `ink` must reach 4.5:1 in both themes, the same bar the
+text roles are held to. Nothing checks the heights.
+
 `Choice` is not a `Button`: a button asks to be acted on, a choice shows a state. It is
 drawn as one track with the current option raised out of it, in equal shares — separate
 pills say "press one of these", a track says "it is set to this one", and only the second

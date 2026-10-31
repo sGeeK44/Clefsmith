@@ -41,6 +41,15 @@ describe('themes', () => {
     expect(readings).toEqual(readings.map(([where]) => [where, true]));
   });
 
+  it('hold a readable label on the one fill a button is allowed to be', () => {
+    const readings = Object.entries(themes).map(([name, theme]) => [
+      name,
+      contrastRatio(theme.colors.bg, theme.colors.ink) >= 4.5,
+    ]);
+
+    expect(readings).toEqual(readings.map(([where]) => [where, true]));
+  });
+
   it('raise a surface above the page rather than beside it', () => {
     expect(contrastRatio(themes.light.colors.surf, themes.light.colors.bg)).toBeGreaterThan(1);
     expect(contrastRatio(themes.dark.colors.surf, themes.dark.colors.bg)).toBeGreaterThan(1);
