@@ -18,6 +18,8 @@ import { useUnistyles } from 'react-native-unistyles';
 /** The side of a tab glyph, and the corner that tells the two squares apart from the circle. */
 const GLYPH = 22;
 const CORNER = 7;
+/** How thick an unvisited tab's outline is. */
+const STROKE = 2;
 export default function TabsLayout() {
   const { theme } = useUnistyles();
 
@@ -25,7 +27,7 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: theme.colors.accent,
+        tabBarActiveTintColor: theme.colors.ink,
         tabBarInactiveTintColor: theme.colors.muted,
         tabBarLabelStyle: { fontFamily: theme.typography.family.medium },
         tabBarStyle: { backgroundColor: theme.colors.surf, borderTopColor: theme.colors.line },
@@ -36,7 +38,9 @@ export default function TabsLayout() {
         options={{
           title: 'Pupitre',
           tabBarButtonTestID: 'tab-desk',
-          tabBarIcon: ({ color }) => <Glyph color={color} round={false} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Glyph color={color} focused={focused} round={false} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -44,7 +48,9 @@ export default function TabsLayout() {
         options={{
           title: 'Progrès',
           tabBarButtonTestID: 'tab-progress',
-          tabBarIcon: ({ color }) => <Glyph color={color} round={false} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Glyph color={color} focused={focused} round={false} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -52,7 +58,7 @@ export default function TabsLayout() {
         options={{
           title: 'Réglages',
           tabBarButtonTestID: 'tab-settings',
-          tabBarIcon: ({ color }) => <Glyph color={color} round />,
+          tabBarIcon: ({ color, focused }) => <Glyph color={color} focused={focused} round />,
         }}
       />
     </Tabs>
@@ -67,13 +73,28 @@ export default function TabsLayout() {
  * would be a dependency carrying hundreds of glyphs for the sake of two. The
  * shapes are what the mockup draws, and the colour is the bar's own — it is
  * handed to the icon so that the active tab and its label never disagree.
+ *
+ * The tab being read is filled and the other two are outlined, which is the
+ * mockup's own distinction. Three filled shapes tell the learner which tab
+ * they are on by hue alone, and a bar read at a glance on a bright screen is
+ * a bar read by shape.
  */
-function Glyph({ color, round }: { readonly color: ColorValue; readonly round: boolean }) {
+function Glyph({
+  color,
+  focused,
+  round,
+}: {
+  readonly color: ColorValue;
+  readonly focused: boolean;
+  readonly round: boolean;
+}) {
   return (
     <View
       style={{
-        backgroundColor: color,
+        backgroundColor: focused ? color : 'transparent',
+        borderColor: color,
         borderRadius: round ? GLYPH / 2 : CORNER,
+        borderWidth: focused ? 0 : STROKE,
         height: GLYPH,
         width: GLYPH,
       }}

@@ -219,13 +219,22 @@ function Open({
         {studyLine(clef, level, notation)}
       </Text>
 
-      {/* The last studies draw fifteen notes, which is wider than any phone. */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <Staff
-          clef={clef}
-          notes={poolOf(clef, level).map((pitch) => ({ pitch, shade: 'ahead' }) as const)}
-          space={8}
-        />
+      {/* The last studies draw fifteen notes, which is wider than any phone; the
+          first draw three, which the mockup still sets from edge to edge of the
+          card. A scroller sizes its content to the content, so the staff is
+          given the card to grow into and scrolls only once it outgrows it. */}
+      <ScrollView
+        contentContainerStyle={styles.sheet}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      >
+        <View style={styles.sheet}>
+          <Staff
+            clef={clef}
+            notes={poolOf(clef, level).map((pitch) => ({ pitch, shade: 'ahead' }) as const)}
+            space={8}
+          />
+        </View>
       </ScrollView>
 
       <View style={styles.marks}>
@@ -296,6 +305,8 @@ const styles = StyleSheet.create((theme) => ({
   /** The name takes the slack, so the meta is pinned to the right edge. */
   name: { flex: 1 },
   marks: { alignItems: 'center', flexDirection: 'row', gap: theme.spacing.m },
+  /** Wide enough for the card, and wider still when the staff asks for it. */
+  sheet: { flexGrow: 1 },
   panel: {
     borderBottomColor: theme.colors.line,
     borderBottomWidth: 1,

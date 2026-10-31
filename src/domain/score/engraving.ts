@@ -48,3 +48,22 @@ export const ENGRAVING: Engraving = {
   thickBarlineThickness: ENGRAVING_DEFAULTS.thickBarlineThickness,
   barlineSeparation: ENGRAVING_DEFAULTS.barlineSeparation,
 };
+
+/**
+ * The same engraving, with its notes spread over the width that is on offer.
+ *
+ * A staff engraved at its own width stops wherever its last note happens to
+ * fall, which on a card the mockup draws edge to edge reads as a picture cut
+ * short. The clef keeps its allowance and what is left of the width is divided
+ * between the notes, so the staff ends where the card does.
+ *
+ * It only ever widens. A width too narrow for the engraved spacing is a screen
+ * the staff does not fit on, and notes set closer than a notehead is wide
+ * collide — better the overflow, which is visible, than the collision, which
+ * reads as a wrong note.
+ */
+export function spreadOver(engraving: Engraving, notes: number, width: number): Engraving {
+  const room = (width - engraving.clefWidth) / notes;
+
+  return room > engraving.noteSpacing ? { ...engraving, noteSpacing: room } : engraving;
+}
