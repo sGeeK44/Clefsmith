@@ -93,26 +93,26 @@ const light: Theme = {
 };
 
 /**
- * Derived, not drawn: the mockup has no dark palette.
+ * The mockup's own dark palette, read off it as-is.
  *
- * The warm hue is kept and the lightness ladder inverted role by role, so that
- * `surf` still reads as raised above `bg` and `canvas` still separates the staff
- * from the page. The status colours keep their hue and chroma and move up in
- * lightness, which is what a dark ground needs to keep them legible.
+ * `canvas` is **darker** than `bg` here, where in the light theme it is darker
+ * too: the staff sits in a well on both grounds rather than on a raised card,
+ * which is what keeps the stave lines reading as paper and not as a surface.
+ * An inverted ladder derived from the light theme got that one backwards.
  */
 const dark: Theme = {
   colors: {
-    bg: '#16140f',
-    surf: '#1f1c16',
-    canvas: '#2a251d',
-    ink: '#f2ede1',
-    muted: '#a39a89',
-    line: '#2f2a22',
-    soft: '#262118',
-    accent: '#639be1', // oklch(0.68 0.12 255)
-    ok: '#63b376', // oklch(0.70 0.12 150)
-    late: '#dea143', // oklch(0.75 0.13 75)
-    bad: '#ef6661', // oklch(0.68 0.17 25)
+    bg: '#171613',
+    surf: '#211f1b',
+    canvas: '#0e0d0b',
+    ink: '#f1ece2',
+    muted: '#a39c8f',
+    line: '#343029',
+    soft: '#2a2722',
+    accent: '#75aef5', // oklch(0.74 0.12 255)
+    ok: '#6fc082', // oklch(0.74 0.12 150)
+    late: '#e6b55d', // oklch(0.8 0.12 80)
+    bad: '#f07f77', // oklch(0.72 0.14 25)
   },
   spacing,
   radii,

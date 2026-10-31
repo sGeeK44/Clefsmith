@@ -17,11 +17,13 @@ ladder that happened to be regular would move it. The segmented `Choice` takes i
 corner as `m` less its lip, which lands on the mockup's own 11 without anyone writing 11
 down twice.
 
-The mockup supplies the light palette only. The dark one is derived from it — warm hue
-kept, lightness ladder inverted role by role, status colours moved up in lightness at
-constant hue and chroma. The mockup writes its status colours in `oklch()`, which older
-Android versions do not parse, so each is converted once, committed as hex, and keeps its
-`oklch` in the comment beside it. Without that, the dark variant cannot be re-derived.
+Both palettes are the mockup's own, read off it as-is. The mockup writes its status
+colours in `oklch()`, which older Android versions do not parse, so each is converted once,
+committed as hex, and keeps its `oklch` in the comment beside it — a hex value nobody can
+re-derive is a value nobody can change.
+
+`canvas` is darker than `bg` in **both** themes. The staff sits in a well on either
+ground, never on a raised card, which is what keeps the stave lines reading as paper.
 
 **Checked** by `bun test`, a step of `tools/verify`: the two themes must declare the same
 roles, text roles must reach 4.5:1 against their own ground and status roles 3:1. The
