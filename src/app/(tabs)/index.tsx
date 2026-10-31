@@ -146,7 +146,7 @@ function Exercise({
       testID={`mode-${id}`}
     >
       <View style={styles.tile}>
-        <Text variant="title" tone={open ? 'ink' : 'muted'}>
+        <Text style={styles.glyph} variant="title" tone={open ? 'ink' : 'muted'}>
           {glyph}
         </Text>
       </View>
@@ -171,6 +171,8 @@ const DISC = 48;
 const TILE = 44;
 
 const styles = StyleSheet.create((theme) => ({
+  /** The staff's font: the rest the mockup draws is in no system font. */
+  glyph: { fontFamily: theme.typography.family.music },
   modes: { gap: theme.spacing.xs },
   row: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
   disc: {

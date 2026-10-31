@@ -4,6 +4,7 @@
     "": {
       "name": "clefsmith",
       "dependencies": {
+        "@expo-google-fonts/noto-music": "^0.4.2",
         "@expo-google-fonts/outfit": "^0.4.3",
         "@shopify/react-native-skia": "2.14.0",
         "expo": "~58.0.19",
@@ -220,6 +221,8 @@
     "@emnapi/runtime": ["@emnapi/runtime@1.11.2", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-kyOl3X0DuTiT1h2ft8r2fYO8JYtU9a9Xis/zBSiGArNaagCOWx90N1k2wxp18czFDH+OgcWGb5ZP/XMt3dcyPA=="],
 
     "@emnapi/wasi-threads": ["@emnapi/wasi-threads@1.2.2", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-c95qOXkHdydNKhscBTebqEC1CVAZpyqOfVfBzQ1qgzyl3gfeldUjIggDbIZgDKsHLgnsM+igH7TJ/eAasaVuMA=="],
+
+    "@expo-google-fonts/noto-music": ["@expo-google-fonts/noto-music@0.4.2", "", {}, "sha512-UyiZCTbfHE+pzB9X5dI1lZdLLTtrekj4U5PdlDsEyYF4I8ftC5LygyeOYaXzMYJWH5wmBEd493B3qlBeMUSdrw=="],
 
     "@expo-google-fonts/outfit": ["@expo-google-fonts/outfit@0.4.3", "", {}, "sha512-2uQmDVJencWLllxds6SG92E+SjxyZfvg7eZKZ5XLHggmm5AuUyQK7lzMAFOUzT6kheq2kJ7BAiubMdjKT32fJg=="],
 
