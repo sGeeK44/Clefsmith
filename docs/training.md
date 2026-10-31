@@ -354,28 +354,27 @@ itself, and the wall clock only decides when to write the next ones down. So the
 that matters is not how late JavaScript woke up — it is how far the sound that left the
 speaker is from the instant the tempo asked for, after a whole session of them.
 
-**Measured on a Zebra TC52, Android 13, arm64-v8a**, by recording the device's speaker and
-dating each click's attack:
+Measured on **a Zebra TC52 under Android 13** and on **an iPhone 16 under iOS 26.6.2**, by
+recording the device's speaker and dating each click's attack:
 
-| Asked             | Beats | Runs | Beat measured          | Deviation at the last beat |
-| ----------------- | ----- | ---- | ---------------------- | -------------------------- |
-| 60 to the minute  | 62    | 8    | 1000.010 – 1000.027 ms | **≤ 3 ms**                 |
-| 120 to the minute | 64    | 6    | 500.000 – 500.017 ms   | **≤ 2 ms**                 |
+| Device     | Asked             | Beats | Runs | Beat measured          | Deviation at the last beat |
+| ---------- | ----------------- | ----- | ---- | ---------------------- | -------------------------- |
+| Zebra TC52 | 60 to the minute  | 62    | 8    | 1000.010 – 1000.027 ms | **≤ 3 ms**                 |
+| Zebra TC52 | 120 to the minute | 64    | 6    | 500.000 – 500.017 ms   | **≤ 2 ms**                 |
+| iPhone 16  | 60 to the minute  | 62    | 8    | 999.979 – 999.999 ms   | **≤ 1 ms**                 |
+| iPhone 16  | 120 to the minute | 61    | 6    | 499.988 – 499.998 ms   | **≤ 2 ms**                 |
 
-Every run was accepted; none was discarded. The beat comes out long by some twenty parts
-per million at both tempos, which is a constant offset and not an accumulation — it is the
-distance between two crystals, the device's and the recorder's, and it is inside what
-either is specified to hold. The dating resolves to a millisecond, so a deviation reported
-as 2 ms is a deviation of no more than that.
+Every run was accepted; none was discarded. The beat is off by some twenty parts per
+million — long on the Android, short on the iPhone — which is a constant offset and not an
+accumulation: it is the distance between two crystals, the device's and the recorder's,
+and it is inside what either is specified to hold. That the sign flips with the device and
+not with the tempo is what says so. The dating resolves to a millisecond, so a deviation
+reported as 2 ms is a deviation of no more than that.
 
 **The threshold: under 5 ms across a sixteen-measure session**, which is a twentieth of
 the tolerance window at the fastest tempo the setup offers. A beat scheduled by a
 JavaScript timer instead would be late by several whole beats over the same session, which
 is what the audio clock is here to prevent.
-
-The **iOS line is still to take**. The same measurement wants a physical iPhone, and the
-one paired to this machine was only available long enough to confirm that the audio
-session opens with an output route.
 
 **Not checked by anything.** No test in this repository hears a speaker. The measurement
 is a device run, and the figures above are what one produced; re-running it is the only
