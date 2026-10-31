@@ -1,6 +1,5 @@
-import { studyLine, tempoOf } from '@/components/wording/study';
+import { tempoOf } from '@/components/wording/study';
 import type { Clef } from '@/domain/notation/clef';
-import type { Notation } from '@/domain/notation/naming';
 import type { Level } from '@/domain/training/level';
 
 /**
@@ -22,9 +21,21 @@ export function verdictLine(accuracy: number): string {
   return accuracy >= GOOD ? 'Bon travail.' : 'On la reprend.';
 }
 
-/** What was played: the study, or the fact that it was not one. */
-export function playedLine(clef: Clef, level: Level, review: boolean, notation: Notation): string {
-  return review ? 'Révision ciblée' : studyLine(clef, level, notation);
+/**
+ * What was played: the study, or the fact that it was not one.
+ *
+ * Named by its marking rather than by the notes it brings. The parcours lists
+ * the studies and says what is in each; a report is read after the session, when
+ * what was in it has just been played — and the one thing it is worth saying is
+ * which study the figures below belong to.
+ */
+export function playedLine(clef: Clef, level: Level, review: boolean): string {
+  return review ? 'Révision ciblée' : studyMark(clef, level);
+}
+
+/** `Étude 3 · Andante` — a study said the short way, by its number and its marking. */
+function studyMark(clef: Clef, level: Level): string {
+  return `Étude ${level} · ${tempoOf(clef, level)}`;
 }
 
 /**
@@ -47,7 +58,7 @@ export function missLine(times: number): string {
 
 /** The study a session opened, named — or the next session, when it opened none. */
 export function nextLine(clef: Clef, opened: Level | undefined): string {
-  return opened === undefined ? 'Séance suivante' : `Étude ${opened} · ${tempoOf(clef, opened)}`;
+  return opened === undefined ? 'Séance suivante' : studyMark(clef, opened);
 }
 
 export const RIGHT_NOTES = 'Notes justes';
