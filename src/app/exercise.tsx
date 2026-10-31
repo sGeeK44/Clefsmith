@@ -144,8 +144,11 @@ export default function ExerciseScreen() {
    * When the beat the note on screen was put there by fell.
    *
    * A ref rather than state: an answer arriving is not a reason to redraw the
-   * staff, and the beat it is judged against must be the one that was passing
-   * when the learner spoke rather than the one the next render has moved to.
+   * staff, and it is read as it stands rather than as the last render left it.
+   *
+   * It is the *latest* beat, not the one the answer belongs to — that one is
+   * counted back from the instant the learner started speaking, which is the
+   * only thing that says which note they were reading.
    */
   const shownAt = useRef(0);
 
@@ -160,6 +163,9 @@ export default function ExerciseScreen() {
           return answered(reading, degree);
         }
 
+        /* The beat is handed the instant the utterance started, and works out
+           for itself how far back that was: the grid has usually moved on by
+           the time a word is understood. */
         return scored(reading, degree, beatingOf(startedAt, shownAt.current, Number(tempo)));
       });
     },

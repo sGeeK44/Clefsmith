@@ -2,6 +2,9 @@ import { describe, expect, it } from 'bun:test';
 import { BAND, beatAt, beatIntervalMs, beatingOf, beatOf, meterOf } from '@/domain/training/beat';
 
 describe('the beat grid', () => {
+  /** The beat the note on screen was put there by, a second into a session at sixty. */
+  const BEAT = 1000;
+
   it('beats once a second at sixty to the minute', () => {
     expect(beatIntervalMs(60)).toBe(1000);
   });
@@ -25,9 +28,6 @@ describe('the beat grid', () => {
   });
 
   describe('the tolerance window', () => {
-    /** The beat the note on screen was put there by, a second into a session at sixty. */
-    const BEAT = 1000;
-
     it('calls a note started on its beat in time', () => {
       expect(beatingOf(BEAT, BEAT, 60).timing).toBe('in-time');
     });
@@ -36,21 +36,15 @@ describe('the beat grid', () => {
       expect(beatingOf(BEAT + 1000, BEAT, 60).timing).toBe('off-beat');
     });
 
-    it('tolerates as much ahead of the beat as behind it', () => {
-      expect(beatingOf(BEAT - 400, BEAT, 60).timing).toBe('in-time');
-      expect(beatingOf(BEAT - 600, BEAT, 60).timing).toBe('off-beat');
+    it('tolerates the same delay at one tempo and not at another', () => {
+      const late = 300;
+
+      expect(beatingOf(BEAT + late, BEAT, 60).timing).toBe('in-time');
+      expect(beatingOf(BEAT + late, BEAT, 160).timing).toBe('off-beat');
     });
 
-    it('tolerates the same lead at one tempo and not at another', () => {
-      const lead = 300;
-
-      expect(beatingOf(BEAT - lead, BEAT, 60).timing).toBe('in-time');
-      expect(beatingOf(BEAT - lead, BEAT, 160).timing).toBe('off-beat');
-    });
-
-    it('measures how far off the beat the note fell, and on which side of it', () => {
+    it('measures how far into its own beat the note fell', () => {
       expect(beatingOf(BEAT + 120, BEAT, 60).offset).toBe(120);
-      expect(beatingOf(BEAT - 120, BEAT, 60).offset).toBe(-120);
     });
 
     it('turns a note in time into a late one when it is timed on the decoder settling', () => {
@@ -59,6 +53,41 @@ describe('the beat grid', () => {
 
       expect(beatingOf(BEAT, BEAT, 60).timing).toBe('in-time');
       expect(beatingOf(BEAT + settling, BEAT, 60).timing).toBe('off-beat');
+    });
+  });
+
+  describe('which beat an utterance belongs to', () => {
+    it('is the beat passing, for a word settled before the next one', () => {
+      expect(beatingOf(BEAT + 120, BEAT, 60).behind).toBe(0);
+    });
+
+    it('is the beat it was said on, not the one the grid has reached since', () => {
+      const beating = beatingOf(BEAT - 400, BEAT, 60);
+
+      expect(beating.behind).toBe(1);
+      expect(beating.offset).toBe(600);
+    });
+
+    it('reaches back as many beats as the decoder took', () => {
+      expect(beatingOf(BEAT - 1200, BEAT, 60).behind).toBe(2);
+    });
+
+    it('reaches back further at a tempo whose beats are shorter', () => {
+      const settling = 900;
+
+      expect(beatingOf(BEAT - settling, BEAT, 60).behind).toBe(1);
+      expect(beatingOf(BEAT - settling, BEAT, 160).behind).toBe(3);
+    });
+
+    it('never credits a word to a beat the session has not reached', () => {
+      expect(beatingOf(BEAT + 5000, BEAT, 60).behind).toBe(0);
+    });
+
+    it('counts a word started on a beat as said on that beat, not the one before', () => {
+      const beating = beatingOf(BEAT - 1000, BEAT, 60);
+
+      expect(beating.behind).toBe(1);
+      expect(beating.offset).toBe(0);
     });
   });
 });

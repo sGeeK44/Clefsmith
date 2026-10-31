@@ -49,7 +49,7 @@ describe('what the exercise screen says', () => {
         said: 'c',
         expected: 'c',
         right: true,
-        beating: { timing: 'off-beat', offset: 700 },
+        beating: { timing: 'off-beat', offset: 700, behind: 0 },
       }),
     ).toBe('off-beat');
   });
@@ -60,22 +60,22 @@ describe('what the exercise screen says', () => {
         said: 'c',
         expected: 'c',
         right: true,
-        beating: { timing: 'in-time', offset: 0 },
+        beating: { timing: 'in-time', offset: 0, behind: 0 },
       }),
     ).toBe('right');
   });
 
   it('says which side of the beat a note fell on, and how far off', () => {
-    expect(offsetLine({ timing: 'off-beat', offset: 700 })).toBe('En retard · ±700 ms');
-    expect(offsetLine({ timing: 'off-beat', offset: -700 })).toBe('En avance · ±700 ms');
+    expect(offsetLine({ timing: 'off-beat', offset: 700, behind: 0 })).toBe('En retard · ±700 ms');
+    expect(offsetLine({ timing: 'off-beat', offset: -700, behind: 0 })).toBe('En avance · ±700 ms');
   });
 
   it('says a note inside the window is in time rather than which side it leans', () => {
-    expect(offsetLine({ timing: 'in-time', offset: -120 })).toBe('À temps · ±120 ms');
+    expect(offsetLine({ timing: 'in-time', offset: -120, behind: 0 })).toBe('À temps · ±120 ms');
   });
 
   it("rounds the figure: a tenth of a millisecond is nobody's precision", () => {
-    expect(offsetLine({ timing: 'in-time', offset: 119.6 })).toBe('À temps · ±120 ms');
+    expect(offsetLine({ timing: 'in-time', offset: 119.6, behind: 0 })).toBe('À temps · ±120 ms');
   });
 
   it('names the note that was missed, in the notation the learner chose', () => {
