@@ -52,9 +52,7 @@
       [
         "react-native-vosk",
         {
-          "models": [
-            "./assets/models/vosk-model-small-fr-0.22"
-          ]
+          "models": ["./assets/models/vosk-model-small-fr-0.22"]
         }
       ],
       [
