@@ -57,10 +57,13 @@ const SILENT = 0.0001;
  * when JavaScript happened to wake up.
  */
 export function createAudioApiClickTracks(openClock: OpenAudioClock): OpenClickTrack {
-  return (): ClickTrack => {
+  return (): Promise<ClickTrack> => {
     const clock = openClock();
 
-    return {
+    /* Nothing to wait for while the click is synthesised: the hardware is
+       usable the instant it is handed over. The promise is the port's, not
+       this adapter's. */
+    return Promise.resolve({
       now: () => clock.currentTime * SECOND,
 
       clickAt(instant) {
@@ -81,6 +84,6 @@ export function createAudioApiClickTracks(openClock: OpenAudioClock): OpenClickT
       stop() {
         void clock.close();
       },
-    };
+    });
   };
 }

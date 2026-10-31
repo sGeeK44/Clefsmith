@@ -30,8 +30,12 @@ const HORIZON = 500;
 /**
  * A track is opened per session and closed with it: closing releases the audio
  * hardware, and what is released cannot be scheduled on again.
+ *
+ * Opening is asynchronous because the sound a click is made of has to be read
+ * and decoded before any click can be written down, and a track handed over
+ * half-opened would take beats it could not sound.
  */
-export type OpenClickTrack = () => ClickTrack;
+export type OpenClickTrack = () => Promise<ClickTrack>;
 
 export type PlayClicks = (tempo: number) => () => void;
 
@@ -45,20 +49,32 @@ export type PlayClicks = (tempo: number) => () => void;
  */
 export function createPlayClicks(openTrack: OpenClickTrack, clock: Clock): PlayClicks {
   return (tempo) => {
-    const clicks = openTrack();
-    const startedAt = clicks.now();
-    const wokeAt = clock.now();
     let stopped = false;
-    let next = 0;
-
-    const fill = () => {
-      while (beatAt(startedAt, next, tempo) < clicks.now() + HORIZON) {
-        clicks.clickAt(beatAt(startedAt, next, tempo));
-        next += 1;
-      }
-    };
+    let clicks: ClickTrack | undefined;
 
     const keep = async () => {
+      const track = await openTrack();
+
+      if (stopped) {
+        /* Stopping before the track was open leaves nothing to close; the
+           hardware arrives anyway, and closing it here is what releases it. */
+        track.stop();
+
+        return;
+      }
+
+      clicks = track;
+      const startedAt = track.now();
+      const wokeAt = clock.now();
+      let next = 0;
+
+      const fill = () => {
+        while (beatAt(startedAt, next, tempo) < track.now() + HORIZON) {
+          track.clickAt(beatAt(startedAt, next, tempo));
+          next += 1;
+        }
+      };
+
       fill();
 
       for (let refill = 1; !stopped; refill += 1) {
@@ -74,7 +90,7 @@ export function createPlayClicks(openTrack: OpenClickTrack, clock: Clock): PlayC
 
     return () => {
       stopped = true;
-      clicks.stop();
+      clicks?.stop();
     };
   };
 }
