@@ -511,7 +511,8 @@ const styles = StyleSheet.create((theme) => ({
   /** The meter takes the screen's width; the zone around it centres everything else. */
   meter: { alignSelf: 'stretch', gap: theme.spacing.xs },
   ends: { flexDirection: 'row', justifyContent: 'space-between' },
-  legend: { flexDirection: 'row', gap: theme.spacing.m },
+  /** Under the staff and centred on it, the way the mockup sets it. */
+  legend: { flexDirection: 'row', gap: theme.spacing.m, justifyContent: 'center' },
   actions: { flexDirection: 'row', gap: theme.spacing.s },
   half: { flex: 1 },
   pause: { flex: 1, gap: theme.spacing.m, justifyContent: 'center' },
