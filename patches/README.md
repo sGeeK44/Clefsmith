@@ -46,19 +46,32 @@ application plays is rendered at all — a player's clock does not even advance,
 which looks like a frozen metronome rather than a silenced one.
 
 The patch asks for `AVAudioSessionCategoryPlayAndRecord` with
-`AVAudioSessionCategoryOptionDefaultToSpeaker`, keeping `Measurement` mode so
-the decoder still gets the microphone signal with as little system processing on
-it as possible. The option is needed because `playAndRecord` otherwise plays out
-of the receiver.
+`AVAudioSessionCategoryOptionDefaultToSpeaker`. The option is needed because
+`playAndRecord` otherwise plays out of the receiver.
+
+The mode is `Default`. It was `Measurement`, which upstream sets so the decoder
+gets the microphone signal with as little system processing on it as possible —
+and which Apple documents as disabling "some dynamics processing on input and
+output signals, resulting in a lower-output playback level". That attenuation is
+what made the metronome barely audible on an iPhone 16 while the same sound was
+loud on Android: measured off the speaker at a fixed distance, the click sits at
+−27.7 dBFS under `Measurement` and at −14.7 dBFS under `Default`. A processed
+microphone signal is what is given up for those thirteen decibels.
+
+`voiceChat` and `videoChat` are not a way out: Apple documents the same lower
+playback level for both unless Voice-Processing I/O is enabled, which the
+library does not expose.
 
 `src/app/_layout.tsx` declares the same category, mode and option to
 `react-native-audio-api`, which configures the session itself when a context is
 created. The two must say the same thing or each reconfiguration tears the other
 side down.
 
-**Checked by**: nothing automated — see the paragraph above on native code. It
-is verified by playing a session with the metronome on and hearing the clicks
-while the notes are still recognised.
+**Checked by**: nothing automated — see the paragraph above on native code. The
+speech bench cannot stand in for it either: it replays recorded files and never
+goes through the microphone, so it is blind to the mode. It is verified by
+playing a session with the metronome on and hearing the clicks while the notes
+are still recognised.
 
 ## On a version bump
 

@@ -32,18 +32,32 @@ const MODEL_PATH = 'vosk-model-small-fr-0.22';
  * sides, neither reconfiguration is a change, so neither tears the other down.
  *
  * `defaultToSpeaker` because `playAndRecord` otherwise comes out of the
- * receiver, and `measurement` because the recogniser wants the microphone
- * signal with as little system processing on it as possible.
+ * receiver. `default` rather than the `measurement` this started as: Apple
+ * documents that measurement mode "disables some dynamics processing on input
+ * and output signals, resulting in a lower-output playback level", and that
+ * attenuation is what made the metronome barely audible on the iPhone while
+ * the same sound was loud on Android. Minimal processing on the way in is what
+ * is given up for it.
  */
 AudioManager.setAudioSessionOptions({
   iosCategory: 'playAndRecord',
-  iosMode: 'measurement',
+  iosMode: 'default',
   iosOptions: ['defaultToSpeaker'],
 });
 
+/**
+ * The metronome's click: a kilohertz sine over forty milliseconds, decaying by
+ * `exp(-90t)`, mono at 48 kHz, peaking at 0.72 of full scale.
+ *
+ * Recorded rather than synthesised so that both platforms sound the same, and
+ * uncompressed so that the attack lands on the sample it was written for — the
+ * library decodes WAV through miniaudio on iOS and Android alike.
+ */
+const CLICK = require('../../assets/sounds/click.wav');
+
 const container = createContainer(
   createVoskAnswerSource(vosk, MODEL_PATH, systemClock),
-  createAudioApiClickTracks(() => new AudioContext()),
+  createAudioApiClickTracks(() => new AudioContext(), CLICK),
 );
 
 const WELCOME = '/welcome';
