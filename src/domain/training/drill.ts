@@ -120,15 +120,45 @@ export function restarted(drill: Drill): Drill {
 }
 
 /**
- * The same attempt, recorded where the reading stands.
+ * The same attempt, recorded against the note it was an answer to.
  *
  * What a metronome session does with a named degree: it is worth what it is
  * worth, and accuracy counts it, but it moves nothing. Under a metronome the
  * beat owns the position — rewinding to the start of the measure while the beat
  * keeps counting would put the two out of step for the rest of the session.
+ *
+ * The note is not where the reading stands. Understanding a word takes longer
+ * than a beat, so where the reading stands is the note after the one the
+ * learner was looking at; the beating says how many beats back to reach.
  */
 export function scored(drill: Drill, said: Degree, beating: Beating | undefined): Drill {
-  return marked(drill, said, beating, drill.at);
+  const at = drill.at - (beating?.behind ?? 0);
+
+  /**
+   * Nothing is written outside the measure in hand, and nothing is written
+   * twice. A reading settled so late that the grid has left its measure is an
+   * answer to a staff the learner is no longer looking at, and marking it would
+   * change a measure they have already been shown the result of. Two readings
+   * landing on one beat is the same note answered twice: the first is theirs.
+   */
+  if (at < measureOf(lastRead(drill)) || drill.marks[at] !== undefined) {
+    return drill;
+  }
+
+  return marked(drill, said, beating, at);
+}
+
+/**
+ * The last note the reading has reached, which is the last note there is once
+ * it is over.
+ *
+ * A session ends on its final beat, and the word for its final note is still
+ * being decoded when it does. Counting from the position itself would put that
+ * last answer a measure behind the cursor and throw it away — every session
+ * losing its last note, and only its last note.
+ */
+function lastRead(drill: Drill): number {
+  return Math.min(drill.at, drill.notes.length - 1);
 }
 
 /**
