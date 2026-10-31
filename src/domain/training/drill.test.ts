@@ -154,16 +154,28 @@ describe('a session being read', () => {
       expect(scored(once, 'a', ON_BEAT)).toBe(once);
     });
 
-    it('drops an answer whose note belongs to a measure the reading has left', () => {
+    it('drops an answer more than a measure behind the beat', () => {
+      const fifth = NOTES.reduce(beaten, drillOf(NOTES));
+
+      expect(scored(fifth, 'c', beatsBack(5))).toBe(fifth);
+    });
+
+    it('keeps an answer a whole measure behind the beat', () => {
+      const fifth = NOTES.reduce(beaten, drillOf(NOTES));
+
+      expect(scored(fifth, 'd', beatsBack(4)).marks[1]).toBe('ok');
+    });
+
+    it('keeps an answer late by one beat across a bar line', () => {
+      /* The last note of a measure, answered once the beat has moved on to the
+         first of the next: a bar line between the two is a beat of lateness
+         like any other, and it is the commonest one there is. */
       const nextMeasure = NOTES.slice(0, 4).reduce(beaten, drillOf(NOTES));
 
-      expect(scored(nextMeasure, 'f', beatsBack(1))).toBe(nextMeasure);
+      expect(scored(nextMeasure, 'f', beatsBack(1)).marks[3]).toBe('ok');
     });
 
     it('keeps the answer to the last note, settled after the session ended', () => {
-      /* A whole measure and no more: its last note is also the last of its
-         measure, which is where counting the measure from the position the
-         beat has run past would throw the answer away. */
       const measure = NOTES.slice(0, 4);
       const over = measure.reduce(beaten, drillOf(measure));
 
