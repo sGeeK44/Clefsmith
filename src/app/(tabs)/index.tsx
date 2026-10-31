@@ -105,7 +105,7 @@ function Current({ level, notation }: { readonly level: Level; readonly notation
           <View>
             <Text variant="title">{tempoOf(level)}</Text>
             <Text testID="current-study-line" variant="caption" tone="muted">
-              {studyLine(level, notation)}
+              {studyLine('treble', level, notation)}
             </Text>
           </View>
           <View style={styles.disc}>

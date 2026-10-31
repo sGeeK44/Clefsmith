@@ -1,4 +1,5 @@
 import { studyLine, tempoOf } from '@/components/wording/study';
+import type { Clef } from '@/domain/notation/clef';
 import type { Notation } from '@/domain/notation/naming';
 import type { Level } from '@/domain/training/level';
 
@@ -22,8 +23,8 @@ export function verdictLine(accuracy: number): string {
 }
 
 /** What was played: the study, or the fact that it was not one. */
-export function playedLine(level: Level, review: boolean, notation: Notation): string {
-  return review ? 'Révision ciblée' : studyLine(level, notation);
+export function playedLine(clef: Clef, level: Level, review: boolean, notation: Notation): string {
+  return review ? 'Révision ciblée' : studyLine(clef, level, notation);
 }
 
 /** `3 erreurs`, and `1 erreur` — a learner who missed a note once reads the singular. */

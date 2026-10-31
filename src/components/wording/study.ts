@@ -32,12 +32,15 @@ export const STUDIES = LEVELS.length;
 /**
  * `Étude 4 · Do, Ré`, or just `Étude 6` at the level that brings nothing.
  *
- * The notes are named through the learner's own notation, and capitalised the way
- * a list of names is written rather than the way a note is answered out loud.
+ * The notes are the ones the study adds **in its clef**: the two clefs climb
+ * their own pool, so the same study number names different notes in each.
+ *
+ * They are named through the learner's own notation, and capitalised the way a
+ * list of names is written rather than the way a note is answered out loud.
  */
-export function studyLine(level: Level, notation: Notation): string {
+export function studyLine(clef: Clef, level: Level, notation: Notation): string {
   const study = `Étude ${level}`;
-  const brought = newcomersOf('treble', level).map(({ degree }) =>
+  const brought = newcomersOf(clef, level).map(({ degree }) =>
     capitalised(nameOf(degree, notation)),
   );
 
