@@ -24,6 +24,9 @@
         // No file imports the package, and removing it would empty the app of
         // its typography.
         "@expo-google-fonts/outfit",
+        // Noto Music goes in the same way, and for the same reason: it draws
+        // the musical glyphs of a label, which iOS has only some of.
+        "@expo-google-fonts/noto-music",
         // The Inversify container entry opens on `import 'reflect-metadata/lite'`,
         // unconditionally and whether or not a decorator is used. No file here
         // imports it, and without it the bundle fails to resolve. It is declared

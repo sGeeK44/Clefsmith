@@ -116,6 +116,13 @@ prebuild.
 `@expo-google-fonts/outfit` is imported by no file — `app.json` names its paths — which is
 why it is declared in `knip.jsonc`.
 
+A musical glyph in a label is set in **Noto Music**, `theme.typography.family.music`, and
+never in the text face. iOS carries some of the Unicode musical symbols and not others —
+the clef yes, the rests no — so a glyph chosen off a character table renders on one build
+and draws a box on the next. Bravura is not that font: it is the engraving font Skia draws
+the staff with, and its glyphs sit on a staff's baseline rather than on a line of text.
+Nothing checks this; a glyph that boxes is seen on the screen or not at all.
+
 ## Looking at it
 
 Nothing any more: the gallery route is gone. `Staff`, `Card` and `Text` have the desk,

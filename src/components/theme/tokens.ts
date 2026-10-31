@@ -41,7 +41,9 @@ interface Theme {
   readonly spacing: Readonly<Record<'xs' | 's' | 'm' | 'l' | 'xl', number>>;
   readonly radii: Readonly<Record<'s' | 'm' | 'l' | 'xl' | 'pill', number>>;
   readonly typography: {
-    readonly family: Readonly<Record<'light' | 'regular' | 'medium' | 'semibold' | 'bold', string>>;
+    readonly family: Readonly<
+      Record<'light' | 'regular' | 'medium' | 'semibold' | 'bold' | 'music', string>
+    >;
     readonly size: Readonly<Record<'caption' | 'body' | 'title' | 'display', number>>;
   };
 }
@@ -68,6 +70,16 @@ const typography = {
     medium: 'Outfit_500Medium',
     semibold: 'Outfit_600SemiBold',
     bold: 'Outfit_700Bold',
+    /**
+     * The font the musical glyphs of a label are drawn in.
+     *
+     * iOS draws some of the Unicode musical symbols and not others — the clef
+     * yes, the rests no — so a glyph picked for a label renders on one device
+     * and boxes on another. This is the mockup's own font, and unlike Bravura
+     * — which is an engraving font and sets its glyphs on a staff's baseline —
+     * it is cut to sit on a line of text.
+     */
+    music: 'NotoMusic-Regular',
   },
   size: { caption: 13, body: 16, title: 22, display: 34 },
 } as const;
