@@ -1,6 +1,31 @@
 import { describe, expect, it } from 'bun:test';
 import { type ClickTrack, createPlayClicks } from '@/usecases/play-clicks';
 
+/** Lets everything already waiting on a resolved promise run before asserting. */
+const settle = () => new Promise<void>((done) => setTimeout(done, 0));
+
+/** A track that is already open: the ordinary case, where opening waits for nothing. */
+const openAs = (track: ClickTrack) => () => Promise.resolve(track);
+
+/**
+ * A track handed over only when the test says so, so that what a session does
+ * *while* its hardware is still opening can be asserted at all.
+ */
+function openingOnDemand(track: ClickTrack) {
+  let handOver = () => {};
+  const waited = new Promise<void>((resolve) => {
+    handOver = resolve;
+  });
+
+  return {
+    open: () => waited.then(() => track),
+    async hand() {
+      handOver();
+      await settle();
+    },
+  };
+}
+
 /** How late a platform timer fires, in this test's milliseconds. */
 const OVERSLEPT = 137;
 
@@ -64,18 +89,20 @@ function trackFrom(origin: number) {
 }
 
 describe('clicking the beat', () => {
-  it('clicks once a second at sixty to the minute', () => {
+  it('clicks once a second at sixty to the minute', async () => {
     const track = trackFrom(0);
 
-    createPlayClicks(() => track, clockOnDemand())(60);
+    createPlayClicks(openAs(track), clockOnDemand())(60);
+    await settle();
 
     expect(track.scheduled).toEqual([0]);
   });
 
-  it('clicks four times as often at a hundred and sixty', () => {
+  it('clicks four times as often at a hundred and sixty', async () => {
     const track = trackFrom(0);
 
-    createPlayClicks(() => track, clockOnDemand())(160);
+    createPlayClicks(openAs(track), clockOnDemand())(160);
+    await settle();
 
     expect(track.scheduled).toEqual([0, 375]);
   });
@@ -84,7 +111,8 @@ describe('clicking the beat', () => {
     const track = trackFrom(0);
     const clock = clockOnDemand();
 
-    createPlayClicks(() => track, clock)(60);
+    createPlayClicks(openAs(track), clock)(60);
+    await settle();
     track.play(600);
     await clock.pass();
 
@@ -95,17 +123,19 @@ describe('clicking the beat', () => {
     const track = trackFrom(0);
     const clock = clockOnDemand();
 
-    createPlayClicks(() => track, clock)(60);
+    createPlayClicks(openAs(track), clock)(60);
+    await settle();
     track.play(1000);
     await clock.pass();
 
     expect(track.scheduled).toEqual([0, 1000]);
   });
 
-  it('runs on the audio clock, not on the wall clock', () => {
+  it('runs on the audio clock, not on the wall clock', async () => {
     const track = trackFrom(8000);
 
-    createPlayClicks(() => track, clockOnDemand())(60);
+    createPlayClicks(openAs(track), clockOnDemand())(60);
+    await settle();
 
     expect(track.scheduled).toEqual([8000]);
   });
@@ -114,7 +144,8 @@ describe('clicking the beat', () => {
     const track = trackFrom(0);
     const clock = clockOnDemand();
 
-    createPlayClicks(() => track, clock)(60);
+    createPlayClicks(openAs(track), clock)(60);
+    await settle();
 
     for (const _ of Array.from({ length: 64 })) {
       track.play(250);
@@ -128,11 +159,43 @@ describe('clicking the beat', () => {
     const track = trackFrom(0);
     const clock = clockOnDemand();
 
-    const stop = createPlayClicks(() => track, clock)(60);
+    const stop = createPlayClicks(openAs(track), clock)(60);
+    await settle();
     stop();
     track.play(1000);
     await clock.pass();
 
     expect([track.stopped, track.scheduled]).toEqual([true, [0]]);
+  });
+
+  it('writes nothing while the track is still opening', async () => {
+    const track = trackFrom(0);
+    const opening = openingOnDemand(track);
+
+    createPlayClicks(opening.open, clockOnDemand())(60);
+    await settle();
+
+    expect(track.scheduled).toEqual([]);
+  });
+
+  it('starts the grid where the track opened, not where it was asked for', async () => {
+    const track = trackFrom(0);
+    const opening = openingOnDemand(track);
+
+    createPlayClicks(opening.open, clockOnDemand())(60);
+    track.play(400);
+    await opening.hand();
+
+    expect(track.scheduled).toEqual([400]);
+  });
+
+  it('closes a track that opens after the session was stopped', async () => {
+    const track = trackFrom(0);
+    const opening = openingOnDemand(track);
+
+    createPlayClicks(opening.open, clockOnDemand())(60)();
+    await opening.hand();
+
+    expect([track.stopped, track.scheduled]).toEqual([true, []]);
   });
 });

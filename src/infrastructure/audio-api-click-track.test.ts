@@ -89,32 +89,32 @@ function audioClock(currentTime: number) {
 }
 
 describe('audio api click track', () => {
-  it('tells the time on the audio hardware, in milliseconds', () => {
-    const track = createAudioApiClickTracks(audioClock(2.5).open)();
+  it('tells the time on the audio hardware, in milliseconds', async () => {
+    const track = await createAudioApiClickTracks(audioClock(2.5).open)();
 
     expect(track.now()).toBe(2500);
   });
 
-  it('sounds a click at the instant it was written for, not at the current one', () => {
+  it('sounds a click at the instant it was written for, not at the current one', async () => {
     const hardware = audioClock(2.5);
 
-    createAudioApiClickTracks(hardware.open)().clickAt(4000);
+    (await createAudioApiClickTracks(hardware.open)()).clickAt(4000);
 
     expect(hardware.written[0]?.startedAt).toBe(4);
   });
 
-  it('cuts each click short, so a beat is a click and not a tone', () => {
+  it('cuts each click short, so a beat is a click and not a tone', async () => {
     const hardware = audioClock(0);
 
-    createAudioApiClickTracks(hardware.open)().clickAt(1000);
+    (await createAudioApiClickTracks(hardware.open)()).clickAt(1000);
 
     expect([hardware.written[0]?.startedAt, hardware.written[0]?.stoppedAt]).toEqual([1, 1.03]);
   });
 
-  it('rides the click on an envelope that reaches the output', () => {
+  it('rides the click on an envelope that reaches the output', async () => {
     const hardware = audioClock(0);
 
-    createAudioApiClickTracks(hardware.open)().clickAt(1000);
+    (await createAudioApiClickTracks(hardware.open)()).clickAt(1000);
 
     expect([hardware.written[0]?.reachesTheOutput, hardware.written[0]?.shapedAt]).toEqual([
       true,
@@ -122,15 +122,15 @@ describe('audio api click track', () => {
     ]);
   });
 
-  it('releases the hardware when the track is stopped', () => {
+  it('releases the hardware when the track is stopped', async () => {
     const hardware = audioClock(0);
 
-    createAudioApiClickTracks(hardware.open)().stop();
+    (await createAudioApiClickTracks(hardware.open)()).stop();
 
     expect(hardware.closed).toBe(true);
   });
 
-  it('opens its own hardware per track, so a stopped session cannot deafen the next', () => {
+  it('opens its own hardware per track, so a stopped session cannot deafen the next', async () => {
     let opened = 0;
     const tracks = createAudioApiClickTracks(() => {
       opened += 1;
@@ -138,8 +138,8 @@ describe('audio api click track', () => {
       return audioClock(0).open();
     });
 
-    tracks();
-    tracks();
+    await tracks();
+    await tracks();
 
     expect(opened).toBe(2);
   });
